@@ -18,5 +18,6 @@ public enum StatusCode
     Ok = 0,
     Conflict = 1001,
     Unauthorized =  1002,
+    BadRequest = 1003,
     ServerError = 5000
 }
