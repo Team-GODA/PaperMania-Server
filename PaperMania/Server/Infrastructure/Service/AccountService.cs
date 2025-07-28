@@ -1,4 +1,5 @@
 ﻿using Google.Apis.Auth;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -32,9 +33,13 @@ public class AccountService : IAccountService
 
     public async Task<PlayerAccountData?> RegisterAsync(PlayerAccountData player, string password)
     {
-        var exists = await _repository.GetAccountDataByEmailAsync(player.Email);
-        if (exists != null)
-            return null;
+        var existByEmail = await _repository.GetAccountDataByEmailAsync(player.Email);
+        if (existByEmail != null)
+            throw new DuplicateEmailException(player.Email);
+
+        var existByPlayerId = await _repository.GetAccountDataByPlayerIdAsync(player.PlayerId);
+        if (existByPlayerId != null)
+            throw new DuplicatePlayerIdException(player.PlayerId);
         
         player.Password = BCrypt.Net.BCrypt.HashPassword(password);
         player.IsNewAccount = true;
@@ -44,19 +49,19 @@ public class AccountService : IAccountService
         return createdPlayer;
     }
 
-    public async Task<string?> LoginAsync(string playerId, string password)
+    public async Task<(string sessionId, PlayerAccountData user)> LoginAsync(string playerId, string password)
     {
         var user = await _repository.GetAccountDataByPlayerIdAsync(playerId);
-        if (user == null) 
-            return null;
+
+        if (user == null)
+            throw new AuthenticationFailedException("사용자가 존재하지 않습니다.");
         
         bool isVerified = BCrypt.Net.BCrypt.Verify(password, user.Password);
         if (!isVerified)
-            return null;
+            throw new AuthenticationFailedException("비밀번호가 일치하지 않습니다.");
 
         var sessionId = await _sessionService.CreateSessionAsync(user.Id);
-        
-        return sessionId;
+        return (sessionId, user);
     }
 
     public async Task<bool> LogoutAsync(string sessionId)
