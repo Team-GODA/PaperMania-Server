@@ -45,6 +45,12 @@ namespace Server.Api.Controller
             
             try
             {
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    _logger.LogWarning("플레이어 AP 조회 실패: 세션 ID 없음");
+                    return Ok(ApiResponse.Error<GetPlayerActionPointResponse>(1001, "SID가 없습니다."));
+                }
+                
                 var currentActionPoint = await _currencyService.GetPlayerActionPointAsync(userId, sessionId!);
                 var response = new GetPlayerActionPointResponse
                 {
@@ -52,12 +58,12 @@ namespace Server.Api.Controller
                 };                         
                 
                 _logger.LogInformation($"플레이어 AP 조회 성공 : Id : {userId}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : Id : {userId}", response));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 AP 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<GetPlayerActionPointResponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -79,6 +85,12 @@ namespace Server.Api.Controller
             
             try
             {
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    _logger.LogWarning("플레이어 최대 AP 갱신 실패: 세션 ID 없음");
+                    return Ok(ApiResponse.Error<UpdatePlayerMaxActionPointResponse>(1001, "SID가 없습니다."));
+                }
+                
                 var newMaxActionPoint = await _currencyService.UpdatePlayerMaxActionPoint(userId, request.NewMaxActionPoint, sessionId!);
                 var response = new UpdatePlayerMaxActionPointResponse
                 {
@@ -86,12 +98,12 @@ namespace Server.Api.Controller
                 };
                 
                 _logger.LogInformation($"플레이어 최대 AP 갱신 성공 : Id : {userId}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 최대 AP 갱신 성공", response));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 최대 AP 갱신 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<UpdatePlayerMaxActionPointResponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -113,6 +125,12 @@ namespace Server.Api.Controller
             
             try
             {
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    _logger.LogWarning("플레이어 AP 사용 실패: 세션 ID 없음");
+                    return Ok(ApiResponse.Error<UsePlayerActionPointResponse>(1001, "SID가 없습니다."));
+                }
+                
                 await _currencyService.UsePlayerActionPointAsync(userId, request.UsedActionPoint, sessionId!);
                 var currentActionPoint = await _currencyService.GetPlayerActionPointAsync(userId, sessionId!);
 
@@ -122,12 +140,12 @@ namespace Server.Api.Controller
                 };
 
                 _logger.LogInformation($"플레이어 AP 사용 성공 : Id : {userId}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 AP 사용 성공", response));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 AP 사용 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<UsePlayerActionPointResponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -147,6 +165,12 @@ namespace Server.Api.Controller
             
             try
             {
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    _logger.LogWarning("플레이어 골드 조회 실패: 세션 ID 없음");
+                    return Ok(ApiResponse.Error<GetPlayerGoldReponse>(1001, "SID가 없습니다."));
+                }
+                
                 var gold = await _currencyService.GetPlayerGoldAsync(userId, sessionId!);
                 var response = new GetPlayerGoldReponse
                 {
@@ -154,12 +178,12 @@ namespace Server.Api.Controller
                 };
                 
                 _logger.LogInformation($"플레이어 골드 조회 성공 : Id {userId}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 골드 조회 성공", response));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 골드 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<GetPlayerGoldReponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -181,6 +205,12 @@ namespace Server.Api.Controller
 
             try
             {
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    _logger.LogWarning("플레이어 골드 갱신: 세션 ID 없음");
+                    return Ok(ApiResponse.Error<ModifyGoldResponse>(1001, "SID가 없습니다."));
+                }
+                
                 if (request.Amount >= 0)
                 {
                     _logger.LogInformation($"플레이어 골드 추가 성공 :  {userId}, Amount : {request.Amount}");
@@ -198,12 +228,13 @@ namespace Server.Api.Controller
                     CurrentGold = currentGold
                 };
                 
-                return Ok(response);
+                _logger.LogInformation($"플레이어 골드 갱신 성공 : Id {userId}");
+                return Ok(ApiResponse.Ok("플레이어 골드 사용/추가 성공", response));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "플레이어 골드 업데이트 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                _logger.LogError(ex, "플레이어 골드 갱신 중 오류 발생");
+                return Ok(ApiResponse.Error<ModifyGoldResponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -223,6 +254,12 @@ namespace Server.Api.Controller
 
             try
             {
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    _logger.LogWarning("플레이어 종이조각 조회 실패: 세션 ID 없음");
+                    return Ok(ApiResponse.Error<GetPlayerPaperPieceReponse>(1001, "SID가 없습니다."));
+                }
+                
                 var currentPaperPiece = await _currencyService.GetPlayerPaperPieceAsync(userId, sessionId!);
                 var response = new GetPlayerPaperPieceReponse
                 {
@@ -230,12 +267,12 @@ namespace Server.Api.Controller
                 };
 
                 _logger.LogInformation($"플레이어 종이조각 조회 성공 : Id : {userId}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 종이조각 조회 성공", response));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 종이조각 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<GetPlayerPaperPieceReponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -257,6 +294,12 @@ namespace Server.Api.Controller
             
             try
             {
+                if (string.IsNullOrEmpty(sessionId))
+                {
+                    _logger.LogWarning("플레이어 종이 조각 추가 실패: 세션 ID 없음");
+                    return Ok(ApiResponse.Error<GetPlayerPaperPieceReponse>(1001, "SID가 없습니다."));
+                }
+                
                 if (request.Amount >= 0)
                 {
                     _logger.LogInformation($"플레이어 종이 조각 추가 성공 : Id : {userId}");
@@ -274,12 +317,13 @@ namespace Server.Api.Controller
                     CurrentPaperPieces = currentPaperPiece
                 };
                 
-                return Ok(response);
+                _logger.LogInformation($"플레이어 종이 조각 성공 : Id {userId}");
+                return Ok(ApiResponse.Ok("플레이어 종이 조각 성공",  response));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 종이 조각 업데이트 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<ModifyPaperPieceResponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
     }
