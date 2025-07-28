@@ -1,10 +1,8 @@
-﻿using Server.Api.Dto.Response;
+﻿namespace Server.Api.Dto.Response;
 
-namespace Server.Api;
-
-public static class Response
+public static class ApiResponse
 {
-    public static BaseResponse<T> Ok<T>(T data, string message)
+    public static BaseResponse<T> Ok<T>(string message, T data)
     {
         return new() { ErrorCode = 0, Message = message, Data = data };
     }
