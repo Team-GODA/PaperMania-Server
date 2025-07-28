@@ -4,6 +4,7 @@ using Server.Api.Dto.Request;
 using Server.Application.Port;
 using Asp.Versioning;
 using Server.Api.Dto.Response;
+using Server.Api.Dto.Response.Data;
 using Server.Api.Filter;
 
 namespace Server.Api.Controller
@@ -44,7 +45,6 @@ namespace Server.Api.Controller
                 var result = await _dataService.AddPlayerDataAsync(request.PlayerName, sessionId);
                 var response = new AddPlayerDataResponse
                 {
-                    Message = "이름이 성공적으로 설정되었습니다.",
                     PlayerName = result
                 };
 

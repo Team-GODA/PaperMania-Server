@@ -1,4 +1,4 @@
-﻿namespace Server.Api.Dto.Response;
+﻿namespace Server.Api.Dto.Response.Data;
 
 public class RenamePlayerNameResponse
 {

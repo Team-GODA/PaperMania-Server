@@ -1,10 +1,9 @@
 ﻿using Server.Domain.Entity;
 
-namespace Server.Api.Dto.Response;
+namespace Server.Api.Dto.Response.Reward;
 
 public class ClaimStageRewardResponse
 {
-    public string Message  { get; set; }
     public int? Id   { get; set; }
     public StageReward? StageReward { get; set; }
 }

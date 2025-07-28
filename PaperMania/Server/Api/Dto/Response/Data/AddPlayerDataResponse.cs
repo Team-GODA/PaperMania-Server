@@ -1,7 +1,6 @@
-﻿namespace Server.Api.Dto.Response;
+﻿namespace Server.Api.Dto.Response.Data;
 
 public class AddPlayerDataResponse
 {
-    public string Message { get; set; }
     public string PlayerName { get; set; }
 }

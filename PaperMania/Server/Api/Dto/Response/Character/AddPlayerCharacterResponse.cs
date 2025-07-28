@@ -1,6 +1,6 @@
 ﻿using Server.Domain.Entity;
 
-namespace Server.Api.Dto.Response;
+namespace Server.Api.Dto.Response.Character;
 
 public class AddPlayerCharacterResponse
 {

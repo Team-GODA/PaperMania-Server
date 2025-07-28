@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
+using Server.Api.Dto.Response.Reward;
 using Server.Api.Filter;
 using Server.Application.Port;
 using Server.Domain.Entity;
@@ -96,7 +97,6 @@ namespace Server.Api.Controller
 
                 var response = new ClaimStageRewardResponse
                 {
-                    Message = "스테이지 보상 지급 완료",
                     Id = userId,
                     StageReward = stageReward
                 };
