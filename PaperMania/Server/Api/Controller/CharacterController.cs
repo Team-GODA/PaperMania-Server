@@ -33,7 +33,6 @@ namespace Server.Api.Controller
         /// <returns>캐릭터 정보</returns>
         [HttpGet]
         [ProducesResponseType(typeof(GetAllPlayerCharactersResponse), 200)]
-        [ProducesResponseType(404)]
         public async Task<ActionResult<GetAllPlayerCharactersResponse>> GetAllPlayerCharacters()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
@@ -50,12 +49,12 @@ namespace Server.Api.Controller
                 };
                 
                 _logger.LogInformation($"플레이어 보유 캐릭터 데이터 조회 성공: ID: {userId}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 보유 캐릭터 데이터 조회 성공",  response));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 보유 캐릭터 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<GetAllPlayerCharactersResponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -89,12 +88,12 @@ namespace Server.Api.Controller
                 };
                 
                 _logger.LogInformation($"플레이어 보유 캐릭터 추가 성공: Id: {request.Id}, CharacterId: {request.CharacterId}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 보유 캐릭터 추가 성공", response));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 캐릭터 추가 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<AddPlayerCharacterResponse>(5000, "서버 오류가 발생했습니다."));
             }
         }
     }
