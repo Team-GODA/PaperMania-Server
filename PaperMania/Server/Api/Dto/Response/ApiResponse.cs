@@ -12,3 +12,11 @@ public static class ApiResponse
         return new() { ErrorCode = code, Message = message, Data = default };
     }
 }
+
+public enum StatusCode
+{
+    Ok = 0,
+    Conflict = 1001,
+    Unauthorized =  1002,
+    ServerError = 5000
+}
