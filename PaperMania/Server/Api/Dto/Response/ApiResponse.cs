@@ -13,9 +13,8 @@ public static class ApiResponse
     }
 }
 
-public enum StatusCode
+public enum ErrorStatusCode
 {
-    Ok = 0,
     Conflict = 1001,
     Unauthorized =  1002,
     BadRequest = 1003,
