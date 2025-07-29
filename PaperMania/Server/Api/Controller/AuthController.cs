@@ -170,12 +170,12 @@ namespace Server.Api.Controller
             catch (SessionNotFoundException ex)
             {
                 _logger.LogWarning(ex, "로그아웃 실패: 세션 ID 없음");
-                return Ok(ApiResponse.Error<LogoutResponse>(1001, "SID가 없습니다."));
+                return Ok(ApiResponse.Error<LogoutResponse>((int)ErrorStatusCode.Conflict, "SID가 없습니다."));
             }
             catch (SessionInValidataionException ex)
             {
                 _logger.LogWarning(ex, "로그아웃 실패:  유효하지 않은 세션: SessionId={SessionId}", sessionId);
-                return Ok(ApiResponse.Error<LogoutResponse>(1001, "유효하지 않는 SID 입니다"));
+                return Ok(ApiResponse.Error<LogoutResponse>((int)ErrorStatusCode.Conflict, "유효하지 않는 SID 입니다"));
             }
             catch (Exception ex)
             {
