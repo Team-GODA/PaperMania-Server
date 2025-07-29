@@ -6,6 +6,11 @@ public static class ApiResponse
     {
         return new() { ErrorCode = 0, Message = message, Data = data };
     }
+    
+    public static BaseResponse<object> Ok(string message)
+    {
+        return new() { ErrorCode = 0, Message = message, Data = null };
+    }
 
     public static BaseResponse<T> Error<T>(int code, string message)
     {
