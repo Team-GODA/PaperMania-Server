@@ -159,30 +159,23 @@ namespace Server.Api.Controller
             var userId =  await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation("로그아웃 시도: SessionId={SessionId}", sessionId);
-            
+
             try
             {
-                if (string.IsNullOrEmpty(sessionId))
-                {
-                    _logger.LogWarning("로그아웃 실패: 세션 ID 없음");
-                    return Ok(ApiResponse.Error<LogoutResponse>(1001, "SID가 없습니다."));
-                }
-
-                var success = await _accountService.LogoutAsync(sessionId);
-                if (!success)
-                {
-                    _logger.LogWarning("로그아웃 실패:  유효하지 않은 세션: SessionId={SessionId}", sessionId);
-                    return Ok(ApiResponse.Error<LogoutResponse>(1001, "유효하지 않는 SID 입니다"));
-                }
-
-                var response = new LogoutResponse
-                {
-                    Id = userId,
-                    Message = "로그아웃 성공"
-                };
+                await _accountService.LogoutAsync(sessionId);
 
                 _logger.LogInformation("로그아웃 성공: SessionId={SessionId}", sessionId);
-                return Ok(ApiResponse.Ok("로그아웃 성공", response));
+                return Ok(ApiResponse.Ok("로그아웃 성공"));
+            }
+            catch (SessionNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "로그아웃 실패: 세션 ID 없음");
+                return Ok(ApiResponse.Error<LogoutResponse>(1001, "SID가 없습니다."));
+            }
+            catch (SessionInValidataionException ex)
+            {
+                _logger.LogWarning(ex, "로그아웃 실패:  유효하지 않은 세션: SessionId={SessionId}", sessionId);
+                return Ok(ApiResponse.Error<LogoutResponse>(1001, "유효하지 않는 SID 입니다"));
             }
             catch (Exception ex)
             {
