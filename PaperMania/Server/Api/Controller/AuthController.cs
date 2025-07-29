@@ -4,6 +4,7 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;
 using Server.Api.Filter;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -34,47 +35,43 @@ namespace Server.Api.Controller
         /// <returns>회원가입 성공 시 생성된 사용자 ID</returns>
         /// <response code="200">회원가입이 성공적으로 완료됨</response>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(RegisterResponse), 201)]
+        [ProducesResponseType(typeof(RegisterResponse), 200)]
         public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
         {
             _logger.LogInformation("회원가입 시도: Email={Email}, PlayerId={PlayerId}", request.Email, request.PlayerId);
-            
+
             try
             {
-                var existByEmail = await _accountService.GetByEmailAsync(request.Email);
-                if (existByEmail != null)
-                {
-                    _logger.LogWarning("회원가입 실패: 이메일 중복: {Email}", request.Email);
-                    return Ok(ApiResponse.Error<RegisterResponse>(1001, "이미 사용 중인 이메일입니다."));
-                }
-
-                var existByPlayerId = await _accountService.GetByPlayerIdAsync(request.PlayerId);
-                if (existByPlayerId != null)
-                {
-                    _logger.LogWarning("회원가입 실패: PlayerId 중복: {PlayerId}", request.PlayerId);
-                    return Ok(ApiResponse.Error<RegisterResponse>(1001, "이미 사용 중인 PlayerId 입니다."));
-                }
-
                 var newUser = new PlayerAccountData
                 {
                     PlayerId = request.PlayerId,
                     Email = request.Email
                 };
-                
+
                 await _accountService.RegisterAsync(newUser, request.Password);
 
                 var response = new RegisterResponse
-                {
+                {   
                     Id = newUser.Id
                 };
 
                 _logger.LogInformation("회원가입 성공: Id={Id}, PlayerId={PlayerId}", response.Id, request.PlayerId);
                 return Ok(ApiResponse.Ok("회원가입 성공", response));
             }
+            catch (DuplicateEmailException ex)
+            {
+                _logger.LogWarning(ex, "회원가입 실패: 이메일 중복: {Email}", request.Email);
+                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.Conflict, "이미 사용 중인 이메일입니다."));
+            }
+            catch (DuplicatePlayerIdException ex)
+            {
+                _logger.LogWarning(ex, "회원가입 실패: PlayerId 중복: {PlayerId}", request.PlayerId);
+                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.Conflict, "이미 사용 중인 PlayerId 입니다."));
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류:  회원가입 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>(5000, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -88,31 +85,29 @@ namespace Server.Api.Controller
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
         {
             _logger.LogInformation("로그인 시도: PlayerId={PlayerId}", request.PlayerId);
-            
+
             try
             {
-                var sessionId = await _accountService.LoginAsync(request.PlayerId, request.Password);
-                if (string.IsNullOrEmpty(sessionId))
-                {
-                    _logger.LogWarning("로그인 실패: 아이디 또는 비밀번호 불일치: PlayerId={PlayerId}", request.PlayerId);
-                    return Ok(ApiResponse.Error<RegisterResponse>(1002, "아이디 또는 비밀번호 불일치합니다."));
-                }
+                var (sessionId, user) = await _accountService.LoginAsync(request.PlayerId, request.Password);
 
-                var data = await _accountService.GetByPlayerIdAsync(request.PlayerId);
-                
                 var response = new LoginResponse
                 {
-                    Id = data!.Id,
+                    Id = user.Id,
                     SessionId = sessionId
                 };
 
-                _logger.LogInformation("로그인 성공: PlayerId={PlayerId}, SessionId={SessionId}", request.PlayerId, sessionId);
+                _logger.LogInformation($"로그인 성공: PlayerId={request.PlayerId}");
                 return Ok(ApiResponse.Ok("로그인 성공", response));
+            }
+            catch (AuthenticationFailedException ex)
+            {
+                _logger.LogWarning(ex, $"로그인 실패: 아이디 또는 비밀번호 불일치 : PlayerId={request.PlayerId}");
+                return Ok(ApiResponse.Error<LoginResponse>((int)ErrorStatusCode.BadRequest, "아이디 또는 비밀번호 불일치합니다."));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류: 로그인 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>(5000, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -133,7 +128,7 @@ namespace Server.Api.Controller
                 if (string.IsNullOrEmpty(sessionId))
                 {
                     _logger.LogWarning("구글 로그인 실패");
-                    return Ok(ApiResponse.Error<GoogleLoginResponse>(1002, "구글 로그인 실패"));
+                    return Ok(ApiResponse.Error<GoogleLoginResponse>((int)ErrorStatusCode.Unauthorized, "구글 로그인 실패"));
                 }
 
                 var response = new GoogleLoginResponse
@@ -147,7 +142,7 @@ namespace Server.Api.Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류: 구글 로그인 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>(5000, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -192,7 +187,7 @@ namespace Server.Api.Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류 - 로그아웃 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>(5000, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
     }
