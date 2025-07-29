@@ -97,7 +97,7 @@ public class AccountService : IAccountService
                     Password = "",
                     Role = "user",
                     Email = payload.Email,
-                    IsNewAccount = true,    
+                    IsNewAccount = true,
                     CreatedAt = DateTime.UtcNow
                 });
             }
