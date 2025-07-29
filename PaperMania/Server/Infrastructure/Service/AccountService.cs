@@ -1,4 +1,6 @@
 ﻿using Google.Apis.Auth;
+using Microsoft.Extensions.Options;
+using Server.Application.Configure;
 using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
@@ -10,15 +12,16 @@ public class AccountService : IAccountService
     private readonly IAccountRepository _repository;
     private readonly ISessionService _sessionService;
     private readonly ILogger<AccountService> _logger;
+    
+    private readonly string _googleClientId;
 
-    private readonly string _googleClientId =
-        "1072960220447-ifi2uau290btfudnu2ol5b82eq1ucp96.apps.googleusercontent.com";
-
-    public AccountService(IAccountRepository repository, ISessionService sessionService, ILogger<AccountService> logger)
+    public AccountService(IAccountRepository repository, ISessionService sessionService,
+        ILogger<AccountService> logger, IOptions<GoogleAuthSetting> googleAuthOptions)
     {
         _repository = repository;
         _sessionService = sessionService;
         _logger = logger;
+        _googleClientId = googleAuthOptions.Value.ClientId;
     }
     
     public async Task<PlayerAccountData?> GetByPlayerIdAsync(string playerId)
@@ -85,7 +88,7 @@ public class AccountService : IAccountService
             var payload = await GoogleJsonWebSignature.ValidateAsync(idToken,
                 new GoogleJsonWebSignature.ValidationSettings
                 {
-                    Audience = new[] { _googleClientId }
+                    Audience = [_googleClientId]
                 });
             
             var user = await _repository.GetAccountDataByEmailAsync(payload.Email);
@@ -104,7 +107,7 @@ public class AccountService : IAccountService
                 });
             }
             
-            var sessionId = await _sessionService.CreateSessionAsync(user.Id);
+            var sessionId = await _sessionService.CreateSessionAsync(user!.Id);
             return sessionId;
         }
         catch (InvalidJwtException ex)

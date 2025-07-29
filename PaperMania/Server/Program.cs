@@ -2,6 +2,7 @@ using System.Text;
 using Azure.Identity;
 using Server.Api.Filter;
 using Server.Api.Middleware;
+using Server.Application.Configure;
 using Server.Application.Port;
 using Server.Infrastructure.Repository;
 using Server.Infrastructure.Service;
@@ -21,6 +22,8 @@ var redisConnectionString = env.IsDevelopment()
     : "redis:6379,abortConnect=false";
 var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
+
+builder.Services.Configure<GoogleAuthSetting>(builder.Configuration.GetSection("GoogleAuth"));
 
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
