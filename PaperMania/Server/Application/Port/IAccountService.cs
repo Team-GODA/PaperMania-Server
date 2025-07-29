@@ -8,6 +8,6 @@ public interface IAccountService
     Task<PlayerAccountData?> GetByEmailAsync(string email);
     Task<PlayerAccountData?> RegisterAsync(PlayerAccountData player, string password);
     Task<(string sessionId, PlayerAccountData user)> LoginAsync(string playerId, string password);
-    Task<bool> LogoutAsync(string sessionId);
+    Task LogoutAsync(string sessionId);
     Task<string?> LoginByGoogleAsync(string idToken);
 }

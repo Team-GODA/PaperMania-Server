@@ -64,16 +64,18 @@ public class AccountService : IAccountService
         return (sessionId, user);
     }
 
-    public async Task<bool> LogoutAsync(string sessionId)
+    public async Task LogoutAsync(string sessionId)
     {
+        if (string.IsNullOrEmpty(sessionId))
+            throw new SessionNotFoundException();
+        
         var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
         
         var isVaild = await _sessionService.ValidateSessionAsync(sessionId, userId);
         if (!isVaild)
-            return false;
+            throw new SessionInValidataionException();
         
         await _sessionService.DeleteSessionAsync(sessionId);
-        return true;
     }
     
     public async Task<string?> LoginByGoogleAsync(string idToken)
