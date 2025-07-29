@@ -61,12 +61,12 @@ namespace Server.Api.Controller
             catch (DuplicateEmailException ex)
             {
                 _logger.LogWarning(ex, "회원가입 실패: 이메일 중복: {Email}", request.Email);
-                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.Conflict, "이미 사용 중인 이메일입니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.Conflict, ex.Message));
             }
             catch (DuplicatePlayerIdException ex)
             {
                 _logger.LogWarning(ex, "회원가입 실패: PlayerId 중복: {PlayerId}", request.PlayerId);
-                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.Conflict, "이미 사용 중인 PlayerId 입니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.Conflict, ex.Message));
             }
             catch (Exception ex)
             {
@@ -102,7 +102,7 @@ namespace Server.Api.Controller
             catch (AuthenticationFailedException ex)
             {
                 _logger.LogWarning(ex, $"로그인 실패: 아이디 또는 비밀번호 불일치 : PlayerId={request.PlayerId}");
-                return Ok(ApiResponse.Error<LoginResponse>((int)ErrorStatusCode.BadRequest, "아이디 또는 비밀번호 불일치합니다."));
+                return Ok(ApiResponse.Error<LoginResponse>((int)ErrorStatusCode.BadRequest, ex.Message));
             }
             catch (Exception ex)
             {
@@ -125,11 +125,6 @@ namespace Server.Api.Controller
             try
             {
                 var sessionId = await _accountService.LoginByGoogleAsync(request.IdToken);
-                if (string.IsNullOrEmpty(sessionId))
-                {
-                    _logger.LogWarning("구글 로그인 실패");
-                    return Ok(ApiResponse.Error<GoogleLoginResponse>((int)ErrorStatusCode.Unauthorized, "구글 로그인 실패"));
-                }
 
                 var response = new GoogleLoginResponse
                 {
@@ -138,6 +133,11 @@ namespace Server.Api.Controller
 
                 _logger.LogInformation("구글 로그인 성공");
                 return Ok(ApiResponse.Ok("구글 로그인 성공", response));
+            }
+            catch (GoogleLoginFailedException ex)
+            {
+                _logger.LogWarning(ex, "구글 로그인 실패");
+                return Ok(ApiResponse.Error<GoogleLoginResponse>((int)ErrorStatusCode.Unauthorized, ex.Message));
             }
             catch (Exception ex)
             {
@@ -165,17 +165,17 @@ namespace Server.Api.Controller
                 await _accountService.LogoutAsync(sessionId);
 
                 _logger.LogInformation("로그아웃 성공: SessionId={SessionId}", sessionId);
-                return Ok(ApiResponse.Ok("로그아웃 성공"));
+                return Ok(ApiResponse.Ok<LogoutResponse>("로그아웃 성공"));
             }
             catch (SessionNotFoundException ex)
             {
                 _logger.LogWarning(ex, "로그아웃 실패: 세션 ID 없음");
-                return Ok(ApiResponse.Error<LogoutResponse>((int)ErrorStatusCode.Conflict, "SID가 없습니다."));
+                return Ok(ApiResponse.Error<LogoutResponse>((int)ErrorStatusCode.Unauthorized, "SID가 없습니다."));
             }
-            catch (SessionInValidataionException ex)
+            catch (SessionValidationException ex)
             {
                 _logger.LogWarning(ex, "로그아웃 실패:  유효하지 않은 세션: SessionId={SessionId}", sessionId);
-                return Ok(ApiResponse.Error<LogoutResponse>((int)ErrorStatusCode.Conflict, "유효하지 않는 SID 입니다"));
+                return Ok(ApiResponse.Error<LogoutResponse>((int)ErrorStatusCode.Unauthorized, "유효하지 않는 SID 입니다"));
             }
             catch (Exception ex)
             {
