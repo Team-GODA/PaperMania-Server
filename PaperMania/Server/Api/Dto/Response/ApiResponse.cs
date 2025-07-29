@@ -7,7 +7,7 @@ public static class ApiResponse
         return new() { ErrorCode = 0, Message = message, Data = data };
     }
     
-    public static BaseResponse<object> Ok(string message)
+    public static BaseResponse<T?> Ok<T>(string message) where T : class
     {
         return new() { ErrorCode = 0, Message = message, Data = null };
     }
