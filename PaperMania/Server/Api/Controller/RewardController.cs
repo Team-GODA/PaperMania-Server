@@ -4,6 +4,7 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Reward;
 using Server.Api.Filter;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -32,10 +33,8 @@ namespace Server.Api.Controller
         /// <param name="stageSubNum">서브 스테이지 번호</param>
         /// <returns>스테이지 보상 정보</returns>
         [HttpGet("stage")]
-        [ProducesResponseType(typeof(GetStageRewardResponse), 200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<GetStageRewardResponse>> GetStageReward(
+        [ProducesResponseType(typeof(BaseResponse<GetStageRewardResponse>), 200)]
+        public async Task<ActionResult<BaseResponse<GetStageRewardResponse>>> GetStageReward(
             [FromQuery] int stageNum,
             [FromQuery] int stageSubNum)
         {
@@ -44,21 +43,23 @@ namespace Server.Api.Controller
             try
             {
                 var reward = await _rewardService.GetStageRewardAsync(stageNum, stageSubNum);
-                if (reward == null)
-                    return NotFound("해당 스테이지 보상이 없습니다.");
-
                 var response = new GetStageRewardResponse
                 {
                     StageReward = reward
                 };
-                
+
                 _logger.LogInformation($"스테이지 보상 조회 성공 : StageNum = {stageNum}, StageSubNum = {stageSubNum}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("스테이지 보상 조회 성공", response));
+            }
+            catch (StageRewardNotFoundException ex)
+            {
+                _logger.LogWarning (ex, "스테이지 보상 정보가 없습니다.");
+                return Ok(ApiResponse.Error<GetStageRewardResponse>(ErrorStatusCode.NotFound, ex.Message));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "스테이지 보상 조회 중 오류 발생");
-                return StatusCode(500, "서버 오류가 발생했습니다.");
+                return Ok(ApiResponse.Error<GetStageRewardResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -69,14 +70,12 @@ namespace Server.Api.Controller
         /// <returns>수령 결과 메시지와 보상 내역</returns>
         [HttpPatch("stage")]
         [ServiceFilter(typeof(SessionValidationFilter))]
-        [ProducesResponseType(typeof(object), 200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> ClaimStageReward(
+        [ProducesResponseType(typeof(BaseResponse<ClaimStageRewardResponse>), 200)]
+        public async Task<ActionResult<ActionResult<BaseResponse<ClaimStageRewardResponse>>>> ClaimStageReward(
             [FromBody] ClaimStageRewardRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
+            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 스테이지 보상 수령 시도 : Id : {userId}");
 
@@ -88,11 +87,11 @@ namespace Server.Api.Controller
                     StageNum = request.StageNum,
                     SubStageNum = request.SubStageNum
                 };
-                
+
                 var stageReward = await _rewardService.GetStageRewardAsync(request.StageNum, request.SubStageNum);
                 if (stageReward == null)
                     return NotFound("해당 스테이지 보상이 없습니다.");
-                
+
                 await _rewardService.ClaimStageRewardByUserIdAsync(userId, stageReward, stageData);
 
                 var response = new ClaimStageRewardResponse
@@ -100,10 +99,14 @@ namespace Server.Api.Controller
                     Id = userId,
                     StageReward = stageReward
                 };
-                
-                _logger.LogInformation($"플레이어 스테이지 보상 수령 성공 : Id : {userId}");
 
-                return Ok(response);
+                _logger.LogInformation($"플레이어 스테이지 보상 수령 성공 : Id : {userId}");
+                return Ok(ApiResponse.Ok("스테이지 보상 수령 성공", response));
+            }
+            catch (StageRewardNotFoundException ex)
+            {
+                _logger.LogWarning (ex, "스테이지 보상 정보가 없습니다.");
+                return Ok(ApiResponse.Error<ClaimStageRewardResponse>(ErrorStatusCode.NotFound, ex.Message));
             }
             catch (Exception ex)
             {
