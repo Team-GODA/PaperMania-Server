@@ -5,6 +5,7 @@ using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Reward;
 using Server.Api.Filter;
 using Server.Application.Exceptions;
+using Server.Application.Exceptions.Stage;
 using Server.Application.Port;
 using Server.Domain.Entity;
 

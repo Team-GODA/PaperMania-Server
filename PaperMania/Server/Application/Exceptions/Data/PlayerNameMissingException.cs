@@ -1,4 +1,4 @@
-﻿namespace Server.Application.Exceptions;
+﻿namespace Server.Application.Exceptions.Data;
 
 public class PlayerNameMissingException : Exception
 {

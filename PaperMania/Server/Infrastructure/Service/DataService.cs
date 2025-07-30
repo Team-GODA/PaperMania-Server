@@ -1,4 +1,5 @@
 ﻿using Server.Application.Exceptions;
+using Server.Application.Exceptions.Data;
 using Server.Application.Port;
 using Server.Domain.Entity;
 

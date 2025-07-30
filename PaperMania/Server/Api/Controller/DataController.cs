@@ -7,6 +7,7 @@ using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
 using Server.Api.Filter;
 using Server.Application.Exceptions;
+using Server.Application.Exceptions.Data;
 
 namespace Server.Api.Controller
 {

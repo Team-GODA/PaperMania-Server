@@ -5,6 +5,8 @@ using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;
 using Server.Api.Filter;
 using Server.Application.Exceptions;
+using Server.Application.Exceptions.Auth;
+using Server.Application.Exceptions.Data;
 using Server.Application.Port;
 using Server.Domain.Entity;
 

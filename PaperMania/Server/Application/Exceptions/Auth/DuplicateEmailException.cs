@@ -1,4 +1,4 @@
-﻿namespace Server.Application.Exceptions;
+﻿namespace Server.Application.Exceptions.Auth;
 
 public class DuplicateEmailException : Exception
 {

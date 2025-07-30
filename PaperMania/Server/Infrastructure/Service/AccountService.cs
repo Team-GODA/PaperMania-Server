@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Options;
 using Server.Application.Configure;
 using Server.Application.Exceptions;
+using Server.Application.Exceptions.Auth;
+using Server.Application.Exceptions.Data;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
