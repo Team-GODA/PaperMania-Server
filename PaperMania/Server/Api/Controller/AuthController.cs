@@ -61,17 +61,17 @@ namespace Server.Api.Controller
             catch (DuplicateEmailException ex)
             {
                 _logger.LogWarning(ex, "회원가입 실패: 이메일 중복: {Email}", request.Email);
-                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.Conflict, ex.Message));
+                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.Conflict, ex.Message));
             }
             catch (DuplicatePlayerIdException ex)
             {
                 _logger.LogWarning(ex, "회원가입 실패: PlayerId 중복: {PlayerId}", request.PlayerId);
-                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.Conflict, ex.Message));
+                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.Conflict, ex.Message));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류:  회원가입 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -102,12 +102,12 @@ namespace Server.Api.Controller
             catch (AuthenticationFailedException ex)
             {
                 _logger.LogWarning(ex, $"로그인 실패: 아이디 또는 비밀번호 불일치 : PlayerId={request.PlayerId}");
-                return Ok(ApiResponse.Error<LoginResponse>((int)ErrorStatusCode.BadRequest, ex.Message));
+                return Ok(ApiResponse.Error<LoginResponse>(ErrorStatusCode.BadRequest, ex.Message));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류: 로그인 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -137,12 +137,12 @@ namespace Server.Api.Controller
             catch (GoogleLoginFailedException ex)
             {
                 _logger.LogWarning(ex, "구글 로그인 실패");
-                return Ok(ApiResponse.Error<GoogleLoginResponse>((int)ErrorStatusCode.BadRequest, ex.Message));
+                return Ok(ApiResponse.Error<GoogleLoginResponse>(ErrorStatusCode.BadRequest, ex.Message));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류: 구글 로그인 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -170,7 +170,7 @@ namespace Server.Api.Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류 - 로그아웃 중 예외 발생");
-                return Ok(ApiResponse.Error<EmptyResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<EmptyResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
     }

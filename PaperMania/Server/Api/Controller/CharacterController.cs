@@ -54,7 +54,7 @@ namespace Server.Api.Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 보유 캐릭터 조회 중 오류 발생");
-                return Ok(ApiResponse.Error<GetAllPlayerCharactersResponse>(5000, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<GetAllPlayerCharactersResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -93,7 +93,7 @@ namespace Server.Api.Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 캐릭터 추가 중 오류 발생");
-                return Ok(ApiResponse.Error<AddPlayerCharacterResponse>(5000, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<AddPlayerCharacterResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
     }

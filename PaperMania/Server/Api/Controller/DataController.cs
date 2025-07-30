@@ -6,6 +6,7 @@ using Asp.Versioning;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
 using Server.Api.Filter;
+using Server.Application.Exceptions;
 
 namespace Server.Api.Controller
 {
@@ -33,38 +34,36 @@ namespace Server.Api.Controller
         /// <returns>등록 성공 여부에 대한 응답</returns>
         [HttpPost("player")]
         [ProducesResponseType(typeof(AddPlayerDataResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<AddPlayerDataResponse>> AddPlayerData([FromBody] AddPlayerDataRequest request)
         {
-            _logger.LogInformation($"플레이어 이름 등록 시도: PlayerName = {request.PlayerName}");
+            _logger.LogInformation($"플레이어 데이터 등록 시도: PlayerName = {request.PlayerName}");
             var sessionId = HttpContext.Items["SessionId"] as string;
 
             try
             {
-                var result = await _dataService.AddPlayerDataAsync(request.PlayerName, sessionId);
+                var result = await _dataService.AddPlayerDataAsync(request.PlayerName, sessionId!);
                 var response = new AddPlayerDataResponse
                 {
                     PlayerName = result
                 };
 
-                _logger.LogInformation("플레이어 이름 등록 성공: PlayerName = {PlayerName}", request.PlayerName);
-                return Ok(response);
+                _logger.LogInformation("플레이어 데이터 등록 성공: PlayerName = {PlayerName}", request.PlayerName);
+                return Ok(ApiResponse.Ok("플레이어 데이터 등록 성공", response));
             }
-            catch (UnauthorizedAccessException)
+            catch (PlayerNameExistException ex)
             {
-                _logger.LogWarning("플레이어 이름 등록 실패: 유효하지 않은 세션");
-                return Conflict(new { message = "유효하지 않은 세션입니다." });
+                _logger.LogWarning(ex, "플레이어 이름 중복: {PlayerName}", request.PlayerName);
+                return Conflict(ApiResponse.Error<AddPlayerDataResponse>(ErrorStatusCode.Conflict, ex.Message));
             }
-            catch (InvalidOperationException ex)
+            catch (PlayerDataExistException ex)
             {
-                _logger.LogWarning("플레이어 이름 등록 실패: {Message}", ex.Message);
-                return Conflict(new { message = ex.Message });
+                _logger.LogWarning(ex, "이미 등록된 계정");
+                return Conflict(ApiResponse.Error<AddPlayerDataResponse>(ErrorStatusCode.Conflict, ex.Message));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "서버 오류 발생: 플레이어 이름 등록 중 예외");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                _logger.LogError(ex, "서버 오류 발생: 플레이어 데이터 등록 중 예외");
+                return Ok(ApiResponse.Error<AddPlayerDataResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -91,14 +90,19 @@ namespace Server.Api.Controller
                     Id = userId,
                     PlayerName = playerName
                 };
-                
+
                 _logger.LogInformation($"플레이어 이름 조회 성공: PlayerName: {playerName}");
                 return Ok(response);
+            }
+            catch (PlayerNotFoundException ex)
+            {
+                _logger.LogError(ex, "플레이어 데이터 조회 실패");
+                return Ok(ApiResponse.Error<GetPlayerNameResponse>(ErrorStatusCode.NotFound, "해당 플레이어를 찾을 수 없습니다."));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 이름 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<GetPlayerNameResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -137,7 +141,7 @@ namespace Server.Api.Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 이름 재설정 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<RenamePlayerNameResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -173,7 +177,7 @@ namespace Server.Api.Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 레벨 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<GetPlayerLevelResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
 
@@ -212,7 +216,7 @@ namespace Server.Api.Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "플레이어 레벨 갱신 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
+                return Ok(ApiResponse.Error<UpdatePlayerLevelByExpResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
     }
