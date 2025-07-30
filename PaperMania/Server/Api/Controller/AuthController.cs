@@ -151,9 +151,9 @@ namespace Server.Api.Controller
         /// </summary>
         /// <returns>로그아웃 결과</returns>
         [HttpPost("logout")]
-        [ProducesResponseType(typeof(LogoutResponse), 200)]
+        [ProducesResponseType(typeof(EmptyResponse), 200)]
         [ServiceFilter(typeof(SessionValidationFilter))]
-        public async Task<ActionResult<LogoutResponse>> Logout()
+        public async Task<ActionResult<EmptyResponse>> Logout()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId =  await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
@@ -165,22 +165,12 @@ namespace Server.Api.Controller
                 await _accountService.LogoutAsync(sessionId);
 
                 _logger.LogInformation("로그아웃 성공: SessionId={SessionId}", sessionId);
-                return Ok(ApiResponse.Ok<LogoutResponse>("로그아웃 성공"));
-            }
-            catch (SessionNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "로그아웃 실패: 세션 ID 없음");
-                return Ok(ApiResponse.Error<LogoutResponse>((int)ErrorStatusCode.Unauthorized, "SID가 없습니다."));
-            }
-            catch (SessionValidationException ex)
-            {
-                _logger.LogWarning(ex, "로그아웃 실패:  유효하지 않은 세션: SessionId={SessionId}", sessionId);
-                return Ok(ApiResponse.Error<LogoutResponse>((int)ErrorStatusCode.Unauthorized, "유효하지 않는 SID 입니다"));
+                return Ok(ApiResponse.Ok<EmptyResponse>("로그아웃 성공"));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "서버 오류 - 로그아웃 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
+                return Ok(ApiResponse.Error<EmptyResponse>((int)ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
             }
         }
     }
