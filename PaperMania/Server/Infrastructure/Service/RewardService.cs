@@ -1,4 +1,5 @@
-﻿using Server.Application.Port;
+﻿using Server.Application.Exceptions;
+using Server.Application.Port;
 using Server.Domain.Entity;
 
 namespace Server.Infrastructure.Service;
@@ -16,7 +17,11 @@ public class RewardService : IRewardService
     
     public async Task<StageReward?> GetStageRewardAsync(int stageNum, int stageSubNum)
     {
-        return await _rewardRepository.GetStageRewardAsync(stageNum, stageSubNum);
+        var reward = await _rewardRepository.GetStageRewardAsync(stageNum, stageSubNum);
+        if (reward == null)
+            throw new StageRewardNotFoundException(stageNum, stageSubNum);
+        
+        return reward;
     }
 
     public async Task ClaimStageRewardByUserIdAsync(int? userId, StageReward reward, PlayerStageData data)
