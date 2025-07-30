@@ -156,7 +156,6 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId =  await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation("로그아웃 시도: SessionId={SessionId}", sessionId);
 

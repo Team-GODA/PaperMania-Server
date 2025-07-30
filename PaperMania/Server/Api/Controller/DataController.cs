@@ -53,12 +53,12 @@ namespace Server.Api.Controller
             catch (PlayerNameExistException ex)
             {
                 _logger.LogWarning(ex, "플레이어 이름 중복: {PlayerName}", request.PlayerName);
-                return Conflict(ApiResponse.Error<AddPlayerDataResponse>(ErrorStatusCode.Conflict, ex.Message));
+                return Ok(ApiResponse.Error<AddPlayerDataResponse>(ErrorStatusCode.Conflict, ex.Message));
             }
             catch (PlayerDataExistException ex)
             {
                 _logger.LogWarning(ex, "이미 등록된 계정");
-                return Conflict(ApiResponse.Error<AddPlayerDataResponse>(ErrorStatusCode.Conflict, ex.Message));
+                return Ok(ApiResponse.Error<AddPlayerDataResponse>(ErrorStatusCode.Conflict, ex.Message));
             }
             catch (Exception ex)
             {
@@ -134,7 +134,7 @@ namespace Server.Api.Controller
             }
             catch (PlayerNameMissingException ex)
             {
-                _logger.LogError(ex, "플레이어 이름 재설정 실패 : NewName 누락 오류");
+                _logger.LogError(ex, "플레이어 이름 재설정 실패");
                 return Ok(ApiResponse.Error<RenamePlayerNameResponse>(ErrorStatusCode.NotFound, ex.Message));
             }
             catch (Exception ex)
@@ -175,7 +175,7 @@ namespace Server.Api.Controller
             catch (PlayerNotFoundException ex)
             {
                 _logger.LogError(ex, "플레이어 데이터 조회 실패");
-                return Ok(ApiResponse.Error<GetPlayerNameResponse>(ErrorStatusCode.NotFound, ex.Message));
+                return Ok(ApiResponse.Error<GetPlayerLevelResponse>(ErrorStatusCode.NotFound, ex.Message));
             }
             catch (Exception ex)
             {
@@ -189,7 +189,7 @@ namespace Server.Api.Controller
         /// </summary>
         /// <param name="request">추가할 경험치 정보</param>
         /// <returns>갱신된 레벨 및 경험치 정보</returns>
-        [HttpPatch("level/exp")]
+        [HttpPatch("level")]
         [ProducesResponseType(typeof(BaseResponse<UpdatePlayerLevelByExpResponse>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<BaseResponse<UpdatePlayerLevelByExpResponse>>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request)
         {
