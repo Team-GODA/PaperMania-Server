@@ -69,15 +69,6 @@ public class AccountService : IAccountService
 
     public async Task LogoutAsync(string sessionId)
     {
-        if (string.IsNullOrEmpty(sessionId))
-            throw new SessionNotFoundException();
-        
-        var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
-        
-        var isVaild = await _sessionService.ValidateSessionAsync(sessionId, userId);
-        if (!isVaild)
-            throw new SessionValidationException();
-        
         await _sessionService.DeleteSessionAsync(sessionId);
     }
     
