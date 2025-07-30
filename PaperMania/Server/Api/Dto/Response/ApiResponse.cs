@@ -12,9 +12,9 @@ public static class ApiResponse
         return new() { ErrorCode = 0, Message = message, Data = null };
     }
 
-    public static BaseResponse<T> Error<T>(ErrorStatusCode code, string message)
+    public static BaseResponse<T> Error<T>(ErrorStatusCode code, string message) where T : class
     {
-        return new() { ErrorCode = (int)code, Message = message, Data = default };
+        return new() { ErrorCode = (int)code, Message = message, Data = null };
     }
 }
 
