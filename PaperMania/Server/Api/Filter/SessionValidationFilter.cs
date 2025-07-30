@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Server.Api.Dto.Response;
-using Server.Api.Dto.Response.Auth;
 using Server.Application.Port;
 
 namespace Server.Api.Filter;
@@ -26,7 +25,7 @@ public class SessionValidationFilter : IAsyncActionFilter
             return;
         }
 
-        var isValid = await _cacheService.ExistsAsync(sessionId);
+        var isValid = await _cacheService.ExistsAsync(sessionId!);
         if (!isValid)
         {
             _logger.LogWarning($"유효하지 않은 세션: {sessionId}");
