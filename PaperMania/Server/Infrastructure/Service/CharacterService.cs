@@ -1,4 +1,5 @@
-﻿using Server.Application.Port;
+﻿using Server.Application.Exceptions;
+using Server.Application.Port;
 using Server.Domain.Entity;
 
 namespace Server.Infrastructure.Service;
@@ -14,7 +15,11 @@ public class CharacterService : ICharacterService
     
     public async Task<IEnumerable<PlayerCharacterData>> GetPlayerCharacterDataByUserIdAsync(int? userId)
     {
-        return await _characterRepository.GetPlayerCharacterDataByUserIdAsync(userId);
+        var data = (await _characterRepository.GetPlayerCharacterDataByUserIdAsync(userId)).ToList();
+        if (data.Count == 0)
+            throw new PlayerCharactersNotFoundException(userId);
+            
+        return data;
     }
 
     public async Task<PlayerCharacterData> AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data)
