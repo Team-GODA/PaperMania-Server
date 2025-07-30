@@ -35,8 +35,8 @@ namespace Server.Api.Controller
         /// <returns>회원가입 성공 시 생성된 사용자 ID</returns>
         /// <response code="200">회원가입이 성공적으로 완료됨</response>
         [HttpPost("register")]
-        [ProducesResponseType(typeof(RegisterResponse), 200)]
-        public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request)
+        [ProducesResponseType(typeof(BaseResponse<RegisterResponse>), 200)]
+        public async Task<ActionResult<BaseResponse<RegisterResponse>>> Register([FromBody] RegisterRequest request)
         {
             _logger.LogInformation("회원가입 시도: Email={Email}, PlayerId={PlayerId}", request.Email, request.PlayerId);
 
@@ -81,8 +81,8 @@ namespace Server.Api.Controller
         /// <param name="request">로그인에 필요한 PlayerId와 비밀번호</param>
         /// <returns>로그인 결과</returns>
         [HttpPost("login")]
-        [ProducesResponseType(typeof(LoginResponse), 200)]
-        public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request)
+        [ProducesResponseType(typeof(BaseResponse<LoginResponse>), 200)]
+        public async Task<ActionResult<BaseResponse<LoginResponse>>> Login([FromBody] LoginRequest request)
         {
             _logger.LogInformation("로그인 시도: PlayerId={PlayerId}", request.PlayerId);
 
@@ -117,8 +117,8 @@ namespace Server.Api.Controller
         /// <param name="request">구글 로그인 요청 정보</param>
         /// <returns>로그인 결과</returns>
         [HttpPost("login/google")]
-        [ProducesResponseType(typeof(GoogleLoginResponse), 200)]
-        public async Task<ActionResult<GoogleLoginResponse>> LoginByGoogle([FromBody] GoogleLoginRequest request)
+        [ProducesResponseType(typeof(BaseResponse<GoogleLoginResponse>), 200)]
+        public async Task<ActionResult<BaseResponse<GoogleLoginResponse>>> LoginByGoogle([FromBody] GoogleLoginRequest request)
         {
             _logger.LogInformation("구글 로그인 시도");
 
@@ -128,7 +128,7 @@ namespace Server.Api.Controller
 
                 var response = new GoogleLoginResponse
                 {
-                    SessionId = sessionId,
+                    SessionId = sessionId!,
                 };
 
                 _logger.LogInformation("구글 로그인 성공");
@@ -151,9 +151,9 @@ namespace Server.Api.Controller
         /// </summary>
         /// <returns>로그아웃 결과</returns>
         [HttpPost("logout")]
-        [ProducesResponseType(typeof(EmptyResponse), 200)]
+        [ProducesResponseType(typeof(BaseResponse<EmptyResponse>), 200)]
         [ServiceFilter(typeof(SessionValidationFilter))]
-        public async Task<ActionResult<EmptyResponse>> Logout()
+        public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId =  await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
