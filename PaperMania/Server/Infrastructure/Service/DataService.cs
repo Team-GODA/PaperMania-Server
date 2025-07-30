@@ -1,4 +1,5 @@
-﻿using Server.Application.Port;
+﻿using Server.Application.Exceptions;
+using Server.Application.Port;
 using Server.Domain.Entity;
 
 namespace Server.Infrastructure.Service;
@@ -27,11 +28,11 @@ public class DataService : IDataService
     
     public async Task<string> AddPlayerDataAsync(string playerName, string sessionId)
     {
-        var exists = await _dataRepository.ExistsPlayerNameAsync(playerName);
-        if (exists != null)
+        var existName = await _dataRepository.ExistsPlayerNameAsync(playerName);
+        if (existName != null)
         {
             _logger.LogWarning($"이미 존재하는 이름입니다. player_name: {playerName}");
-            throw new InvalidOperationException("이미 존재하는 플레이어 이름입니다.");
+            throw new PlayerNameExistException(playerName);
         }
         
         var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
@@ -39,8 +40,8 @@ public class DataService : IDataService
         var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
         if (!isNewAccount)
         {
-            _logger.LogWarning($"이미 이름을 등록한 계정입니다. player_name: {playerName}");
-            throw new InvalidOperationException("이미 이름을 등록한 계정입니다.");
+            _logger.LogWarning($"이미 등록된 계정입니다. player_name: {playerName}");
+            throw new PlayerDataExistException();
         }
         
         await _dataRepository.AddPlayerDataAsync(userId, playerName);
@@ -53,11 +54,13 @@ public class DataService : IDataService
     public async Task<string?> GetPlayerNameByUserIdAsync(int? userId)
     {
         var data = await GetPlayerDataByIdAsync(userId);
+        if (data == null)
+            throw new PlayerNotFoundException(userId);
 
-        return data?.PlayerName;
+        return data.PlayerName;
     }
 
-    public async Task<PlayerGameData?> GetPlayerDataByIdAsync(int? userId)
+    private async Task<PlayerGameData?> GetPlayerDataByIdAsync(int? userId)
     {
         return await _dataRepository.GetPlayerDataByIdAsync(userId);
     }
@@ -65,18 +68,27 @@ public class DataService : IDataService
     public async Task<int> GetPlayerLevelByUserIdAsync(int? userId)
     {
         var data = await GetPlayerDataByUserId(userId);
+        if (data == null)
+            throw new PlayerNotFoundException(userId);
+        
         return data.PlayerLevel;
     }
 
     public async Task<int> GetPlayerExpByUserIdAsync(int? userId)
     {
         var data = await GetPlayerDataByUserId(userId);
+        if (data == null)
+            throw new PlayerNotFoundException(userId);
+        
         return data.PlayerExp;
     }
 
     public async Task<PlayerGameData> UpdatePlayerLevelByExpAsync(int? userId, int exp)
     {
         var playerData = await GetPlayerDataByUserId(userId);
+        if (playerData == null)
+            throw new PlayerNotFoundException(userId);
+        
         playerData.PlayerExp += exp;
 
         while (true)
@@ -94,13 +106,16 @@ public class DataService : IDataService
         return playerData;
     }
 
-    public async Task RenamePlayerNameAsync(int? userId, string newPlayerName)
+    public async Task RenamePlayerNameAsync(int? userId, string? newPlayerName)
     {
+        if (string.IsNullOrEmpty(newPlayerName))
+            throw new PlayerNameMissingException();
+        
         var exists = await _dataRepository.ExistsPlayerNameAsync(newPlayerName);
         if (exists != null)
         {
             _logger.LogWarning($"이미 존재하는 이름입니다. player_name: {newPlayerName}");
-            throw new InvalidOperationException("이미 존재하는 플레이어 이름입니다.");
+            throw new PlayerNameExistException(newPlayerName);
         }
 
         await _dataRepository.RenamePlayerNameAsync(userId, newPlayerName);

@@ -73,7 +73,6 @@ namespace Server.Api.Controller
         /// <returns>플레이어 이름 정보</returns>
         [HttpGet("name")]
         [ProducesResponseType(typeof(GetPlayerNameResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<GetPlayerNameResponse>> GetPlayerName()
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
@@ -92,12 +91,12 @@ namespace Server.Api.Controller
                 };
 
                 _logger.LogInformation($"플레이어 이름 조회 성공: PlayerName: {playerName}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 이름 조회 성공", response));
             }
             catch (PlayerNotFoundException ex)
             {
                 _logger.LogError(ex, "플레이어 데이터 조회 실패");
-                return Ok(ApiResponse.Error<GetPlayerNameResponse>(ErrorStatusCode.NotFound, "해당 플레이어를 찾을 수 없습니다."));
+                return Ok(ApiResponse.Error<GetPlayerNameResponse>(ErrorStatusCode.NotFound, ex.Message));
             }
             catch (Exception ex)
             {
@@ -113,8 +112,6 @@ namespace Server.Api.Controller
         /// <returns>변경된 이름 반환</returns>
         [HttpPatch("name")]
         [ProducesResponseType(typeof(RenamePlayerNameResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<RenamePlayerNameResponse>> RenamePlayerName([FromBody] RenamePlayerNameRequest request)
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
@@ -124,9 +121,6 @@ namespace Server.Api.Controller
 
             try
             {
-                if (request.NewName == null)
-                    return Conflict(new { message = "플레이어 이름 재설정 실패 : NewName 누락 오류" });
-
                 await _dataService.RenamePlayerNameAsync(userId, request.NewName);
 
                 var response = new RenamePlayerNameResponse
@@ -136,7 +130,12 @@ namespace Server.Api.Controller
                 };
 
                 _logger.LogInformation($"플레이어 이름 재설정 성공: Id: {userId}, NewName: {request.NewName}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 이름 재설정 성공", response));
+            }
+            catch (PlayerNameMissingException ex)
+            {
+                _logger.LogError(ex, "플레이어 이름 재설정 실패 : NewName 누락 오류");
+                return Ok(ApiResponse.Error<RenamePlayerNameResponse>(ErrorStatusCode.NotFound, ex.Message));
             }
             catch (Exception ex)
             {
@@ -151,7 +150,6 @@ namespace Server.Api.Controller
         /// <returns>레벨 및 경험치 정보</returns>
         [HttpGet("level")]
         [ProducesResponseType(typeof(GetPlayerLevelResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<GetPlayerLevelResponse>> GetPlayerLevel()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
@@ -172,7 +170,12 @@ namespace Server.Api.Controller
                 };
 
                 _logger.LogInformation($"플레이어 레벨 조회 성공: PlayerLevel: {level}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 레벨 조회 성공", response));
+            }
+            catch (PlayerNotFoundException ex)
+            {
+                _logger.LogError(ex, "플레이어 데이터 조회 실패");
+                return Ok(ApiResponse.Error<GetPlayerNameResponse>(ErrorStatusCode.NotFound, ex.Message));
             }
             catch (Exception ex)
             {
@@ -188,7 +191,6 @@ namespace Server.Api.Controller
         /// <returns>갱신된 레벨 및 경험치 정보</returns>
         [HttpPatch("level/exp")]
         [ProducesResponseType(typeof(UpdatePlayerLevelByExpResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<UpdatePlayerLevelByExpResponse>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request)
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
@@ -211,7 +213,12 @@ namespace Server.Api.Controller
                 };
 
                 _logger.LogInformation($"플레이어 레벨 갱신 성공: Id: {userId}");
-                return Ok(response);
+                return Ok(ApiResponse.Ok("플레이어 레벨 갱신 성공", response));
+            }
+            catch (PlayerNotFoundException ex)
+            {
+                _logger.LogError(ex, "플레이어 데이터 조회 실패");
+                return Ok(ApiResponse.Error<GetPlayerNameResponse>(ErrorStatusCode.NotFound, ex.Message));
             }
             catch (Exception ex)
             {

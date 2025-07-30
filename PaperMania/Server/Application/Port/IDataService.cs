@@ -9,5 +9,5 @@ public interface IDataService
     Task<int> GetPlayerLevelByUserIdAsync(int? userId);
     Task<int> GetPlayerExpByUserIdAsync(int? userId);
     Task<PlayerGameData> UpdatePlayerLevelByExpAsync(int? userId, int exp);
-    Task RenamePlayerNameAsync(int? userId, string newPlayerName);
+    Task RenamePlayerNameAsync(int? userId, string? newPlayerName);
 }

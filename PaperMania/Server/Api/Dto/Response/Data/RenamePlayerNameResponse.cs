@@ -3,5 +3,5 @@
 public class RenamePlayerNameResponse
 {
     public int? Id { get; set; }
-    public string NewPlayerName { get; set; }
+    public string? NewPlayerName { get; set; }
 }
