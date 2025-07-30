@@ -137,7 +137,7 @@ namespace Server.Api.Controller
             catch (GoogleLoginFailedException ex)
             {
                 _logger.LogWarning(ex, "구글 로그인 실패");
-                return Ok(ApiResponse.Error<GoogleLoginResponse>((int)ErrorStatusCode.Unauthorized, ex.Message));
+                return Ok(ApiResponse.Error<GoogleLoginResponse>((int)ErrorStatusCode.BadRequest, ex.Message));
             }
             catch (Exception ex)
             {
@@ -162,7 +162,7 @@ namespace Server.Api.Controller
 
             try
             {
-                await _accountService.LogoutAsync(sessionId);
+                await _accountService.LogoutAsync(sessionId!);
 
                 _logger.LogInformation("로그아웃 성공: SessionId={SessionId}", sessionId);
                 return Ok(ApiResponse.Ok<EmptyResponse>("로그아웃 성공"));
