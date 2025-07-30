@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Server.Api.Dto.Response;
+using Server.Api.Dto.Response.Auth;
 using Server.Application.Port;
 
 namespace Server.Api.Filter;
@@ -20,7 +22,7 @@ public class SessionValidationFilter : IAsyncActionFilter
         if (!context.HttpContext.Request.Headers.TryGetValue("Session-Id", out var sessionId) || string.IsNullOrWhiteSpace(sessionId))
         {
             _logger.LogWarning("세션 ID가 없습니다.");
-            context.Result = new UnauthorizedObjectResult(new { message = "세션 ID가 없습니다." });
+            context.Result = new JsonResult(ApiResponse.Error<EmptyResponse>((int)ErrorStatusCode.Unauthorized, "SID가 없습니다."));
             return;
         }
 
@@ -28,7 +30,7 @@ public class SessionValidationFilter : IAsyncActionFilter
         if (!isValid)
         {
             _logger.LogWarning($"유효하지 않은 세션: {sessionId}");
-            context.Result = new UnauthorizedObjectResult(new { message = "유효하지 않은 세션입니다." });
+            context.Result = new JsonResult(ApiResponse.Error<EmptyResponse>((int)ErrorStatusCode.Unauthorized, "유효하지 않은 세션입니다."));
             return;
         }
 
