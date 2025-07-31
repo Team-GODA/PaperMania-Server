@@ -4,9 +4,6 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;
 using Server.Api.Filter;
-using Server.Application.Exceptions;
-using Server.Application.Exceptions.Auth;
-using Server.Application.Exceptions.Data;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -18,14 +15,12 @@ namespace Server.Api.Controller
     public class AuthController : ControllerBase
     {
         private readonly IAccountService _accountService;
-        private readonly ISessionService _sessionService;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAccountService accountService, ISessionService sessionService, 
+        public AuthController(IAccountService accountService, 
             ILogger<AuthController> logger)
         {
             _accountService = accountService;
-            _sessionService =  sessionService;
             _logger = logger;
         }
 
