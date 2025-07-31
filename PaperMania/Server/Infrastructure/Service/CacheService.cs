@@ -5,7 +5,7 @@ namespace Server.Infrastructure.Service;
 
 public class CacheService : ICacheService
 {
-    private IDatabase _db;
+    private readonly IDatabase _db;
 
     public CacheService(IConnectionMultiplexer redis)
     {

@@ -4,7 +4,7 @@ namespace Server.Application.Port;
 
 public interface ICurrencyRepository
 {
-    Task AddPlayerGoodsDataByUserIdAsync(int? userId);
-    Task<PlayerGoodsData> GetPlayerGoodsDataByUserIdAsync(int? userId);
-    Task UpdatePlayerGoodsDataAsync(PlayerGoodsData data);
+    Task AddPlayerCurrencyDataByUserIdAsync(int? userId);
+    Task<PlayerCurrencyData> GetPlayerCurrencyDataByUserIdAsync(int? userId);
+    Task UpdatePlayerCurrencyDataAsync(PlayerCurrencyData data);
 }

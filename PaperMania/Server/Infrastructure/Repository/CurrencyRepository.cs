@@ -10,7 +10,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
     {
     }
     
-    public async Task AddPlayerGoodsDataByUserIdAsync(int? userId)
+    public async Task AddPlayerCurrencyDataByUserIdAsync(int? userId)
     {
         await using var db = CreateConnection();
         await db.OpenAsync();
@@ -22,7 +22,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
         await db.ExecuteAsync(sql, new { UserId = userId });
     }
 
-    public async Task<PlayerGoodsData> GetPlayerGoodsDataByUserIdAsync(int? userId)
+    public async Task<PlayerCurrencyData> GetPlayerCurrencyDataByUserIdAsync(int? userId)
     {
         await using var db = CreateConnection();
         await db.OpenAsync();
@@ -33,11 +33,11 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
             FROM paper_mania_game_data.player_currency_data
             WHERE id = @Id";
         
-        var result = await db.QueryFirstOrDefaultAsync<PlayerGoodsData>(sql, new { Id = userId });
+        var result = await db.QueryFirstOrDefaultAsync<PlayerCurrencyData>(sql, new { Id = userId });
         return result ?? throw new InvalidOperationException($"플레이어 재화 데이터 NULL : Id : {userId}");
     }
 
-    public async Task UpdatePlayerGoodsDataAsync(PlayerGoodsData data)
+    public async Task UpdatePlayerCurrencyDataAsync(PlayerCurrencyData data)
     {
         await using var db = CreateConnection();
         await db.OpenAsync();

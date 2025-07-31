@@ -1,4 +1,6 @@
-﻿using Server.Application.Port;
+﻿using Server.Application.Exceptions.Currency;
+using Server.Application.Exceptions.Data;
+using Server.Application.Port;
 using Server.Domain.Entity;
 
 namespace Server.Infrastructure.Service;
@@ -6,119 +8,113 @@ namespace Server.Infrastructure.Service;
 public class CurrencyService : ICurrencyService
 {
     private readonly ICurrencyRepository _currencyRepository;
-    private readonly ISessionService _sessionService;
     private readonly ILogger<CurrencyService> _logger;
 
-    public CurrencyService(ICurrencyRepository currencyRepository, ISessionService sessionService, ILogger<CurrencyService> logger)
+    public CurrencyService(ICurrencyRepository currencyRepository, ILogger<CurrencyService> logger)
     {
         _currencyRepository = currencyRepository;
-        _sessionService = sessionService;
         _logger = logger;
     }
-
-    private async Task ValidateSessionAsync(string sessionId)
-    {
-        var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
-
-        var isValid = await _sessionService.ValidateSessionAsync(sessionId, userId);
-        if (!isValid)
-            throw new UnauthorizedAccessException("세션이 유효하지 않습니다.");
-    }
     
-    public async Task<int> GetPlayerActionPointAsync(int? userId, string sessionId)
+    public async Task<int> GetPlayerActionPointAsync(int? userId)
     {
-        await ValidateSessionAsync(sessionId);
+        var data = await GetPlayerCurrencyDataOrException(userId);
         
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
         var updated = await RegenerateActionPointAsync(data);
-
         if (updated)
             _logger.LogInformation($"AP 자동 회복 적용: UserId={userId}, AP={data.ActionPoint}");
 
         return data.ActionPoint;
     }
 
-    public async Task<int> UpdatePlayerMaxActionPoint(int? userId, int newMaxActionPoint, string sessionId)
+    public async Task<int> UpdatePlayerMaxActionPoint(int? userId, int newMaxActionPoint)
     {
-        await ValidateSessionAsync(sessionId);
+        var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
+        if (data == null)
+            throw new CurrencyDataNotFoundException(userId);
         
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
         data.MaxActionPoint = newMaxActionPoint;
 
-        await _currencyRepository.UpdatePlayerGoodsDataAsync(data);
+        await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
         return newMaxActionPoint;
     }
 
-    public async Task UsePlayerActionPointAsync(int? userId, int usedActionPoint, string sessionId)
+    public async Task UsePlayerActionPointAsync(int? userId, int usedActionPoint)
     {
-        await ValidateSessionAsync(sessionId);
-
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
+        var data = await GetPlayerCurrencyDataOrException(userId);
         await RegenerateActionPointAsync(data);
 
         data.ActionPoint = Math.Max(data.ActionPoint - usedActionPoint, 0);
         data.LastActionPointUpdated = DateTime.UtcNow;
 
-        await _currencyRepository.UpdatePlayerGoodsDataAsync(data);
+        await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
     }
 
-    public async Task<int> GetPlayerGoldAsync(int? userId, string sessionId)
+    public async Task<int> GetPlayerGoldAsync(int? userId)
     {
-        await ValidateSessionAsync(sessionId);
-        
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
+        var data = await GetPlayerCurrencyDataOrException(userId);
         return data.Gold;
     }
 
-    public async Task AddPlayerGoldAsync(int? userId, int gold, string sessionId)
+    public async Task ModifyPlayerGoldAsync(int? userId, int amount)
     {
-        await ValidateSessionAsync(sessionId);
+        var data = await GetPlayerCurrencyDataOrException(userId);
+
+        if (amount >= 0)
+        {
+            _logger.LogInformation($"플레이어 골드 추가 성공 :  {userId}, Amount : {amount}");
+            data.Gold += amount;
+        }
+        else
+        {
+            var decrease = -amount;
+            
+            if (data.Gold < decrease)
+            {
+                _logger.LogWarning($"골드 부족: UserId={userId}, 현재={data.Gold}, 요청={decrease}");
+                throw new NotEnoughGoldException(userId);
+            }
+            
+            _logger.LogInformation($"플레이어 골드 사용 : UserId={userId}, Amount={decrease}");
+            data.Gold -= decrease;
+        }
         
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
-        data.Gold += gold;
-        
-        await _currencyRepository.UpdatePlayerGoodsDataAsync(data);
+        await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
     }
 
-    public async Task UsePlayerGoldAsync(int? userId, int usedGold, string sessionId)
+    public async Task<int> GetPlayerPaperPieceAsync(int? userId)
     {
-        await ValidateSessionAsync(sessionId);
-        
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
-        data.Gold = Math.Max(data.Gold - usedGold, 0);
-        
-        await _currencyRepository.UpdatePlayerGoodsDataAsync(data);
-    }
-
-    public async Task<int> GetPlayerPaperPieceAsync(int? userId, string sessionId)
-    {
-        await ValidateSessionAsync(sessionId);
-        ;
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
+        var data = await GetPlayerCurrencyDataOrException(userId);
         return data.PaperPiece;
     }
 
-    public async Task AddPlayerPaperPieceAsync(int? userId, int paperPiece, string sessionId)
+    public async Task ModifyPlayerPaperPieceAsync(int? userId, int amount)
     {
-        await ValidateSessionAsync(sessionId);
+        var data = await GetPlayerCurrencyDataOrException(userId);
+
+        if (amount >= 0)
+        {
+            _logger.LogInformation($"플레이어 종이 조각 추가 성공 :  {userId}, Amount : {amount}");
+            data.PaperPiece += amount;
+        }
+        else
+        {
+            var decrease = -amount;
+            
+            if (data.PaperPiece < decrease)
+            {
+                _logger.LogWarning($"종이 조각 부족: UserId={userId}, 현재={data.PaperPiece}, 요청={decrease}");
+                throw new NotEnoughPaperPieceException(userId);
+            }
+            
+            _logger.LogInformation($"플레이어 종이 조각 사용 : UserId={userId}, Amount={decrease}");
+            data.PaperPiece -= decrease;
+        }
         
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
-        data.PaperPiece += paperPiece;
-        
-        await _currencyRepository.UpdatePlayerGoodsDataAsync(data);
+        await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
     }
 
-    public async Task UsePlayerPaperPieceAsync(int? userId, int usedPaperPiece, string sessionId)
-    {
-        await ValidateSessionAsync(sessionId);
-        
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
-        data.PaperPiece = Math.Max(data.PaperPiece - usedPaperPiece, 0);
-        
-        await _currencyRepository.UpdatePlayerGoodsDataAsync(data);
-    }
-
-    private async Task<bool> RegenerateActionPointAsync(PlayerGoodsData data)
+    private async Task<bool> RegenerateActionPointAsync(PlayerCurrencyData data)
     {
         var currentActionPoint = data.ActionPoint;
         var maxActionPoint = data.MaxActionPoint;
@@ -142,10 +138,22 @@ public class CurrencyService : ICurrencyService
             _logger.LogInformation($"AP 증가: {apToAdd}, 새 AP: {currentActionPoint}");
             _logger.LogInformation($"LastActionPointUpdated 갱신: {data.LastActionPointUpdated}");
 
-            await _currencyRepository.UpdatePlayerGoodsDataAsync(data);
+            await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
             return true;
         }
 
         return false;
+    }
+
+    private async Task<PlayerCurrencyData> GetPlayerCurrencyDataOrException(int? userId)
+    {
+        if (userId == null)
+            throw new UserIdNotFoundException(userId);
+
+        var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
+        if (data == null)
+            throw new CurrencyDataNotFoundException(userId);
+
+        return data;
     }
 }

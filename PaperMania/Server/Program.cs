@@ -2,6 +2,7 @@ using System.Text;
 using Azure.Identity;
 using Server.Api.Filter;
 using Server.Api.Middleware;
+using Server.Application.Configure;
 using Server.Application.Port;
 using Server.Infrastructure.Repository;
 using Server.Infrastructure.Service;
@@ -22,11 +23,14 @@ var redisConnectionString = env.IsDevelopment()
 var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
+builder.Services.Configure<GoogleAuthSetting>(builder.Configuration.GetSection("GoogleAuth"));
+
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<SessionValidationFilter>();
 
@@ -52,6 +56,13 @@ builder.Services.AddScoped<ICurrencyRepository>(provider =>
     var connectionString = config[keyName];
 
     return new CurrencyRepository(connectionString!);
+});
+builder.Services.AddScoped<ICharacterRepository>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config[keyName];
+
+    return new CharacterRepository(connectionString!);
 });
 builder.Services.AddScoped<IStageRepository>(provider =>
 {
@@ -95,6 +106,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<SessionRefresh>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
