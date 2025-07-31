@@ -124,7 +124,7 @@ public class DataService : IDataService
 
     public async Task<PlayerCurrencyData> GetPlayerGoodsDataByUserIdAsync(int userId)
     {
-        var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
+        var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
         return data;
     }
 

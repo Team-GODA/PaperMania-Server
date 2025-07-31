@@ -10,7 +10,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
     {
     }
     
-    public async Task AddPlayerGoodsDataByUserIdAsync(int? userId)
+    public async Task AddPlayerCurrencyDataByUserIdAsync(int? userId)
     {
         await using var db = CreateConnection();
         await db.OpenAsync();
@@ -22,7 +22,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
         await db.ExecuteAsync(sql, new { UserId = userId });
     }
 
-    public async Task<PlayerCurrencyData> GetPlayerGoodsDataByUserIdAsync(int? userId)
+    public async Task<PlayerCurrencyData> GetPlayerCurrencyDataByUserIdAsync(int? userId)
     {
         await using var db = CreateConnection();
         await db.OpenAsync();
@@ -37,7 +37,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
         return result ?? throw new InvalidOperationException($"플레이어 재화 데이터 NULL : Id : {userId}");
     }
 
-    public async Task UpdatePlayerGoodsDataAsync(PlayerCurrencyData data)
+    public async Task UpdatePlayerCurrencyDataAsync(PlayerCurrencyData data)
     {
         await using var db = CreateConnection();
         await db.OpenAsync();
