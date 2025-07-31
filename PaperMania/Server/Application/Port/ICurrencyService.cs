@@ -9,10 +9,8 @@ public interface ICurrencyService
     Task UsePlayerActionPointAsync(int? userId, int usedActionPoint);
     
     Task<int> GetPlayerGoldAsync(int? userId);
-    Task AddPlayerGoldAsync(int? userId, int gold);
-    Task UsePlayerGoldAsync(int? userId, int usedGold);
+    Task ModifyPlayerGoldAsync(int? userId, int amount);
     
     Task<int> GetPlayerPaperPieceAsync(int? userId);
-    Task AddPlayerPaperPieceAsync(int? userId, int paperPiece);
-    Task UsePlayerPaperPieceAsync(int? userId, int usedPaperPiece);
+    Task ModifyPlayerPaperPieceAsync(int? userId, int amount);
 }

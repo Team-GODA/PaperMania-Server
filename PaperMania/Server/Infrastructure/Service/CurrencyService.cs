@@ -56,18 +56,28 @@ public class CurrencyService : ICurrencyService
         return data.Gold;
     }
 
-    public async Task AddPlayerGoldAsync(int? userId, int gold)
+    public async Task ModifyPlayerGoldAsync(int? userId, int amount)
     {
         var data = await GetPlayerCurrencyDataOrException(userId);
-        data.Gold += gold;
-        
-        await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
-    }
 
-    public async Task UsePlayerGoldAsync(int? userId, int usedGold)
-    {
-        var data = await GetPlayerCurrencyDataOrException(userId);
-        data.Gold = Math.Max(data.Gold - usedGold, 0);
+        if (amount >= 0)
+        {
+            _logger.LogInformation($"플레이어 골드 추가 성공 :  {userId}, Amount : {amount}");
+            data.Gold += amount;
+        }
+        else
+        {
+            var decrease = -amount;
+            
+            if (data.Gold < decrease)
+            {
+                _logger.LogWarning($"골드 부족: UserId={userId}, 현재={data.Gold}, 요청={decrease}");
+                throw new NotEnoughGoldException(userId);
+            }
+            
+            _logger.LogInformation($"플레이어 골드 사용 : UserId={userId}, Amount={decrease}");
+            data.Gold -= decrease;
+        }
         
         await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
     }
@@ -78,18 +88,28 @@ public class CurrencyService : ICurrencyService
         return data.PaperPiece;
     }
 
-    public async Task AddPlayerPaperPieceAsync(int? userId, int paperPiece)
+    public async Task ModifyPlayerPaperPieceAsync(int? userId, int amount)
     {
         var data = await GetPlayerCurrencyDataOrException(userId);
-        data.PaperPiece += paperPiece;
-        
-        await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
-    }
 
-    public async Task UsePlayerPaperPieceAsync(int? userId, int usedPaperPiece)
-    {
-        var data = await GetPlayerCurrencyDataOrException(userId);
-        data.PaperPiece = Math.Max(data.PaperPiece - usedPaperPiece, 0);
+        if (amount >= 0)
+        {
+            _logger.LogInformation($"플레이어 종이 조각 추가 성공 :  {userId}, Amount : {amount}");
+            data.PaperPiece += amount;
+        }
+        else
+        {
+            var decrease = -amount;
+            
+            if (data.PaperPiece < decrease)
+            {
+                _logger.LogWarning($"종이 조각 부족: UserId={userId}, 현재={data.PaperPiece}, 요청={decrease}");
+                throw new NotEnoughPaperPieceException(userId);
+            }
+            
+            _logger.LogInformation($"플레이어 종이 조각 사용 : UserId={userId}, Amount={decrease}");
+            data.PaperPiece -= decrease;
+        }
         
         await _currencyRepository.UpdatePlayerCurrencyDataAsync(data);
     }
