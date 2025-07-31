@@ -1,6 +1,6 @@
 ﻿namespace Server.Api.Dto.Response.Currency;
 
-public class GetPlayerPaperPieceReponse
+public class GetPlayerPaperPieceResponse
 {
     public int CurrentPaperPieces { get; set; }
 }
