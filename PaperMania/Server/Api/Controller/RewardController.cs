@@ -4,8 +4,6 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Reward;
 using Server.Api.Filter;
-using Server.Application.Exceptions;
-using Server.Application.Exceptions.Stage;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -75,8 +73,7 @@ namespace Server.Api.Controller
             };
 
             var stageReward = await _rewardService.GetStageRewardAsync(request.StageNum, request.SubStageNum);
-
-            await _rewardService.ClaimStageRewardByUserIdAsync(userId, stageReward, stageData);
+            await _rewardService.ClaimStageRewardByUserIdAsync(userId, stageReward!, stageData);
 
             var response = new ClaimStageRewardResponse
             {
