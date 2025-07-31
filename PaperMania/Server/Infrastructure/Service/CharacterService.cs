@@ -1,4 +1,5 @@
-﻿using Server.Application.Port;
+﻿using Server.Application.Exceptions.Character;
+using Server.Application.Port;
 using Server.Domain.Entity;
 
 namespace Server.Infrastructure.Service;
@@ -14,14 +15,18 @@ public class CharacterService : ICharacterService
     
     public async Task<IEnumerable<PlayerCharacterData>> GetPlayerCharacterDataByUserIdAsync(int? userId)
     {
-        return await _characterRepository.GetPlayerCharacterDataByUserIdAsync(userId);
+        var data = (await _characterRepository.GetPlayerCharacterDataByUserIdAsync(userId)).ToList();
+        if (data.Count == 0)
+            throw new PlayerCharactersNotFoundException(userId);
+            
+        return data;
     }
 
     public async Task<PlayerCharacterData> AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data)
     {
         bool exists = await _characterRepository.IsNewCharacterExistAsync(data.Id, data.CharacterId);
         if (exists)
-            throw new InvalidOperationException("이미 해당 캐릭터를 보유 중입니다.");
+            throw new DuplicateCharacterException(data.CharacterName);
         
         return await _characterRepository.AddPlayerCharacterDataByUserIdAsync(data);
     }

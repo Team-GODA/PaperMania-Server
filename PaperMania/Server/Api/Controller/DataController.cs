@@ -4,6 +4,7 @@ using Server.Api.Dto.Request;
 using Server.Application.Port;
 using Asp.Versioning;
 using Server.Api.Dto.Response;
+using Server.Api.Dto.Response.Data;
 using Server.Api.Filter;
 
 namespace Server.Api.Controller
@@ -31,41 +32,20 @@ namespace Server.Api.Controller
         /// <param name="request">플레이어 이름 등록 요청 객체</param>
         /// <returns>등록 성공 여부에 대한 응답</returns>
         [HttpPost("player")]
-        [ProducesResponseType(typeof(AddPlayerDataResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<AddPlayerDataResponse>> AddPlayerData([FromBody] AddPlayerDataRequest request)
+        [ProducesResponseType(typeof(BaseResponse<AddPlayerDataResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<AddPlayerDataResponse>>> AddPlayerData([FromBody] AddPlayerDataRequest request)
         {
-            _logger.LogInformation($"플레이어 이름 등록 시도: PlayerName = {request.PlayerName}");
+            _logger.LogInformation($"플레이어 데이터 등록 시도: PlayerName = {request.PlayerName}");
             var sessionId = HttpContext.Items["SessionId"] as string;
 
-            try
+            var result = await _dataService.AddPlayerDataAsync(request.PlayerName, sessionId!);
+            var response = new AddPlayerDataResponse
             {
-                var result = await _dataService.AddPlayerDataAsync(request.PlayerName, sessionId);
-                var response = new AddPlayerDataResponse
-                {
-                    Message = "이름이 성공적으로 설정되었습니다.",
-                    PlayerName = result
-                };
+                PlayerName = result
+            };
 
-                _logger.LogInformation("플레이어 이름 등록 성공: PlayerName = {PlayerName}", request.PlayerName);
-                return Ok(response);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                _logger.LogWarning("플레이어 이름 등록 실패: 유효하지 않은 세션");
-                return Conflict(new { message = "유효하지 않은 세션입니다." });
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogWarning("플레이어 이름 등록 실패: {Message}", ex.Message);
-                return Conflict(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "서버 오류 발생: 플레이어 이름 등록 중 예외");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
-            }
+            _logger.LogInformation("플레이어 데이터 등록 성공: PlayerName = {PlayerName}", request.PlayerName);
+            return Ok(ApiResponse.Ok("플레이어 데이터 등록 성공", response));
         }
 
         /// <summary>
@@ -73,33 +53,24 @@ namespace Server.Api.Controller
         /// </summary>
         /// <returns>플레이어 이름 정보</returns>
         [HttpGet("name")]
-        [ProducesResponseType(typeof(GetPlayerNameResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<GetPlayerNameResponse>> GetPlayerName()
+        [ProducesResponseType(typeof(BaseResponse<GetPlayerNameResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<GetPlayerNameResponse>>> GetPlayerName()
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 이름 조회 시도: Id: {userId}");
 
-            try
-            {
-                var playerName = await _dataService.GetPlayerNameByUserIdAsync(userId);
+            var playerName = await _dataService.GetPlayerNameByUserIdAsync(userId);
 
-                var response = new GetPlayerNameResponse
-                {
-                    Id = userId,
-                    PlayerName = playerName
-                };
-                
-                _logger.LogInformation($"플레이어 이름 조회 성공: PlayerName: {playerName}");
-                return Ok(response);
-            }
-            catch (Exception ex)
+            var response = new GetPlayerNameResponse
             {
-                _logger.LogError(ex, "플레이어 이름 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
-            }
+                Id = userId,
+                PlayerName = playerName
+            };
+
+            _logger.LogInformation($"플레이어 이름 조회 성공: PlayerName: {playerName}");
+            return Ok(ApiResponse.Ok("플레이어 이름 조회 성공", response));
         }
 
         /// <summary>
@@ -108,37 +79,24 @@ namespace Server.Api.Controller
         /// <param name="request">변경할 새 플레이어 이름 정보</param>
         /// <returns>변경된 이름 반환</returns>
         [HttpPatch("name")]
-        [ProducesResponseType(typeof(RenamePlayerNameResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Conflict)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<RenamePlayerNameResponse>> RenamePlayerName([FromBody] RenamePlayerNameRequest request)
+        [ProducesResponseType(typeof(BaseResponse<RenamePlayerNameResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<RenamePlayerNameResponse>>> RenamePlayerName([FromBody] RenamePlayerNameRequest request)
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 이름 재설정 시도: Id: {userId}");
 
-            try
+            await _dataService.RenamePlayerNameAsync(userId, request.NewName);
+
+            var response = new RenamePlayerNameResponse
             {
-                if (request.NewName == null)
-                    return Conflict(new { message = "플레이어 이름 재설정 실패 : NewName 누락 오류" });
+                Id = userId,
+                NewPlayerName = request.NewName
+            };
 
-                await _dataService.RenamePlayerNameAsync(userId, request.NewName);
-
-                var response = new RenamePlayerNameResponse
-                {
-                    Id = userId,
-                    NewPlayerName = request.NewName
-                };
-
-                _logger.LogInformation($"플레이어 이름 재설정 성공: Id: {userId}, NewName: {request.NewName}");
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "플레이어 이름 재설정 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
-            }
+            _logger.LogInformation($"플레이어 이름 재설정 성공: Id: {userId}, NewName: {request.NewName}");
+            return Ok(ApiResponse.Ok("플레이어 이름 재설정 성공", response));
         }
 
         /// <summary>
@@ -146,35 +104,26 @@ namespace Server.Api.Controller
         /// </summary>
         /// <returns>레벨 및 경험치 정보</returns>
         [HttpGet("level")]
-        [ProducesResponseType(typeof(GetPlayerLevelResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<GetPlayerLevelResponse>> GetPlayerLevel()
+        [ProducesResponseType(typeof(BaseResponse<GetPlayerLevelResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<GetPlayerLevelResponse>>> GetPlayerLevel()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 레벨 조회 시도: Id: {userId}");
 
-            try
-            {
-                var level = await _dataService.GetPlayerLevelByUserIdAsync(userId);
-                var exp = await _dataService.GetPlayerExpByUserIdAsync(userId);
+            var level = await _dataService.GetPlayerLevelByUserIdAsync(userId);
+            var exp = await _dataService.GetPlayerExpByUserIdAsync(userId);
 
-                var response = new GetPlayerLevelResponse
-                {
-                    Id = userId,
-                    Level = level,
-                    Exp = exp
-                };
-
-                _logger.LogInformation($"플레이어 레벨 조회 성공: PlayerLevel: {level}");
-                return Ok(response);
-            }
-            catch (Exception ex)
+            var response = new GetPlayerLevelResponse
             {
-                _logger.LogError(ex, "플레이어 레벨 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
-            }
+                Id = userId,
+                Level = level,
+                Exp = exp
+            };
+
+            _logger.LogInformation($"플레이어 레벨 조회 성공: PlayerLevel: {level}");
+            return Ok(ApiResponse.Ok("플레이어 레벨 조회 성공", response));
         }
 
         /// <summary>
@@ -182,38 +131,29 @@ namespace Server.Api.Controller
         /// </summary>
         /// <param name="request">추가할 경험치 정보</param>
         /// <returns>갱신된 레벨 및 경험치 정보</returns>
-        [HttpPatch("level/exp")]
-        [ProducesResponseType(typeof(UpdatePlayerLevelByExpResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<UpdatePlayerLevelByExpResponse>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request)
+        [HttpPatch("level")]
+        [ProducesResponseType(typeof(BaseResponse<UpdatePlayerLevelByExpResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<UpdatePlayerLevelByExpResponse>>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request)
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 레벨 갱신 시도: Id: {userId}");
 
-            try
+            var data = await _dataService.UpdatePlayerLevelByExpAsync(userId, request.NewExp);
+
+            var newLevel = data.PlayerLevel;
+            var newExp = data.PlayerExp;
+
+            var response = new UpdatePlayerLevelByExpResponse
             {
-                var data = await _dataService.UpdatePlayerLevelByExpAsync(userId, request.NewExp);
+                Id = userId,
+                NewLevel = newLevel,
+                NewExp = newExp
+            };
 
-                var newLevel = data.PlayerLevel;
-                var newExp = data.PlayerExp;
-
-                var response = new UpdatePlayerLevelByExpResponse
-                {
-                    Id = userId,
-                    NewLevel = newLevel,
-                    NewExp = newExp
-                };
-
-                _logger.LogInformation($"플레이어 레벨 갱신 성공: Id: {userId}");
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "플레이어 레벨 갱신 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
-            }
+            _logger.LogInformation($"플레이어 레벨 갱신 성공: Id: {userId}");
+            return Ok(ApiResponse.Ok("플레이어 레벨 갱신 성공", response));
         }
     }
 }

@@ -5,5 +5,5 @@ public class PlayerStageData
     public int? Id { get; set; }
     public int StageNum { get; set; }
     public int SubStageNum { get; set; }
-    public bool IsCleared { get; set; } = false;
+    public bool IsCleared { get; set; }
 }

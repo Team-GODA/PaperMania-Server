@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
+using Server.Api.Dto.Response.Character;
 using Server.Api.Filter;
 using Server.Application.Port;
 using Server.Domain.Entity;
@@ -31,31 +32,22 @@ namespace Server.Api.Controller
         /// </summary>
         /// <returns>캐릭터 정보</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(GetAllPlayerCharactersResponse), 200)]
-        [ProducesResponseType(404)]
-        public async Task<ActionResult<GetAllPlayerCharactersResponse>> GetAllPlayerCharacters()
+        [ProducesResponseType(typeof(BaseResponse<GetAllPlayerCharactersResponse>), 200)]
+        public async Task<ActionResult<BaseResponse<GetAllPlayerCharactersResponse>>> GetAllPlayerCharacters()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 보유 캐릭터 데이터 조회 시도: ID: {userId}");
-            
-            try
+
+            var data = await _characterService.GetPlayerCharacterDataByUserIdAsync(userId);
+            var response = new GetAllPlayerCharactersResponse
             {
-                var data = await _characterService.GetPlayerCharacterDataByUserIdAsync(userId);
-                var response = new GetAllPlayerCharactersResponse
-                {
-                    PlayerCharacters = data
-                };
-                
-                _logger.LogInformation($"플레이어 보유 캐릭터 데이터 조회 성공: ID: {userId}");
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "플레이어 보유 캐릭터 조회 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
-            }
+                PlayerCharacters = data
+            };
+
+            _logger.LogInformation($"플레이어 보유 캐릭터 데이터 조회 성공: ID: {userId}");
+            return Ok(ApiResponse.Ok("플레이어 보유 캐릭터 데이터 조회 성공", response));
         }
 
         /// <summary>
@@ -64,37 +56,28 @@ namespace Server.Api.Controller
         /// <param name="request">추가할 캐릭터 정보</param>
         /// <returns>추가된 캐릭터 정보</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(AddPlayerCharacterResponse), 200)]
+        [ProducesResponseType(typeof(BaseResponse<AddPlayerCharacterResponse>), 200)]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<AddPlayerCharacterResponse>> AddPlayerCharacter(
+        public async Task<ActionResult<BaseResponse<AddPlayerCharacterResponse>>> AddPlayerCharacter(
             [FromBody] AddPlayerCharacterRequest request)
         {
             _logger.LogInformation($"플레이어 보유 캐릭터 추가 시도: Id: {request.Id}, CharacterId: {request.CharacterId}");
-            var sessionId = HttpContext.Items["SessionId"] as string;
             
-            try
+            var data = new PlayerCharacterData
             {
-                var data = new PlayerCharacterData
-                {
-                    Id = request.Id,
-                    CharacterId = request.CharacterId
-                };
+                Id = request.Id,
+                CharacterId = request.CharacterId
+            };
 
-                var addedCharacter = await _characterService.AddPlayerCharacterDataByUserIdAsync(data);
-                var response = new AddPlayerCharacterResponse
-                {
-                    Id = addedCharacter.Id,
-                    CharacterId = addedCharacter.CharacterId
-                };
-                
-                _logger.LogInformation($"플레이어 보유 캐릭터 추가 성공: Id: {request.Id}, CharacterId: {request.CharacterId}");
-                return Ok(response);
-            }
-            catch (Exception ex)
+            var addedCharacter = await _characterService.AddPlayerCharacterDataByUserIdAsync(data);
+            var response = new AddPlayerCharacterResponse
             {
-                _logger.LogError(ex, "플레이어 캐릭터 추가 중 오류 발생");
-                return StatusCode(500, new { message = "서버 오류가 발생했습니다." });
-            }
+                Id = addedCharacter.Id,
+                CharacterId = addedCharacter.CharacterId
+            };
+                
+            _logger.LogInformation($"플레이어 보유 캐릭터 추가 성공: Id: {request.Id}, CharacterId: {request.CharacterId}");
+            return Ok(ApiResponse.Ok("플레이어 보유 캐릭터 추가 성공", response));
         }
     }
 }
