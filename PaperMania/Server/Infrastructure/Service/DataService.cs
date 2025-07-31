@@ -122,7 +122,7 @@ public class DataService : IDataService
         await _dataRepository.RenamePlayerNameAsync(userId, newPlayerName);
     }
 
-    public async Task<PlayerGoodsData> GetPlayerGoodsDataByUserIdAsync(int userId)
+    public async Task<PlayerCurrencyData> GetPlayerGoodsDataByUserIdAsync(int userId)
     {
         var data = await _currencyRepository.GetPlayerGoodsDataByUserIdAsync(userId);
         return data;

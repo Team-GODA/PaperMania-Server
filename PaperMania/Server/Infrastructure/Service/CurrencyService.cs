@@ -118,7 +118,7 @@ public class CurrencyService : ICurrencyService
         await _currencyRepository.UpdatePlayerGoodsDataAsync(data);
     }
 
-    private async Task<bool> RegenerateActionPointAsync(PlayerGoodsData data)
+    private async Task<bool> RegenerateActionPointAsync(PlayerCurrencyData data)
     {
         var currentActionPoint = data.ActionPoint;
         var maxActionPoint = data.MaxActionPoint;

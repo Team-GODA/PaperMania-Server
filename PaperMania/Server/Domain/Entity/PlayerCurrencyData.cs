@@ -1,6 +1,6 @@
 ﻿namespace Server.Domain.Entity;
 
-public class PlayerGoodsData
+public class PlayerCurrencyData
 {
     public int Id { get; set; }
     public int ActionPoint { get; set; } = 0;
