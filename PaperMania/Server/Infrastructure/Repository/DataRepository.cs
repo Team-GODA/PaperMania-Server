@@ -1,7 +1,4 @@
-﻿using System.Data;
-using System.Formats.Asn1;
-using Dapper;
-using Npgsql;
+﻿using Dapper;
 using Server.Application.Port;
 using Server.Domain.Entity;
 

@@ -4,15 +4,13 @@ namespace Server.Application.Port;
 
 public interface ICurrencyService
 {
-    Task<int> GetPlayerActionPointAsync(int? userId, string sessionId);
-    Task<int> UpdatePlayerMaxActionPoint(int? userId, int newMaxActionPoint, string sessionId);
-    Task UsePlayerActionPointAsync(int? userId, int usedActionPoint, string sessionId);
+    Task<int> GetPlayerActionPointAsync(int? userId);
+    Task<int> UpdatePlayerMaxActionPoint(int? userId, int newMaxActionPoint);
+    Task UsePlayerActionPointAsync(int? userId, int usedActionPoint);
     
-    Task<int> GetPlayerGoldAsync(int? userId, string sessionId);
-    Task AddPlayerGoldAsync(int? userId, int gold, string sessionId);
-    Task UsePlayerGoldAsync(int? userId, int usedGold, string sessionId);
+    Task<int> GetPlayerGoldAsync(int? userId);
+    Task ModifyPlayerGoldAsync(int? userId, int amount);
     
-    Task<int> GetPlayerPaperPieceAsync(int? userId, string sessionId);
-    Task AddPlayerPaperPieceAsync(int? userId, int paperPiece, string sessionId);
-    Task UsePlayerPaperPieceAsync(int? userId, int usedPaperPiece, string sessionId);
+    Task<int> GetPlayerPaperPieceAsync(int? userId);
+    Task ModifyPlayerPaperPieceAsync(int? userId, int amount);
 }

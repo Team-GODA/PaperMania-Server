@@ -6,7 +6,7 @@ namespace Server.Infrastructure.Repository;
 
 public class CharacterRepository : RepositoryBase, ICharacterRepository
 {
-    protected CharacterRepository(string connectionString) : base(connectionString)
+    public CharacterRepository(string connectionString) : base(connectionString)
     {
     }
 
