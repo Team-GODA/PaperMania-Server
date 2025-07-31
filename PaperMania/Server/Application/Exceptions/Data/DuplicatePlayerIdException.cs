@@ -1,9 +1,11 @@
-﻿namespace Server.Application.Exceptions.Data;
+﻿using Server.Api.Dto.Response;
 
-public class DuplicatePlayerIdException : Exception
+namespace Server.Application.Exceptions.Data;
+
+public class DuplicatePlayerIdException : GameException
 {
     public DuplicatePlayerIdException(string playerId)
-        : base($"플레이어 ID '{playerId}'은 이미 사용 중입니다.")
+        : base(ErrorStatusCode.Conflict ,$"플레이어 ID '{playerId}'은 이미 사용 중입니다.")
     {
     }
 }

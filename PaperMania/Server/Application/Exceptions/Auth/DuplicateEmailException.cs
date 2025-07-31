@@ -1,9 +1,11 @@
-﻿namespace Server.Application.Exceptions.Auth;
+﻿using Server.Api.Dto.Response;
 
-public class DuplicateEmailException : Exception
+namespace Server.Application.Exceptions.Auth;
+
+public class DuplicateEmailException : GameException
 {
     public DuplicateEmailException(string email)
-        : base($"이메일 '{email}'은 이미 사용 중입니다.")
+        : base(ErrorStatusCode.Conflict ,$"이메일 '{email}'은 이미 사용 중입니다.")
     {
     }
 }

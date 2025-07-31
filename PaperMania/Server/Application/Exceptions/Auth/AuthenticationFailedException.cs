@@ -1,9 +1,11 @@
-﻿namespace Server.Application.Exceptions.Auth;
+﻿using Server.Api.Dto.Response;
 
-public class AuthenticationFailedException : Exception
+namespace Server.Application.Exceptions.Auth;
+
+public class AuthenticationFailedException : GameException
 {
     public AuthenticationFailedException(string message)
-        : base(message)
+        : base(ErrorStatusCode.Unauthorized, message)
     {
     }
 }

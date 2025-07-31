@@ -1,9 +1,11 @@
-﻿namespace Server.Application.Exceptions.Data;
+﻿using Server.Api.Dto.Response;
 
-public class PlayerDataExistException : Exception
+namespace Server.Application.Exceptions.Data;
+
+public class PlayerDataExistException : GameException
 {
     public PlayerDataExistException()
-        : base("이미 이름을 등록한 계정입니다.")
+        : base(ErrorStatusCode.Conflict ,"이미 이름을 등록한 계정입니다.")
     {
     }
 }

@@ -1,9 +1,11 @@
-﻿namespace Server.Application.Exceptions.Auth;
+﻿using Server.Api.Dto.Response;
 
-public class GoogleLoginFailedException : Exception
+namespace Server.Application.Exceptions.Auth;
+
+public class GoogleLoginFailedException : GameException
 {
-    public GoogleLoginFailedException(string message, Exception innerException)
-        : base(message, innerException)
+    public GoogleLoginFailedException(string message)
+        : base(ErrorStatusCode.Unauthorized ,message)
     {
     }
 }

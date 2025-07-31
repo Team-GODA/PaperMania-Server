@@ -1,9 +1,11 @@
-﻿namespace Server.Application.Exceptions.Character;
+﻿using Server.Api.Dto.Response;
 
-public class PlayerCharactersNotFoundException : Exception
+namespace Server.Application.Exceptions.Character;
+
+public class PlayerCharactersNotFoundException : GameException
 {
     public PlayerCharactersNotFoundException(int? userId)
-        : base($"{userId}에 대한 캐릭터 데이터를 찾을 수 없습니다.")
+        : base(ErrorStatusCode.NotFound ,$"{userId}에 대한 캐릭터 데이터를 찾을 수 없습니다.")
     {
     }
 }
