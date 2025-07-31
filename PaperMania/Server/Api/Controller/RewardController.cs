@@ -41,27 +41,14 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation($"스테이지 보상 조회 시도");
 
-            try
+            var reward = await _rewardService.GetStageRewardAsync(stageNum, stageSubNum);
+            var response = new GetStageRewardResponse
             {
-                var reward = await _rewardService.GetStageRewardAsync(stageNum, stageSubNum);
-                var response = new GetStageRewardResponse
-                {
-                    StageReward = reward
-                };
+                StageReward = reward
+            };
 
-                _logger.LogInformation($"스테이지 보상 조회 성공 : StageNum = {stageNum}, StageSubNum = {stageSubNum}");
-                return Ok(ApiResponse.Ok("스테이지 보상 조회 성공", response));
-            }
-            catch (StageRewardNotFoundException ex)
-            {
-                _logger.LogWarning (ex, "스테이지 보상 정보가 없습니다.");
-                return Ok(ApiResponse.Error<GetStageRewardResponse>(ErrorStatusCode.NotFound, ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "스테이지 보상 조회 중 오류 발생");
-                return Ok(ApiResponse.Error<GetStageRewardResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation($"스테이지 보상 조회 성공 : StageNum = {stageNum}, StageSubNum = {stageSubNum}");
+            return Ok(ApiResponse.Ok("스테이지 보상 조회 성공", response));
         }
 
         /// <summary>
@@ -80,40 +67,25 @@ namespace Server.Api.Controller
             
             _logger.LogInformation($"플레이어 스테이지 보상 수령 시도 : Id : {userId}");
 
-            try
+            var stageData = new PlayerStageData
             {
-                var stageData = new PlayerStageData
-                {
-                    Id = userId,
-                    StageNum = request.StageNum,
-                    SubStageNum = request.SubStageNum
-                };
+                Id = userId,
+                StageNum = request.StageNum,
+                SubStageNum = request.SubStageNum
+            };
 
-                var stageReward = await _rewardService.GetStageRewardAsync(request.StageNum, request.SubStageNum);
-                if (stageReward == null)
-                    return NotFound("해당 스테이지 보상이 없습니다.");
+            var stageReward = await _rewardService.GetStageRewardAsync(request.StageNum, request.SubStageNum);
 
-                await _rewardService.ClaimStageRewardByUserIdAsync(userId, stageReward, stageData);
+            await _rewardService.ClaimStageRewardByUserIdAsync(userId, stageReward, stageData);
 
-                var response = new ClaimStageRewardResponse
-                {
-                    Id = userId,
-                    StageReward = stageReward
-                };
-
-                _logger.LogInformation($"플레이어 스테이지 보상 수령 성공 : Id : {userId}");
-                return Ok(ApiResponse.Ok("스테이지 보상 수령 성공", response));
-            }
-            catch (StageRewardNotFoundException ex)
+            var response = new ClaimStageRewardResponse
             {
-                _logger.LogWarning (ex, "스테이지 보상 정보가 없습니다.");
-                return Ok(ApiResponse.Error<ClaimStageRewardResponse>(ErrorStatusCode.NotFound, ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "스테이지 보상 수령 중 오류 발생");
-                return StatusCode(500, "서버 오류가 발생했습니다.");
-            }
+                Id = userId,
+                StageReward = stageReward
+            };
+
+            _logger.LogInformation($"플레이어 스테이지 보상 수령 성공 : Id : {userId}");
+            return Ok(ApiResponse.Ok("스테이지 보상 수령 성공", response));
         }
     }
 }
