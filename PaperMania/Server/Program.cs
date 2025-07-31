@@ -30,6 +30,7 @@ builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<SessionValidationFilter>();
 
@@ -55,6 +56,13 @@ builder.Services.AddScoped<ICurrencyRepository>(provider =>
     var connectionString = config[keyName];
 
     return new CurrencyRepository(connectionString!);
+});
+builder.Services.AddScoped<ICharacterRepository>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config[keyName];
+
+    return new CharacterRepository(connectionString!);
 });
 builder.Services.AddScoped<IStageRepository>(provider =>
 {
