@@ -3,9 +3,9 @@
 public class PlayerCurrencyData
 {
     public int Id { get; set; }
-    public int ActionPoint { get; set; } = 0;
-    public int MaxActionPoint { get; set; } = 0;
-    public int Gold { get; set; } = 0;
-    public int PaperPiece { get; set; } = 0;
+    public int ActionPoint { get; set; }
+    public int MaxActionPoint { get; set; }
+    public int Gold { get; set; }
+    public int PaperPiece { get; set; }
     public DateTime LastActionPointUpdated { get; set; }
 }
