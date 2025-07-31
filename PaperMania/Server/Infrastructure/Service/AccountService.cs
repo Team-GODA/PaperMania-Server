@@ -106,12 +106,12 @@ public class AccountService : IAccountService
         catch (InvalidJwtException ex)
         {
             _logger.LogWarning("구글 토큰 검증 실패: {Message}", ex.Message);
-            throw new GoogleLoginFailedException("유효하지 않은 구글 토큰입니다.", ex);
+            throw new GoogleLoginFailedException("유효하지 않은 구글 토큰입니다.");
         }
         catch (Exception ex)
         {
             _logger.LogError("구글 토큰 검증 중 예기치 못한 오류 발생: {Message}", ex.Message);
-            throw new GoogleLoginFailedException("구글 로그인 중 알 수 없는 오류가 발생했습니다.", ex);
+            throw new GoogleLoginFailedException("구글 로그인 중 알 수 없는 오류가 발생했습니다.");
         }
     }
 }

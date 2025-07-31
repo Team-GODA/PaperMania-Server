@@ -42,39 +42,21 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation("회원가입 시도: Email={Email}, PlayerId={PlayerId}", request.Email, request.PlayerId);
 
-            try
+            var newUser = new PlayerAccountData
             {
-                var newUser = new PlayerAccountData
-                {
-                    PlayerId = request.PlayerId,
-                    Email = request.Email
-                };
+                PlayerId = request.PlayerId,
+                Email = request.Email
+            };
 
-                await _accountService.RegisterAsync(newUser, request.Password);
+            await _accountService.RegisterAsync(newUser, request.Password);
 
-                var response = new RegisterResponse
-                {   
-                    Id = newUser.Id
-                };
+            var response = new RegisterResponse
+            {   
+                Id = newUser.Id
+            };
 
-                _logger.LogInformation("회원가입 성공: Id={Id}, PlayerId={PlayerId}", response.Id, request.PlayerId);
-                return Ok(ApiResponse.Ok("회원가입 성공", response));
-            }
-            catch (DuplicateEmailException ex)
-            {
-                _logger.LogWarning(ex, "회원가입 실패: 이메일 중복: {Email}", request.Email);
-                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.Conflict, ex.Message));
-            }
-            catch (DuplicatePlayerIdException ex)
-            {
-                _logger.LogWarning(ex, "회원가입 실패: PlayerId 중복: {PlayerId}", request.PlayerId);
-                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.Conflict, ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "서버 오류:  회원가입 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation("회원가입 성공: Id={Id}, PlayerId={PlayerId}", response.Id, request.PlayerId);
+            return Ok(ApiResponse.Ok("회원가입 성공", response));
         }
 
         /// <summary>
@@ -88,29 +70,16 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation("로그인 시도: PlayerId={PlayerId}", request.PlayerId);
 
-            try
-            {
-                var (sessionId, user) = await _accountService.LoginAsync(request.PlayerId, request.Password);
+            var (sessionId, user) = await _accountService.LoginAsync(request.PlayerId, request.Password);
 
-                var response = new LoginResponse
-                {
-                    Id = user.Id,
-                    SessionId = sessionId
-                };
+            var response = new LoginResponse
+            {
+                Id = user.Id,
+                SessionId = sessionId
+            };
 
-                _logger.LogInformation($"로그인 성공: PlayerId={request.PlayerId}");
-                return Ok(ApiResponse.Ok("로그인 성공", response));
-            }
-            catch (AuthenticationFailedException ex)
-            {
-                _logger.LogWarning(ex, $"로그인 실패: 아이디 또는 비밀번호 불일치 : PlayerId={request.PlayerId}");
-                return Ok(ApiResponse.Error<LoginResponse>(ErrorStatusCode.BadRequest, ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "서버 오류: 로그인 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation($"로그인 성공: PlayerId={request.PlayerId}");
+            return Ok(ApiResponse.Ok("로그인 성공", response));
         }
 
         /// <summary>
@@ -124,28 +93,15 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation("구글 로그인 시도");
 
-            try
-            {
-                var sessionId = await _accountService.LoginByGoogleAsync(request.IdToken);
+            var sessionId = await _accountService.LoginByGoogleAsync(request.IdToken);
 
-                var response = new GoogleLoginResponse
-                {
-                    SessionId = sessionId!,
-                };
+            var response = new GoogleLoginResponse
+            {
+                SessionId = sessionId!,
+            };
 
-                _logger.LogInformation("구글 로그인 성공");
-                return Ok(ApiResponse.Ok("구글 로그인 성공", response));
-            }
-            catch (GoogleLoginFailedException ex)
-            {
-                _logger.LogWarning(ex, "구글 로그인 실패");
-                return Ok(ApiResponse.Error<GoogleLoginResponse>(ErrorStatusCode.BadRequest, ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "서버 오류: 구글 로그인 중 예외 발생");
-                return Ok(ApiResponse.Error<RegisterResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation("구글 로그인 성공");
+            return Ok(ApiResponse.Ok("구글 로그인 성공", response));
         }
 
         /// <summary>
@@ -161,18 +117,10 @@ namespace Server.Api.Controller
             
             _logger.LogInformation("로그아웃 시도: SessionId={SessionId}", sessionId);
 
-            try
-            {
-                await _accountService.LogoutAsync(sessionId!);
+            await _accountService.LogoutAsync(sessionId!);
 
-                _logger.LogInformation("로그아웃 성공: SessionId={SessionId}", sessionId);
-                return Ok(ApiResponse.Ok<EmptyResponse>("로그아웃 성공"));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "서버 오류 - 로그아웃 중 예외 발생");
-                return Ok(ApiResponse.Error<EmptyResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation("로그아웃 성공: SessionId={SessionId}", sessionId);
+            return Ok(ApiResponse.Ok<EmptyResponse>("로그아웃 성공"));
         }
     }
 }
