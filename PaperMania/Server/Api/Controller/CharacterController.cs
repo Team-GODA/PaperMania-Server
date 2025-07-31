@@ -4,7 +4,6 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Character;
 using Server.Api.Filter;
-using Server.Application.Exceptions.Character;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -63,7 +62,6 @@ namespace Server.Api.Controller
             [FromBody] AddPlayerCharacterRequest request)
         {
             _logger.LogInformation($"플레이어 보유 캐릭터 추가 시도: Id: {request.Id}, CharacterId: {request.CharacterId}");
-            var sessionId = HttpContext.Items["SessionId"] as string;
             
             var data = new PlayerCharacterData
             {
