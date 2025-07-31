@@ -34,31 +34,22 @@ namespace Server.Api.Controller
         /// </remarks>
         /// <returns>현재 행동력 정보</returns>
         [HttpGet("action-point")]
-        [ProducesResponseType(typeof(GetPlayerActionPointResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<GetPlayerActionPointResponse>> GetPlayerActionPointById()
+        [ProducesResponseType(typeof(BaseResponse<GetPlayerActionPointResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<GetPlayerActionPointResponse>>> GetPlayerActionPointById()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 AP 조회 시도 : Id : {userId}");
             
-            try
+            var currentActionPoint = await _currencyService.GetPlayerActionPointAsync(userId);
+            var response = new GetPlayerActionPointResponse
             {
-                var currentActionPoint = await _currencyService.GetPlayerActionPointAsync(userId, sessionId!);
-                var response = new GetPlayerActionPointResponse
-                {
-                    CurrentActionPoint = currentActionPoint
-                };                         
+                CurrentActionPoint = currentActionPoint
+            };                         
                 
-                _logger.LogInformation($"플레이어 AP 조회 성공 : Id : {userId}");
-                return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : Id : {userId}", response));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "플레이어 AP 조회 중 오류 발생");
-                return Ok(ApiResponse.Error<GetPlayerActionPointResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation($"플레이어 AP 조회 성공 : Id : {userId}");
+            return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : Id : {userId}", response));
         }
 
         /// <summary>
@@ -67,9 +58,8 @@ namespace Server.Api.Controller
         /// <param name="request">새로운 최대 행동력 정보</param>
         /// <returns>수정된 최대 행동력</returns>
         [HttpPatch("action-point/max")]
-        [ProducesResponseType(typeof(UpdatePlayerMaxActionPointResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<UpdatePlayerMaxActionPointResponse>> UpdatePlayerMaxActionPoint(
+        [ProducesResponseType(typeof(BaseResponse<UpdatePlayerMaxActionPointResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<UpdatePlayerMaxActionPointResponse>>> UpdatePlayerMaxActionPoint(
             [FromBody] UpdatePlayerMaxActionPointRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
@@ -77,22 +67,14 @@ namespace Server.Api.Controller
             
             _logger.LogInformation($"플레이어 최대 AP 갱신 시도");
             
-            try
+            var newMaxActionPoint = await _currencyService.UpdatePlayerMaxActionPoint(userId, request.NewMaxActionPoint);
+            var response = new UpdatePlayerMaxActionPointResponse
             {
-                var newMaxActionPoint = await _currencyService.UpdatePlayerMaxActionPoint(userId, request.NewMaxActionPoint, sessionId!);
-                var response = new UpdatePlayerMaxActionPointResponse
-                {
-                    NewMaxActionPoint = newMaxActionPoint
-                };
+                NewMaxActionPoint = newMaxActionPoint
+            };
                 
-                _logger.LogInformation($"플레이어 최대 AP 갱신 성공 : Id : {userId}");
-                return Ok(ApiResponse.Ok("플레이어 최대 AP 갱신 성공", response));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "플레이어 최대 AP 갱신 중 오류 발생");
-                return Ok(ApiResponse.Error<UpdatePlayerMaxActionPointResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation($"플레이어 최대 AP 갱신 성공 : Id : {userId}");
+            return Ok(ApiResponse.Ok("플레이어 최대 AP 갱신 성공", response));
         }
 
         /// <summary>
@@ -101,9 +83,8 @@ namespace Server.Api.Controller
         /// <param name="request">소모할 행동력 양</param>
         /// <returns>현재 행동력</returns>
         [HttpPatch("action-point")]
-        [ProducesResponseType(typeof(UsePlayerActionPointResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<UsePlayerActionPointResponse>> UsePlayerActionPoint(
+        [ProducesResponseType(typeof(BaseResponse<UsePlayerActionPointResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<UsePlayerActionPointResponse>>> UsePlayerActionPoint(
             [FromBody] UsePlayerActionPointRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
@@ -111,24 +92,16 @@ namespace Server.Api.Controller
             
             _logger.LogInformation($"플레이어 AP 사용 시도 : Id : {userId}");
             
-            try
-            {
-                await _currencyService.UsePlayerActionPointAsync(userId, request.UsedActionPoint, sessionId!);
-                var currentActionPoint = await _currencyService.GetPlayerActionPointAsync(userId, sessionId!);
+            await _currencyService.UsePlayerActionPointAsync(userId, request.UsedActionPoint);
+            var currentActionPoint = await _currencyService.GetPlayerActionPointAsync(userId);
 
-                var response = new UsePlayerActionPointResponse
-                {
-                    CurrentActionPoint = currentActionPoint
-                };
-
-                _logger.LogInformation($"플레이어 AP 사용 성공 : Id : {userId}");
-                return Ok(ApiResponse.Ok("플레이어 AP 사용 성공", response));
-            }
-            catch (Exception ex)
+            var response = new UsePlayerActionPointResponse
             {
-                _logger.LogError(ex, "플레이어 AP 사용 중 오류 발생");
-                return Ok(ApiResponse.Error<UsePlayerActionPointResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+                CurrentActionPoint = currentActionPoint
+            };
+
+            _logger.LogInformation($"플레이어 AP 사용 성공 : Id : {userId}");
+            return Ok(ApiResponse.Ok("플레이어 AP 사용 성공", response));
         }
 
         /// <summary>
@@ -136,31 +109,22 @@ namespace Server.Api.Controller
         /// </summary>
         /// <returns>현재 골드</returns>
         [HttpGet("gold")]
-        [ProducesResponseType(typeof(GetPlayerGoldReponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<GetPlayerGoldReponse>> GetPlayerGold()
+        [ProducesResponseType(typeof(BaseResponse<GetPlayerGoldResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<GetPlayerGoldResponse>>> GetPlayerGold()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 골드 조회 시도 : Id : {userId}");
             
-            try
+            var gold = await _currencyService.GetPlayerGoldAsync(userId);
+            var response = new GetPlayerGoldResponse
             {
-                var gold = await _currencyService.GetPlayerGoldAsync(userId, sessionId!);
-                var response = new GetPlayerGoldReponse
-                {
-                    CurrentGold = gold
-                };
+                CurrentGold = gold
+            };
                 
-                _logger.LogInformation($"플레이어 골드 조회 성공 : Id {userId}");
-                return Ok(ApiResponse.Ok("플레이어 골드 조회 성공", response));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "플레이어 골드 조회 중 오류 발생");
-                return Ok(ApiResponse.Error<GetPlayerGoldReponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation($"플레이어 골드 조회 성공 : Id {userId}");
+            return Ok(ApiResponse.Ok("플레이어 골드 조회 성공", response));
         }
 
         /// <summary>
@@ -169,9 +133,8 @@ namespace Server.Api.Controller
         /// <param name="request">변경할 골드 양</param>
         /// <returns>변경 후 현재 골드</returns>
         [HttpPatch("gold")]
-        [ProducesResponseType(typeof(ModifyGoldResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<ModifyGoldResponse>> UpdatePlayerGold(
+        [ProducesResponseType(typeof(BaseResponse<ModifyGoldResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<ModifyGoldResponse>>> UpdatePlayerGold(
             [FromBody] ModifyGoldRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
@@ -179,33 +142,16 @@ namespace Server.Api.Controller
 
             _logger.LogInformation($"플레이어 골드 갱신 시도: Id={userId}, Amount={request.Amount}");
 
-            try
-            {
-                if (request.Amount >= 0)
-                {
-                    _logger.LogInformation($"플레이어 골드 추가 성공 :  {userId}, Amount : {request.Amount}");
-                    await _currencyService.AddPlayerGoldAsync(userId, request.Amount, sessionId!);
-                }
-                else
-                {
-                    _logger.LogInformation($"플레이어 골드 사용 성공 : Id : {userId}, Amount : {request.Amount}");
-                    await _currencyService.UsePlayerGoldAsync(userId, -request.Amount, sessionId!);
-                }
+            await _currencyService.ModifyPlayerGoldAsync(userId, request.Amount);
                 
-                var currentGold = await _currencyService.GetPlayerGoldAsync(userId, sessionId!);
-                var response = new ModifyGoldResponse
-                {
-                    CurrentGold = currentGold
-                };
-                
-                _logger.LogInformation($"플레이어 골드 갱신 성공 : Id {userId}");
-                return Ok(ApiResponse.Ok("플레이어 골드 사용/추가 성공", response));
-            }
-            catch (Exception ex)
+            var currentGold = await _currencyService.GetPlayerGoldAsync(userId);
+            var response = new ModifyGoldResponse
             {
-                _logger.LogError(ex, "플레이어 골드 갱신 중 오류 발생");
-                return Ok(ApiResponse.Error<ModifyGoldResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+                CurrentGold = currentGold
+            };
+                
+            _logger.LogInformation($"플레이어 골드 갱신 성공 : Id {userId}");
+            return Ok(ApiResponse.Ok("플레이어 골드 사용/추가 성공", response));
         }
 
         /// <summary>
@@ -213,31 +159,22 @@ namespace Server.Api.Controller
         /// </summary>
         /// <returns>현재 종이 조각 개수</returns>
         [HttpGet("paper-piece")]
-        [ProducesResponseType(typeof(GetPlayerPaperPieceReponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<GetPlayerPaperPieceReponse>> GetPlayerPaperPiece()
+        [ProducesResponseType(typeof(BaseResponse<GetPlayerPaperPieceResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<GetPlayerPaperPieceResponse>>> GetPlayerPaperPiece()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 종이조각 조회 시도 : Id : {userId}");
 
-            try
+            var currentPaperPiece = await _currencyService.GetPlayerPaperPieceAsync(userId);
+            var response = new GetPlayerPaperPieceResponse
             {
-                var currentPaperPiece = await _currencyService.GetPlayerPaperPieceAsync(userId, sessionId!);
-                var response = new GetPlayerPaperPieceReponse
-                {
-                    CurrentPaperPieces = currentPaperPiece
-                };
+                CurrentPaperPieces = currentPaperPiece
+            };
 
-                _logger.LogInformation($"플레이어 종이조각 조회 성공 : Id : {userId}");
-                return Ok(ApiResponse.Ok("플레이어 종이조각 조회 성공", response));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "플레이어 종이조각 조회 중 오류 발생");
-                return Ok(ApiResponse.Error<GetPlayerPaperPieceReponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+            _logger.LogInformation($"플레이어 종이조각 조회 성공 : Id : {userId}");
+            return Ok(ApiResponse.Ok("플레이어 종이조각 조회 성공", response));
         }
 
         /// <summary>
@@ -246,9 +183,8 @@ namespace Server.Api.Controller
         /// <param name="request">변경할 종이 조각 수</param>
         /// <returns>변경 후 현재 종이 조각 수</returns>
         [HttpPatch("paper-piece")]
-        [ProducesResponseType(typeof(object), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public async Task<ActionResult<ModifyPaperPieceResponse>> UpdatePlayerPaperPiece(
+        [ProducesResponseType(typeof(BaseResponse<ModifyPaperPieceResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<BaseResponse<ModifyPaperPieceResponse>>> UpdatePlayerPaperPiece(
             [FromBody] ModifyPaperPieceRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
@@ -256,33 +192,16 @@ namespace Server.Api.Controller
 
             _logger.LogInformation($"플레이어 종이 조각 갱신 시도 : Id : {userId}");
             
-            try
-            {
-                if (request.Amount >= 0)
-                {
-                    _logger.LogInformation($"플레이어 종이 조각 추가 성공 : Id : {userId}");
-                    await _currencyService.AddPlayerPaperPieceAsync(userId, request.Amount, sessionId!);
-                }
-                else
-                {
-                    _logger.LogInformation($"플레이어 종이 조각 사용 성공 : Id : {userId}");
-                    await _currencyService.UsePlayerPaperPieceAsync(userId, -request.Amount, sessionId!);
-                }
+            await _currencyService.ModifyPlayerPaperPieceAsync(userId, request.Amount);
 
-                var currentPaperPiece = await _currencyService.GetPlayerPaperPieceAsync(userId, sessionId!);
-                var response = new ModifyPaperPieceResponse
-                {
-                    CurrentPaperPieces = currentPaperPiece
-                };
-                
-                _logger.LogInformation($"플레이어 종이 조각 성공 : Id {userId}");
-                return Ok(ApiResponse.Ok("플레이어 종이 조각 성공",  response));
-            }
-            catch (Exception ex)
+            var currentPaperPiece = await _currencyService.GetPlayerPaperPieceAsync(userId);
+            var response = new ModifyPaperPieceResponse
             {
-                _logger.LogError(ex, "플레이어 종이 조각 업데이트 중 오류 발생");
-                return Ok(ApiResponse.Error<ModifyPaperPieceResponse>(ErrorStatusCode.ServerError, "서버 오류가 발생했습니다."));
-            }
+                CurrentPaperPieces = currentPaperPiece
+            };
+                
+            _logger.LogInformation($"플레이어 종이 조각 성공 : Id {userId}");
+            return Ok(ApiResponse.Ok("플레이어 종이 조각 성공",  response));
         }
     }
 }
