@@ -28,7 +28,7 @@ public class RewardService : IRewardService
     {
         var stageReward = await _rewardRepository.GetStageRewardAsync(data.StageNum, data.SubStageNum);
         if (stageReward == null)
-            throw new InvalidOperationException("해당 스테이지 보상을 찾을 수 없습니다.");
+            throw new StageRewardNotFoundException(data.StageNum, data.SubStageNum);
         
         if (await _stageRepository.IsClearedStageAsync(data))
             stageReward.PaperPiece = 0;
