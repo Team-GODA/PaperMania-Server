@@ -56,21 +56,25 @@ public class DataService : IDataService
     {
         var data = await GetPlayerDataByIdAsync(userId);
         if (data == null)
-            throw new RequestException(ErrorStatusCode.Conflict, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
 
         return data.PlayerName;
     }
 
     private async Task<PlayerGameData?> GetPlayerDataByIdAsync(int? userId)
     {
-        return await _dataRepository.GetPlayerDataByIdAsync(userId);
+        var data =  await _dataRepository.GetPlayerDataByIdAsync(userId);
+        if (data == null)
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
+        
+        return data;
     }
 
     public async Task<int> GetPlayerLevelByUserIdAsync(int? userId)
     {
         var data = await GetPlayerDataByUserId(userId);
         if (data == null)
-            throw new RequestException(ErrorStatusCode.Conflict, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
         
         return data.PlayerLevel;
     }
@@ -79,7 +83,7 @@ public class DataService : IDataService
     {
         var data = await GetPlayerDataByUserId(userId);
         if (data == null)
-            throw new RequestException(ErrorStatusCode.Conflict, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
         
         return data.PlayerExp;
     }
@@ -88,7 +92,7 @@ public class DataService : IDataService
     {
         var data = await GetPlayerDataByUserId(userId);
         if (data == null)
-            throw new RequestException(ErrorStatusCode.Conflict, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
         
         data.PlayerExp += exp;
 
@@ -110,7 +114,7 @@ public class DataService : IDataService
     public async Task RenamePlayerNameAsync(int? userId, string? newPlayerName)
     {
         if (string.IsNullOrEmpty(newPlayerName))
-            throw new RequestException(ErrorStatusCode.Conflict, "PLAYER_NAME_NOT_FOUND",  new { UserId = userId });
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_NEW_NAME_NOT_FOUND",  new { UserId = userId });
         
         var exists = await _dataRepository.ExistsPlayerNameAsync(newPlayerName);
         if (exists != null)
@@ -125,6 +129,9 @@ public class DataService : IDataService
     public async Task<PlayerCurrencyData> GetPlayerGoodsDataByUserIdAsync(int userId)
     {
         var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
+        if (data == null)
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CURRNCY_DATA_NOT_FOUND",  new { UserId = userId });
+        
         return data;
     }
 
@@ -132,7 +139,7 @@ public class DataService : IDataService
     {
         var data = await _dataRepository.GetPlayerDataByIdAsync(userId);
         if (data == null)
-            throw new Exception($"Id: {userId}의 플레이어 데이터가 없습니다.");
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
 
         return data;
     }
