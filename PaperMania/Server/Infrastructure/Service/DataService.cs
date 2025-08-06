@@ -125,16 +125,7 @@ public class DataService : IDataService
 
         await _dataRepository.RenamePlayerNameAsync(userId, newPlayerName);
     }
-
-    public async Task<PlayerCurrencyData> GetPlayerGoodsDataByUserIdAsync(int userId)
-    {
-        var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
-        if (data == null)
-            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CURRNCY_DATA_NOT_FOUND",  new { UserId = userId });
-        
-        return data;
-    }
-
+    
     private async Task<PlayerGameData> GetPlayerDataByUserId(int? userId)
     {
         var data = await _dataRepository.GetPlayerDataByIdAsync(userId);
