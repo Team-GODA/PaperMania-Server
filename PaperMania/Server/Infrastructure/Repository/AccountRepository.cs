@@ -10,12 +10,12 @@ public class AccountRepository : RepositoryBase, IAccountRepository
     {
     }
     
-    public async Task<PlayerAccountData?> GetByPlayerIdAsync(string playerId)
+    public async Task<PlayerAccountData?> GetAccountDataByPlayerIdAsync(string playerId)
     {
         var db = CreateConnection();
         
         var sql = @"
-            SELECT id, player_id AS PlayerId, email, password, is_new_account AS IsNewAccount,
+            SELECT id AS Id, player_id AS PlayerId, email, password, is_new_account AS IsNewAccount,
                    role AS Role, created_at AS CreatedAt
             FROM paper_mania_account_data.player_account_data
             WHERE player_id = @PlayerId
@@ -24,7 +24,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         return await db.QueryFirstOrDefaultAsync<PlayerAccountData>(sql, new { PlayerId = playerId });
     }
 
-    public async Task<PlayerAccountData?> GetByEmailAsync(string email)
+    public async Task<PlayerAccountData?> GetAccountDataByEmailAsync(string email)
     {
         await using var db = CreateConnection();
         await db.OpenAsync();

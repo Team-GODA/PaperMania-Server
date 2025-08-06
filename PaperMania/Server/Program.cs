@@ -1,5 +1,8 @@
+using System.Text;
 using Azure.Identity;
+using Server.Api.Filter;
 using Server.Api.Middleware;
+using Server.Application.Configure;
 using Server.Application.Port;
 using Server.Infrastructure.Repository;
 using Server.Infrastructure.Service;
@@ -20,12 +23,17 @@ var redisConnectionString = env.IsDevelopment()
 var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
+builder.Services.Configure<GoogleAuthSetting>(builder.Configuration.GetSection("GoogleAuth"));
+
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IDataService, DataService>();
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+builder.Services.AddScoped<ICharacterService, CharacterService>();
+builder.Services.AddScoped<IRewardService, RewardService>();
+builder.Services.AddScoped<SessionValidationFilter>();
 
-// 실험 로직 
 var keyName = "DbConnectionString";
 
 builder.Services.AddScoped<IAccountRepository>(provider =>
@@ -42,8 +50,46 @@ builder.Services.AddScoped<IDataRepository>(provider =>
 
     return new DataRepository(connectionString!);
 });
+builder.Services.AddScoped<ICurrencyRepository>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config[keyName];
+
+    return new CurrencyRepository(connectionString!);
+});
+builder.Services.AddScoped<ICharacterRepository>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config[keyName];
+
+    return new CharacterRepository(connectionString!);
+});
+builder.Services.AddScoped<IStageRepository>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config[keyName];
+
+    return new StageRepository(connectionString!);
+});
+builder.Services.AddScoped<IRewardRepository>(provider =>
+{
+    var config = provider.GetRequiredService<IConfiguration>();
+    var connectionString = config[keyName];
+
+    return new RewardRepository(connectionString!);
+});
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Version = "v1",
+        Title = "PaperMania API",
+        Description = "API Version 1"
+    });
+});
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -54,12 +100,16 @@ builder.Services.AddApiVersioning(options =>
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<SessionRefresh>();
-
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

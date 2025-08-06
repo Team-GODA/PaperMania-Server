@@ -1,4 +1,5 @@
-﻿using Server.Application.Port;
+﻿using Server.Application.Exceptions.Data;
+using Server.Application.Port;
 using Server.Domain.Entity;
 
 namespace Server.Infrastructure.Service;
@@ -7,26 +8,31 @@ public class DataService : IDataService
 {
     private readonly IDataRepository _dataRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly ICurrencyRepository _currencyRepository;
     private readonly ISessionService _sessionService;
+    private readonly IStageRepository _stageRepository;
     private readonly ILogger<DataService> _logger;
 
-    public DataService(IDataRepository dataRepository, IAccountRepository accountRepository, ISessionService sessionService, ILogger<DataService> logger)
+    public DataService(IDataRepository dataRepository, IAccountRepository accountRepository,
+        ICurrencyRepository currencyRepository, ISessionService sessionService,
+        IStageRepository stageRepository,
+        ILogger<DataService> logger)
     {
         _dataRepository = dataRepository;
         _accountRepository = accountRepository;
+        _currencyRepository = currencyRepository;
         _sessionService = sessionService;
+        _stageRepository = stageRepository;
         _logger = logger;
     }
     
     public async Task<string> AddPlayerDataAsync(string playerName, string sessionId)
     {
-        await ValidateSessionAsync(sessionId);
-        
-        var exists = await _dataRepository.ExistsPlayerNameAsync(playerName);
-        if (exists != null)
+        var existName = await _dataRepository.ExistsPlayerNameAsync(playerName);
+        if (existName != null)
         {
             _logger.LogWarning($"이미 존재하는 이름입니다. player_name: {playerName}");
-            throw new InvalidOperationException("이미 존재하는 플레이어 이름입니다.");
+            throw new PlayerNameExistException(playerName);
         }
         
         var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
@@ -34,80 +40,94 @@ public class DataService : IDataService
         var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
         if (!isNewAccount)
         {
-            _logger.LogWarning($"이미 이름을 등록한 계정입니다. player_name: {playerName}");
-            throw new InvalidOperationException("이미 이름을 등록한 계정입니다.");
+            _logger.LogWarning($"이미 등록된 계정입니다. player_name: {playerName}");
+            throw new PlayerDataExistException();
         }
         
         await _dataRepository.AddPlayerDataAsync(userId, playerName);
+        await _stageRepository.CreatePlayerStageDataAsync(userId);
         await _accountRepository.UpdateIsNewAccountAsync(userId, false);
         
         return playerName;
     }
 
-    public async Task<string?> GetPlayerNameByUserIdAsync(int userId, string sessionId)
+    public async Task<string?> GetPlayerNameByUserIdAsync(int? userId)
     {
-        await ValidateSessionAsync(sessionId);
-        var data = await GetByPlayerByIdAsync(userId);
+        var data = await GetPlayerDataByIdAsync(userId);
+        if (data == null)
+            throw new PlayerNotFoundException(userId);
 
-        return data?.PlayerName;
+        return data.PlayerName;
     }
 
-    public async Task<PlayerGameData?> GetByPlayerByIdAsync(int userId)
+    private async Task<PlayerGameData?> GetPlayerDataByIdAsync(int? userId)
     {
         return await _dataRepository.GetPlayerDataByIdAsync(userId);
     }
 
-    public async Task<int> GetPlayerLevelByUserIdAsync(int userId, string sessionId)
+    public async Task<int> GetPlayerLevelByUserIdAsync(int? userId)
     {
-        await ValidateSessionAsync(sessionId);
         var data = await GetPlayerDataByUserId(userId);
-
+        if (data == null)
+            throw new PlayerNotFoundException(userId);
+        
         return data.PlayerLevel;
     }
 
-    public async Task<int> GetPlayerExpByUserIdAsync(int userId, string sessionId)
+    public async Task<int> GetPlayerExpByUserIdAsync(int? userId)
     {
-        await ValidateSessionAsync(sessionId);
         var data = await GetPlayerDataByUserId(userId);
-
+        if (data == null)
+            throw new PlayerNotFoundException(userId);
+        
         return data.PlayerExp;
     }
 
-    public async Task<PlayerGameData> UpdatePlayerLevelAsync(int userId, int level, int exp, string sessionId)
+    public async Task<PlayerGameData> UpdatePlayerLevelByExpAsync(int? userId, int exp)
     {
-        await ValidateSessionAsync(sessionId);
-        var data = await _dataRepository.UpdatePlayerLevelAsync(userId, level, exp);
-        if (data == null)
-            throw new Exception($"Id: {userId}의 플레이어 레벨 데이터가 없습니다.");
+        var playerData = await GetPlayerDataByUserId(userId);
+        if (playerData == null)
+            throw new PlayerNotFoundException(userId);
+        
+        playerData.PlayerExp += exp;
 
+        while (true)
+        {
+            var levelData = await _dataRepository.GetLevelDataAsync(playerData.PlayerLevel);
+
+            if (levelData == null || playerData.PlayerExp < levelData.MaxExp)
+                break;
+
+            playerData.PlayerExp -= levelData.MaxExp;
+            playerData.PlayerLevel++;
+        }
+
+        await _dataRepository.UpdatePlayerLevelAsync(userId, playerData.PlayerLevel, playerData.PlayerExp);
+        return playerData;
+    }
+
+    public async Task RenamePlayerNameAsync(int? userId, string? newPlayerName)
+    {
+        if (string.IsNullOrEmpty(newPlayerName))
+            throw new PlayerNameMissingException();
+        
+        var exists = await _dataRepository.ExistsPlayerNameAsync(newPlayerName);
+        if (exists != null)
+        {
+            _logger.LogWarning($"이미 존재하는 이름입니다. player_name: {newPlayerName}");
+            throw new PlayerNameExistException(newPlayerName);
+        }
+
+        await _dataRepository.RenamePlayerNameAsync(userId, newPlayerName);
+    }
+
+    public async Task<PlayerCurrencyData> GetPlayerGoodsDataByUserIdAsync(int userId)
+    {
+        var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
         return data;
     }
 
-    public async Task<IEnumerable<PlayerCharacterData>> GetPlayerCharacterDataByUserIdAsync(int userId, string sessionId)
-    {
-        await ValidateSessionAsync(sessionId);
-        return await _dataRepository.GetPlayerCharacterDataByUserIdAsync(userId);
-    }
-
-    public async Task<PlayerCharacterData> AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data, string sessionId)
-    {
-        await ValidateSessionAsync(sessionId);
-        
-        bool exists = await _dataRepository.IsNewCharacterExistAsync(data.Id, data.CharacterId);
-        if (exists)
-            throw new InvalidOperationException("이미 해당 캐릭터를 보유 중입니다.");
-        
-        return await _dataRepository.AddPlayerCharacterDataByUserIdAsync(data);
-    }
-
-    private async Task ValidateSessionAsync(string sessionId)
-    {
-        var isValid = await _sessionService.ValidateSessionAsync(sessionId);
-        if (!isValid)
-            throw new UnauthorizedAccessException("세션이 유효하지 않습니다.");
-    }
-
-    private async Task<PlayerGameData> GetPlayerDataByUserId(int userId)
+    private async Task<PlayerGameData> GetPlayerDataByUserId(int? userId)
     {
         var data = await _dataRepository.GetPlayerDataByIdAsync(userId);
         if (data == null)

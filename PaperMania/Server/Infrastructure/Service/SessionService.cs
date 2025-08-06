@@ -4,7 +4,7 @@ namespace Server.Infrastructure.Service;
 
 public class SessionService : ISessionService
 {
-    private ICacheService _cacheService;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<SessionService> _logger;
     private readonly TimeSpan _sessionTimeout = TimeSpan.FromHours(24);
 
@@ -32,29 +32,38 @@ public class SessionService : ISessionService
         return Guid.NewGuid().ToString();
     }
 
-    public async Task<bool> ValidateSessionAsync(string sessionId)
+    public async Task<bool> ValidateSessionAsync(string sessionId, int? userId = null)
     {
         var exists = await _cacheService.ExistsAsync(sessionId);
+        if (!exists)
+        {
+            _logger.LogWarning($"세션 존재하지 않음: SessionId={sessionId}");
+            return false;
+        }
         
-        _logger.LogInformation($"[ValidateSessionAsync] 세션 유효성 검사: SessionId={sessionId}, Exists={exists}");
+        _logger.LogInformation($"세션 유효성 검사: SessionId={sessionId}, Exists={exists}");
+
+        if (userId.HasValue)
+        {
+            var storedUserId = await GetUserIdBySessionIdAsync(sessionId);
+            if (storedUserId != userId)
+            {
+                _logger.LogWarning($"유저 검증 실패: Id ; {storedUserId} != {userId}");
+                return false;
+            }
+        }
         
-        return exists;
+        return true;
     }
 
     public async Task<int?> GetUserIdBySessionIdAsync(string sessionId)
     {
         var value = await _cacheService.GetAsync(sessionId);
-        
         if (value != null && int.TryParse(value, out var userId))
-        {
-            _logger.LogInformation($"[GetUserIdBySessionIdAsync] 세션으로부터 UserId 조회 성공: SessionId={sessionId}, UserId={userId}");
             return userId;
-        }
-        else
-        {
-            _logger.LogWarning($"[GetUserIdBySessionIdAsync] 세션으로부터 UserId 조회 실패: SessionId={sessionId}");
-            return null;
-        }
+
+        _logger.LogWarning($"세션 아이디로 유저 조회 실패: SessionId={sessionId}");
+        return null;
     }
 
     public async Task DeleteSessionAsync(string sessionId)

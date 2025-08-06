@@ -5,7 +5,7 @@ namespace Server.Infrastructure.Service;
 
 public class CacheService : ICacheService
 {
-    private IDatabase _db;
+    private readonly IDatabase _db;
 
     public CacheService(IConnectionMultiplexer redis)
     {
@@ -14,7 +14,7 @@ public class CacheService : ICacheService
     
     public async Task SetAsync(string key, string value, TimeSpan? expiration = null)
     {
-        _db.StringSetAsync(key, value, expiration);
+        await _db.StringSetAsync(key, value, expiration);
     }
 
     public async Task<string?> GetAsync(string key)
@@ -25,7 +25,7 @@ public class CacheService : ICacheService
 
     public async Task RemoveAsync(string key)
     {
-        _db.KeyDeleteAsync(key);
+        await _db.KeyDeleteAsync(key);
     }
 
     public async Task<bool> ExistsAsync(string key)
