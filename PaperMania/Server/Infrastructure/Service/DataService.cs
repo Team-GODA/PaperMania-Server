@@ -1,4 +1,5 @@
-﻿using Server.Application.Exceptions.Data;
+﻿using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -32,7 +33,7 @@ public class DataService : IDataService
         if (existName != null)
         {
             _logger.LogWarning($"이미 존재하는 이름입니다. player_name: {playerName}");
-            throw new PlayerNameExistException(playerName);
+            throw new RequestException(ErrorStatusCode.Conflict, "PLAYER_NAME_EXIST",  new { PlayerName = playerName });
         }
         
         var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
@@ -40,8 +41,8 @@ public class DataService : IDataService
         var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
         if (!isNewAccount)
         {
-            _logger.LogWarning($"이미 등록된 계정입니다. player_name: {playerName}");
-            throw new PlayerDataExistException();
+            _logger.LogWarning($"이미 등록된 계정입니다. player_name: { playerName }");
+            throw new RequestException(ErrorStatusCode.Conflict, "PLAYER_DATA_EXIST",  new { PlayerName = playerName });
         }
         
         await _dataRepository.AddPlayerDataAsync(userId, playerName);
@@ -55,21 +56,25 @@ public class DataService : IDataService
     {
         var data = await GetPlayerDataByIdAsync(userId);
         if (data == null)
-            throw new PlayerNotFoundException(userId);
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
 
         return data.PlayerName;
     }
 
     private async Task<PlayerGameData?> GetPlayerDataByIdAsync(int? userId)
     {
-        return await _dataRepository.GetPlayerDataByIdAsync(userId);
+        var data =  await _dataRepository.GetPlayerDataByIdAsync(userId);
+        if (data == null)
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
+        
+        return data;
     }
 
     public async Task<int> GetPlayerLevelByUserIdAsync(int? userId)
     {
         var data = await GetPlayerDataByUserId(userId);
         if (data == null)
-            throw new PlayerNotFoundException(userId);
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
         
         return data.PlayerLevel;
     }
@@ -78,60 +83,54 @@ public class DataService : IDataService
     {
         var data = await GetPlayerDataByUserId(userId);
         if (data == null)
-            throw new PlayerNotFoundException(userId);
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
         
         return data.PlayerExp;
     }
 
     public async Task<PlayerGameData> UpdatePlayerLevelByExpAsync(int? userId, int exp)
     {
-        var playerData = await GetPlayerDataByUserId(userId);
-        if (playerData == null)
-            throw new PlayerNotFoundException(userId);
+        var data = await GetPlayerDataByUserId(userId);
+        if (data == null)
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
         
-        playerData.PlayerExp += exp;
+        data.PlayerExp += exp;
 
         while (true)
         {
-            var levelData = await _dataRepository.GetLevelDataAsync(playerData.PlayerLevel);
+            var levelData = await _dataRepository.GetLevelDataAsync(data.PlayerLevel);
 
-            if (levelData == null || playerData.PlayerExp < levelData.MaxExp)
+            if (levelData == null || data.PlayerExp < levelData.MaxExp)
                 break;
 
-            playerData.PlayerExp -= levelData.MaxExp;
-            playerData.PlayerLevel++;
+            data.PlayerExp -= levelData.MaxExp;
+            data.PlayerLevel++;
         }
 
-        await _dataRepository.UpdatePlayerLevelAsync(userId, playerData.PlayerLevel, playerData.PlayerExp);
-        return playerData;
+        await _dataRepository.UpdatePlayerLevelAsync(userId, data.PlayerLevel, data.PlayerExp);
+        return data;
     }
 
     public async Task RenamePlayerNameAsync(int? userId, string? newPlayerName)
     {
         if (string.IsNullOrEmpty(newPlayerName))
-            throw new PlayerNameMissingException();
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_NEW_NAME_NOT_FOUND",  new { UserId = userId });
         
         var exists = await _dataRepository.ExistsPlayerNameAsync(newPlayerName);
         if (exists != null)
         {
             _logger.LogWarning($"이미 존재하는 이름입니다. player_name: {newPlayerName}");
-            throw new PlayerNameExistException(newPlayerName);
+            throw new RequestException(ErrorStatusCode.Conflict, "PLAYER_NAME_EXIST",  new { PlayerName = newPlayerName });
         }
 
         await _dataRepository.RenamePlayerNameAsync(userId, newPlayerName);
     }
-
-    public async Task<PlayerCurrencyData> GetPlayerGoodsDataByUserIdAsync(int userId)
-    {
-        var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
-        return data;
-    }
-
+    
     private async Task<PlayerGameData> GetPlayerDataByUserId(int? userId)
     {
         var data = await _dataRepository.GetPlayerDataByIdAsync(userId);
         if (data == null)
-            throw new Exception($"Id: {userId}의 플레이어 데이터가 없습니다.");
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_ACCOUNT_NOT_FOUND",  new { UserId = userId });
 
         return data;
     }

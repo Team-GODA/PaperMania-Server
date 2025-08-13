@@ -1,8 +1,8 @@
 ﻿using Google.Apis.Auth;
 using Microsoft.Extensions.Options;
+using Server.Api.Dto.Response;
 using Server.Application.Configure;
-using Server.Application.Exceptions.Auth;
-using Server.Application.Exceptions.Data;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -39,11 +39,11 @@ public class AccountService : IAccountService
     {
         var existByEmail = await _repository.GetAccountDataByEmailAsync(player.Email);
         if (existByEmail != null)
-            throw new DuplicateEmailException(player.Email);
+            throw new RequestException(ErrorStatusCode.Conflict, "DUPLICATE_EMAIL", new { PlayerId = player.PlayerId, Email = existByEmail.Email });
 
         var existByPlayerId = await _repository.GetAccountDataByPlayerIdAsync(player.PlayerId);
         if (existByPlayerId != null)
-            throw new DuplicatePlayerIdException(player.PlayerId);
+            throw new RequestException(ErrorStatusCode.Conflict, "DUPLICATE_PLAYER_ID", new { PlayerId = player.PlayerId });
         
         player.Password = BCrypt.Net.BCrypt.HashPassword(password);
         player.IsNewAccount = true;
@@ -58,11 +58,11 @@ public class AccountService : IAccountService
         var user = await _repository.GetAccountDataByPlayerIdAsync(playerId);
 
         if (user == null)
-            throw new AuthenticationFailedException("사용자가 존재하지 않습니다.");
+            throw new RequestException(ErrorStatusCode.NotFound, "USER_NOT_FOUND", new { PlayerId = playerId, Password = password });
         
         bool isVerified = BCrypt.Net.BCrypt.Verify(password, user.Password);
         if (!isVerified)
-            throw new AuthenticationFailedException("비밀번호가 일치하지 않습니다.");
+            throw new RequestException(ErrorStatusCode.Conflict, "PASSWORD_NOT_VERIFIED", new { PlayerId = playerId, Password = password });
 
         var sessionId = await _sessionService.CreateSessionAsync(user.Id);
         return (sessionId, user);
@@ -105,12 +105,7 @@ public class AccountService : IAccountService
         catch (InvalidJwtException ex)
         {
             _logger.LogWarning("구글 토큰 검증 실패: {Message}", ex.Message);
-            throw new GoogleLoginFailedException("유효하지 않은 구글 토큰입니다.");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("구글 토큰 검증 중 예기치 못한 오류 발생: {Message}", ex.Message);
-            throw new GoogleLoginFailedException("구글 로그인 중 알 수 없는 오류가 발생했습니다.");
+            throw new RequestException(ErrorStatusCode.Conflict, "INVALID_GOOGLE_TOKEN");
         }
     }
 }
