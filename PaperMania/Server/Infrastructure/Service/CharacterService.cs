@@ -1,4 +1,5 @@
-﻿using Server.Application.Exceptions.Character;
+﻿using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -17,7 +18,8 @@ public class CharacterService : ICharacterService
     {
         var data = (await _characterRepository.GetPlayerCharacterDataByUserIdAsync(userId)).ToList();
         if (data.Count == 0)
-            throw new PlayerCharactersNotFoundException(userId);
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CHARACTERS_NOT_FOUND",
+                new { UserId = userId });
             
         return data;
     }
@@ -26,7 +28,8 @@ public class CharacterService : ICharacterService
     {
         bool exists = await _characterRepository.IsNewCharacterExistAsync(data.Id, data.CharacterId);
         if (exists)
-            throw new DuplicateCharacterException(data.CharacterName);
+            throw new RequestException(ErrorStatusCode.Conflict, "DUPLICATE_PLAYER_CHARACTER",
+            new { CharacterId = data.CharacterId });
         
         return await _characterRepository.AddPlayerCharacterDataByUserIdAsync(data);
     }

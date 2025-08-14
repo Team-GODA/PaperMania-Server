@@ -1,5 +1,5 @@
-﻿using Server.Application.Exceptions.Currency;
-using Server.Application.Exceptions.Data;
+﻿using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -19,6 +19,8 @@ public class CurrencyService : ICurrencyService
     public async Task<int> GetPlayerActionPointAsync(int? userId)
     {
         var data = await GetPlayerCurrencyDataOrException(userId);
+        if (data == null)
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CURRNCY_DATA_NOT_FOUND",  new { UserId = userId });
         
         var updated = await RegenerateActionPointAsync(data);
         if (updated)
@@ -29,9 +31,7 @@ public class CurrencyService : ICurrencyService
 
     public async Task<int> UpdatePlayerMaxActionPoint(int? userId, int newMaxActionPoint)
     {
-        var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
-        if (data == null)
-            throw new CurrencyDataNotFoundException(userId);
+        var data = await GetPlayerCurrencyDataOrException(userId);
         
         data.MaxActionPoint = newMaxActionPoint;
 
@@ -53,6 +53,7 @@ public class CurrencyService : ICurrencyService
     public async Task<int> GetPlayerGoldAsync(int? userId)
     {
         var data = await GetPlayerCurrencyDataOrException(userId);
+        
         return data.Gold;
     }
 
@@ -72,7 +73,7 @@ public class CurrencyService : ICurrencyService
             if (data.Gold < decrease)
             {
                 _logger.LogWarning($"골드 부족: UserId={userId}, 현재={data.Gold}, 요청={decrease}");
-                throw new NotEnoughGoldException(userId);
+                throw new RequestException(ErrorStatusCode.Conflict, "NOT_ENOUGH_GOLD", new { UserId =  userId });
             }
             
             _logger.LogInformation($"플레이어 골드 사용 : UserId={userId}, Amount={decrease}");
@@ -104,7 +105,7 @@ public class CurrencyService : ICurrencyService
             if (data.PaperPiece < decrease)
             {
                 _logger.LogWarning($"종이 조각 부족: UserId={userId}, 현재={data.PaperPiece}, 요청={decrease}");
-                throw new NotEnoughPaperPieceException(userId);
+                throw new RequestException(ErrorStatusCode.Conflict, "NOT_ENOUGH_PAPERPIECE", new { UserId =  userId });
             }
             
             _logger.LogInformation($"플레이어 종이 조각 사용 : UserId={userId}, Amount={decrease}");
@@ -147,12 +148,9 @@ public class CurrencyService : ICurrencyService
 
     private async Task<PlayerCurrencyData> GetPlayerCurrencyDataOrException(int? userId)
     {
-        if (userId == null)
-            throw new UserIdNotFoundException(userId);
-
         var data = await _currencyRepository.GetPlayerCurrencyDataByUserIdAsync(userId);
         if (data == null)
-            throw new CurrencyDataNotFoundException(userId);
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CURRENCY_DATA_NOT_FOUND",  new { UserId = userId });
 
         return data;
     }
