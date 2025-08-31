@@ -1,4 +1,3 @@
-using System.Text;
 using Azure.Identity;
 using Server.Api.Filter;
 using Server.Api.Middleware;

@@ -57,7 +57,6 @@ namespace Server.Api.Controller
         /// <returns>추가된 캐릭터 정보</returns>
         [HttpPost]
         [ProducesResponseType(typeof(BaseResponse<AddPlayerCharacterResponse>), 200)]
-        [ProducesResponseType(500)]
         public async Task<ActionResult<BaseResponse<AddPlayerCharacterResponse>>> AddPlayerCharacter(
             [FromBody] AddPlayerCharacterRequest request)
         {
