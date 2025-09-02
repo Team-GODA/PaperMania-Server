@@ -24,6 +24,12 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
 builder.Services.Configure<GoogleAuthSetting>(builder.Configuration.GetSection("GoogleAuth"));
 
+
+var stageRewardCache = new StageRewardCache();
+await stageRewardCache.Initialize();
+
+builder.Services.AddSingleton(stageRewardCache);
+
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
