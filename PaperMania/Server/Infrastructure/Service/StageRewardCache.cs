@@ -11,7 +11,8 @@ public class StageRewardCache
 
     public StageRewardCache(IOptions<GoogleSheetSetting> options)
     {
-        _url = options.Value.StageRewardUrl;
+        _url = options.Value.StageRewardUrl
+               ?? throw new ArgumentNullException(nameof(options.Value.StageRewardUrl));
     }
     
     public StageReward? GetStageReward(int stageNum, int stageSubNum)

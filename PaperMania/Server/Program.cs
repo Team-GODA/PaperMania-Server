@@ -26,6 +26,7 @@ builder.Services.Configure<GoogleAuthSetting>(builder.Configuration.GetSection("
 builder.Services.Configure<GoogleSheetSetting>(builder.Configuration.GetSection("GoogleSheets"));
 
 builder.Services.AddSingleton<StageRewardCache>();
+builder.Services.AddSingleton<CharacterDataCache>();
 
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
@@ -117,6 +118,12 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var cache = scope.ServiceProvider.GetRequiredService<StageRewardCache>();
+    await cache.Initialize();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var cache = scope.ServiceProvider.GetRequiredService<CharacterDataCache>();
     await cache.Initialize();
 }
 
