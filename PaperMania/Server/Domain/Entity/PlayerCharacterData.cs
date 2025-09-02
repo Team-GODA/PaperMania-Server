@@ -11,16 +11,9 @@ public class PlayerCharacterData
     public string RarityString
     {
         get => Rarity.ToString();
-        set => Rarity = Enum.Parse<Rarity>(value);
+        init => Rarity = Enum.Parse<Rarity>(value, ignoreCase: true);
     }
     
     [System.Text.Json.Serialization.JsonIgnore]
     public Rarity Rarity { get; set; }
-}
-
-public enum Rarity
-{
-    Common,
-    Rare,
-    Epic
 }
