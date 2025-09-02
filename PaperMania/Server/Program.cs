@@ -23,12 +23,9 @@ var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
 builder.Services.Configure<GoogleAuthSetting>(builder.Configuration.GetSection("GoogleAuth"));
+builder.Services.Configure<GoogleSheetSetting>(builder.Configuration.GetSection("GoogleSheets"));
 
-
-var stageRewardCache = new StageRewardCache();
-await stageRewardCache.Initialize();
-
-builder.Services.AddSingleton(stageRewardCache);
+builder.Services.AddSingleton<StageRewardCache>();
 
 builder.Services.AddScoped<ICacheService, CacheService>();
 builder.Services.AddScoped<ISessionService, SessionService>();
@@ -116,5 +113,11 @@ app.UseMiddleware<SessionRefresh>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var cache = scope.ServiceProvider.GetRequiredService<StageRewardCache>();
+    await cache.Initialize();
+}
 
 app.Run();
