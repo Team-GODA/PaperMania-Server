@@ -37,33 +37,33 @@ builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<SessionValidationFilter>();
 
-var keyName = "PaperManiaDbConnection";
+const string keyname = "PaperManiaDbConnection";
 
 builder.Services.AddScoped<IAccountRepository>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var connectionString = config[keyName];
+    var connectionString = config[keyname];
     
     return new AccountRepository(connectionString!);
 });
 builder.Services.AddScoped<IDataRepository>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var connectionString = config[keyName];
+    var connectionString = config[keyname];
 
     return new DataRepository(connectionString!);
 });
 builder.Services.AddScoped<ICurrencyRepository>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var connectionString = config[keyName];
+    var connectionString = config[keyname];
 
     return new CurrencyRepository(connectionString!);
 });
 builder.Services.AddScoped<ICharacterRepository>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var connectionString = config[keyName];
+    var connectionString = config[keyname];
 
     var cache = provider.GetRequiredService<CharacterDataCache>();
     
@@ -72,14 +72,14 @@ builder.Services.AddScoped<ICharacterRepository>(provider =>
 builder.Services.AddScoped<IStageRepository>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var connectionString = config[keyName];
+    var connectionString = config[keyname];
 
     return new StageRepository(connectionString!);
 });
 builder.Services.AddScoped<IRewardRepository>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
-    var connectionString = config[keyName];
+    var connectionString = config[keyname];
 
     return new RewardRepository(connectionString!);
 });
