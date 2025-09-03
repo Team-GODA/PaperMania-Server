@@ -2,7 +2,7 @@
 
 public class PlayerCharacterData
 {
-    public int Id { get; set; }
+    public int UserId { get; set; }
     public string CharacterId { get; set; } = null!;
     public string CharacterName { get; set; } = null!;
     public int CharacterLevel { get; set; } = 1;
@@ -11,8 +11,9 @@ public class PlayerCharacterData
     public string RarityString
     {
         get => Rarity.ToString();
-        init => Rarity = Enum.Parse<Rarity>(value, ignoreCase: true);
+        set => Rarity = Enum.Parse<Rarity>(value, ignoreCase: true);
     }
+    public int PieceAmount { get; set; } = 0;
     
     [System.Text.Json.Serialization.JsonIgnore]
     public Rarity Rarity { get; set; }

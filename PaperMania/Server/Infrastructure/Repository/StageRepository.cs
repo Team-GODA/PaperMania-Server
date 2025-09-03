@@ -17,7 +17,7 @@ public class StageRepository : RepositoryBase, IStageRepository
         
         var sql = @"
                 INSERT INTO paper_mania_stage_data.player_stage_data (id, stage_num, stage_sub_num, is_cleared)
-                VALUES (@Id, @StageNum, @StageSubNum, false);
+                VALUES (@UserId, @StageNum, @StageSubNum, false);
             ";
         
         var data = new List<dynamic>();
@@ -45,7 +45,7 @@ public class StageRepository : RepositoryBase, IStageRepository
         var sql = @"
             SELECT is_cleared AS IsCleared
             FROM paper_mania_stage_data.player_stage_data
-            WHERE id = @Id AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
+            WHERE id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
             LIMIT 1";
         
         var result = await db.QueryFirstOrDefaultAsync<bool?>(sql, new
@@ -66,7 +66,7 @@ public class StageRepository : RepositoryBase, IStageRepository
         var sql = @"
             UPDATE paper_mania_stage_data.player_stage_data
             SET is_cleared = @IsCleared
-            WHERE id = @Id AND stage_num = @StageNum AND stage_sub_num = @StageSubNum";
+            WHERE id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum";
         
         await db.ExecuteAsync(sql, new
         {

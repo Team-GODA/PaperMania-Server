@@ -37,13 +37,13 @@ builder.Services.AddScoped<ICharacterService, CharacterService>();
 builder.Services.AddScoped<IRewardService, RewardService>();
 builder.Services.AddScoped<SessionValidationFilter>();
 
-var keyName = "DbConnectionString";
+var keyName = "PaperManiaDbConnection";
 
 builder.Services.AddScoped<IAccountRepository>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
     var connectionString = config[keyName];
-
+    
     return new AccountRepository(connectionString!);
 });
 builder.Services.AddScoped<IDataRepository>(provider =>
@@ -65,7 +65,9 @@ builder.Services.AddScoped<ICharacterRepository>(provider =>
     var config = provider.GetRequiredService<IConfiguration>();
     var connectionString = config[keyName];
 
-    return new CharacterRepository(connectionString!);
+    var cache = provider.GetRequiredService<CharacterDataCache>();
+    
+    return new CharacterRepository(connectionString!, cache);
 });
 builder.Services.AddScoped<IStageRepository>(provider =>
 {

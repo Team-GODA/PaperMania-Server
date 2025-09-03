@@ -50,7 +50,7 @@ namespace Server.Api.Controller
                 Id = newUser.Id
             };
 
-            _logger.LogInformation("회원가입 성공: Id={Id}, PlayerId={PlayerId}", response.Id, request.PlayerId);
+            _logger.LogInformation("회원가입 성공: UserId={UserId}, PlayerId={PlayerId}", response.Id, request.PlayerId);
             return Ok(ApiResponse.Ok("회원가입 성공", response));
         }
 
@@ -69,7 +69,6 @@ namespace Server.Api.Controller
 
             var response = new LoginResponse
             {
-                Id = user.Id,
                 SessionId = sessionId
             };
 

@@ -59,7 +59,7 @@ namespace Server.Api.Controller
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 이름 조회 시도: Id: {userId}");
+            _logger.LogInformation($"플레이어 이름 조회 시도: UserId: {userId}");
 
             var playerName = await _dataService.GetPlayerNameByUserIdAsync(userId);
 
@@ -85,7 +85,7 @@ namespace Server.Api.Controller
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 이름 재설정 시도: Id: {userId}");
+            _logger.LogInformation($"플레이어 이름 재설정 시도: UserId: {userId}");
 
             await _dataService.RenamePlayerNameAsync(userId, request.NewName);
 
@@ -95,7 +95,7 @@ namespace Server.Api.Controller
                 NewPlayerName = request.NewName
             };
 
-            _logger.LogInformation($"플레이어 이름 재설정 성공: Id: {userId}, NewName: {request.NewName}");
+            _logger.LogInformation($"플레이어 이름 재설정 성공: UserId: {userId}, NewName: {request.NewName}");
             return Ok(ApiResponse.Ok("플레이어 이름 재설정 성공", response));
         }
 
@@ -110,7 +110,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 레벨 조회 시도: Id: {userId}");
+            _logger.LogInformation($"플레이어 레벨 조회 시도: UserId: {userId}");
 
             var level = await _dataService.GetPlayerLevelByUserIdAsync(userId);
             var exp = await _dataService.GetPlayerExpByUserIdAsync(userId);
@@ -138,7 +138,7 @@ namespace Server.Api.Controller
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 레벨 갱신 시도: Id: {userId}");
+            _logger.LogInformation($"플레이어 레벨 갱신 시도: UserId: {userId}");
 
             var data = await _dataService.UpdatePlayerLevelByExpAsync(userId, request.NewExp);
 
@@ -152,7 +152,7 @@ namespace Server.Api.Controller
                 NewExp = newExp
             };
 
-            _logger.LogInformation($"플레이어 레벨 갱신 성공: Id: {userId}");
+            _logger.LogInformation($"플레이어 레벨 갱신 성공: UserId: {userId}");
             return Ok(ApiResponse.Ok("플레이어 레벨 갱신 성공", response));
         }
     }

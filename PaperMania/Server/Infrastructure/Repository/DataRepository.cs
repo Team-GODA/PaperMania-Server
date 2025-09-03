@@ -42,9 +42,9 @@ public class DataRepository : RepositoryBase, IDataRepository
         await db.OpenAsync();
         
         var sql = @"
-            SELECT id AS Id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
+            SELECT id AS UserId, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
             FROM paper_mania_game_data.player_game_data
-            WHERE id = @Id
+            WHERE id = @UserId
             LIMIT 1";
         
         return await db.QueryFirstOrDefaultAsync<PlayerGameData>(sql, new { Id = userId });
@@ -58,7 +58,7 @@ public class DataRepository : RepositoryBase, IDataRepository
         var sql = @"
             UPDATE paper_mania_game_data.player_game_data
             SET player_level = @Level, player_exp = @Exp
-            WHERE id = @Id
+            WHERE id = @UserId
             RETURNING id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel;
             ";
 
@@ -91,7 +91,7 @@ public class DataRepository : RepositoryBase, IDataRepository
         var sql = @"
             UPDATE paper_mania_game_data.player_game_data
             SET player_name = @PlayerName
-            WHERE id = @Id
+            WHERE id = @UserId
             RETURNING player_name AS PlayerName";
         
         await db.ExecuteAsync(sql, new { PlayerName = newPlayerName, Id = userId });

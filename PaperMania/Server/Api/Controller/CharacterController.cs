@@ -60,22 +60,22 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<AddPlayerCharacterResponse>>> AddPlayerCharacter(
             [FromBody] AddPlayerCharacterRequest request)
         {
-            _logger.LogInformation($"플레이어 보유 캐릭터 추가 시도: Id: {request.Id}, CharacterId: {request.CharacterId}");
+            _logger.LogInformation($"플레이어 보유 캐릭터 추가 시도: UserId: {request.Id}, CharacterId: {request.CharacterId}");
             
             var data = new PlayerCharacterData
             {
-                Id = request.Id,
+                UserId = request.Id,
                 CharacterId = request.CharacterId
             };
 
             var addedCharacter = await _characterService.AddPlayerCharacterDataByUserIdAsync(data);
             var response = new AddPlayerCharacterResponse
             {
-                Id = addedCharacter.Id,
+                Id = addedCharacter.UserId,
                 CharacterId = addedCharacter.CharacterId
             };
                 
-            _logger.LogInformation($"플레이어 보유 캐릭터 추가 성공: Id: {request.Id}, CharacterId: {request.CharacterId}");
+            _logger.LogInformation($"플레이어 보유 캐릭터 추가 성공: UserId: {request.Id}, CharacterId: {request.CharacterId}");
             return Ok(ApiResponse.Ok("플레이어 보유 캐릭터 추가 성공", response));
         }
     }

@@ -63,7 +63,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
-            _logger.LogInformation($"플레이어 스테이지 보상 수령 시도 : Id : {userId}");
+            _logger.LogInformation($"플레이어 스테이지 보상 수령 시도 : UserId : {userId}");
 
             var stageData = new PlayerStageData
             {
@@ -81,7 +81,7 @@ namespace Server.Api.Controller
                 StageReward = stageReward
             };
 
-            _logger.LogInformation($"플레이어 스테이지 보상 수령 성공 : Id : {userId}");
+            _logger.LogInformation($"플레이어 스테이지 보상 수령 성공 : UserId : {userId}");
             return Ok(ApiResponse.Ok("스테이지 보상 수령 성공", response));
         }
     }

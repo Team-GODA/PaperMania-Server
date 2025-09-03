@@ -48,7 +48,7 @@ public class SessionService : ISessionService
             var storedUserId = await GetUserIdBySessionIdAsync(sessionId);
             if (storedUserId != userId)
             {
-                _logger.LogWarning($"유저 검증 실패: Id ; {storedUserId} != {userId}");
+                _logger.LogWarning($"유저 검증 실패: UserId ; {storedUserId} != {userId}");
                 return false;
             }
         }

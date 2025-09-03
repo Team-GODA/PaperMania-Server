@@ -18,7 +18,7 @@ public class SessionRefresh
 
         if (!(path.Equals("/api/v1/auth/logout", StringComparison.OrdinalIgnoreCase) && method == "POST"))
         {
-            if (context.Request.Headers.TryGetValue("Session-Id", out var sessionIds))
+            if (context.Request.Headers.TryGetValue("Session-UserId", out var sessionIds))
             {
                 var sessionId = sessionIds.FirstOrDefault();
                 if (!string.IsNullOrEmpty(sessionId))
