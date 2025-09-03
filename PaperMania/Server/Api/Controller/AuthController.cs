@@ -69,6 +69,7 @@ namespace Server.Api.Controller
 
             var response = new LoginResponse
             {
+                IsNewAccount = user.IsNewAccount,
                 SessionId = sessionId
             };
 
