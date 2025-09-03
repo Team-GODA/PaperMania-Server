@@ -73,7 +73,7 @@ builder.Services.AddScoped<IStageRepository>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
     var connectionString = config[keyname];
-
+    
     return new StageRepository(connectionString!);
 });
 builder.Services.AddScoped<IRewardRepository>(provider =>
@@ -81,7 +81,9 @@ builder.Services.AddScoped<IRewardRepository>(provider =>
     var config = provider.GetRequiredService<IConfiguration>();
     var connectionString = config[keyname];
 
-    return new RewardRepository(connectionString!);
+    var cache = provider.GetRequiredService<StageRewardCache>();
+    
+    return new RewardRepository(connectionString!, cache);
 });
 
 builder.Services.AddControllers();

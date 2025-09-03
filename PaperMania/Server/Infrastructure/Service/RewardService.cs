@@ -17,15 +17,15 @@ public class RewardService : IRewardService
         _stageRepository = stageRepository;
     }
     
-    public async Task<StageReward?> GetStageRewardAsync(int stageNum, int stageSubNum)
+    public StageReward GetStageReward(int stageNum, int stageSubNum)
     {
-        var reward = await GetStageDataOrException(stageNum, stageSubNum);
+        var reward = GetStageDataOrException(stageNum, stageSubNum);
         return reward;
     }
 
     public async Task ClaimStageRewardByUserIdAsync(int? userId, StageReward reward, PlayerStageData data)
     {
-        var stageReward = await GetStageDataOrException(data.StageNum, data.SubStageNum);
+        var stageReward = GetStageDataOrException(data.StageNum, data.SubStageNum);
         
         if (await _stageRepository.IsClearedStageAsync(data))
             stageReward.PaperPiece = 0;
@@ -38,9 +38,9 @@ public class RewardService : IRewardService
         await _rewardRepository.ClaimStageRewardByUserIdAsync(userId, stageReward);
     }
 
-    private async Task<StageReward> GetStageDataOrException(int stageNum, int stageSubNum)
+    private StageReward GetStageDataOrException(int stageNum, int stageSubNum)
     {
-        var reward = await _rewardRepository.GetStageRewardAsync(stageNum, stageSubNum);
+        var reward = _rewardRepository.GetStageReward(stageNum, stageSubNum);
         if (reward == null)
             throw new RequestException(ErrorStatusCode.NotFound, "STAGE_NOT_FOUND",
                 new { StageNum = stageNum, SubStageNum = stageSubNum });

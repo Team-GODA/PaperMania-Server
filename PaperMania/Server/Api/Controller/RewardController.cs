@@ -67,7 +67,7 @@ namespace Server.Api.Controller
 
             var stageData = new PlayerStageData
             {
-                Id = userId,
+                UserId = userId,
                 StageNum = request.StageNum,
                 SubStageNum = request.SubStageNum
             };

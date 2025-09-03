@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Server.Application.Port;
 using Server.Domain.Entity;
+using Server.Infrastructure.Service;
 
 namespace Server.Infrastructure.Repository;
 
@@ -16,9 +17,9 @@ public class StageRepository : RepositoryBase, IStageRepository
         await db.OpenAsync();
         
         var sql = @"
-                INSERT INTO paper_mania_stage_data.player_stage_data (id, stage_num, stage_sub_num, is_cleared)
+                INSERT INTO paper_mania_game_data.player_stage_data (user_id, stage_num, stage_sub_num, is_cleared)
                 VALUES (@UserId, @StageNum, @StageSubNum, false);
-            ";
+";
         
         var data = new List<dynamic>();
         for (int stageNum = 1; stageNum <= 5; stageNum++)
@@ -27,7 +28,7 @@ public class StageRepository : RepositoryBase, IStageRepository
             {
                 data.Add(new PlayerStageData
                 {
-                    Id = userId,
+                    UserId = userId,
                     StageNum = stageNum,
                     SubStageNum = subNum
                 });
@@ -44,13 +45,13 @@ public class StageRepository : RepositoryBase, IStageRepository
         
         var sql = @"
             SELECT is_cleared AS IsCleared
-            FROM paper_mania_stage_data.player_stage_data
-            WHERE id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
+            FROM paper_mania_game_data.player_stage_data
+            WHERE user_id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
             LIMIT 1";
         
         var result = await db.QueryFirstOrDefaultAsync<bool?>(sql, new
         {
-            Id = data.Id,
+            UserId = data.UserId,
             StageNum = data.StageNum,
             SubStageNum = data.SubStageNum
         });
@@ -64,13 +65,13 @@ public class StageRepository : RepositoryBase, IStageRepository
         await db.OpenAsync();
 
         var sql = @"
-            UPDATE paper_mania_stage_data.player_stage_data
+            UPDATE paper_mania_game_data.player_stage_data
             SET is_cleared = @IsCleared
-            WHERE id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum";
+            WHERE user_id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum";
         
         await db.ExecuteAsync(sql, new
         {
-            Id = data.Id,
+            UserId = data.UserId,
             IsCleared = data.IsCleared,
             StageNum = data.StageNum,
             SubStageNum = data.SubStageNum
