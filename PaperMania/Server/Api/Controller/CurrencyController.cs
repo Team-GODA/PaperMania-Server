@@ -9,7 +9,6 @@ using Server.Application.Port;
 
 namespace Server.Api.Controller
 {
-    [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     [ServiceFilter(typeof(SessionValidationFilter))]

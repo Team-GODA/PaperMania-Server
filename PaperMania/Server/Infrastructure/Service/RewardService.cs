@@ -10,7 +10,6 @@ public class RewardService : IRewardService
     private readonly IRewardRepository _rewardRepository;
     private readonly IStageRepository _stageRepository;
     
-
     public RewardService(IRewardRepository rewardRepository, IStageRepository stageRepository)
     {
         _rewardRepository = rewardRepository;

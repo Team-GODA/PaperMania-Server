@@ -9,7 +9,6 @@ using Server.Domain.Entity;
 
 namespace Server.Api.Controller
 {
-    [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase

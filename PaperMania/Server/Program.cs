@@ -100,7 +100,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddApiVersioning(options =>
 {
-    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(3, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
 });
