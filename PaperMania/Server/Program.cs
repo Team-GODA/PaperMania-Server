@@ -119,14 +119,11 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var cache = scope.ServiceProvider.GetRequiredService<StageRewardCache>();
-    await cache.Initialize();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var cache = scope.ServiceProvider.GetRequiredService<CharacterDataCache>();
-    await cache.Initialize();
+    var stageRewardCache = scope.ServiceProvider.GetRequiredService<StageRewardCache>();
+    await stageRewardCache.Initialize();
+    
+    var characterDataCache = scope.ServiceProvider.GetRequiredService<CharacterDataCache>();
+    await characterDataCache.Initialize();
 }
 
 app.Run();
