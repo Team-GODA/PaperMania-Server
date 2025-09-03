@@ -8,7 +8,7 @@ using Server.Api.Filter;
 
 namespace Server.Api.Controller
 {
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v3/[controller]")]
     [ApiController]
     [ServiceFilter(typeof(SessionValidationFilter))]
     public class DataController : ControllerBase

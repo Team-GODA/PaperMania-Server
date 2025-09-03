@@ -8,7 +8,7 @@ using Server.Domain.Entity;
 
 namespace Server.Api.Controller
 {
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v3/[controller]")]
     [ServiceFilter(typeof(SessionValidationFilter))]
     [ApiController]
     public class CharacterController : ControllerBase
