@@ -2,7 +2,6 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Application.Port;
-using Asp.Versioning;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
 using Server.Api.Filter;

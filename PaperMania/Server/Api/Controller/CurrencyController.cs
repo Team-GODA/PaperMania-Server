@@ -1,5 +1,4 @@
 using System.Net;
-using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
