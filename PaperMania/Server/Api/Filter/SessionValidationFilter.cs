@@ -18,7 +18,7 @@ public class SessionValidationFilter : IAsyncActionFilter
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        if (!context.HttpContext.Request.Headers.TryGetValue("Session-UserId", out var sessionId) || string.IsNullOrWhiteSpace(sessionId))
+        if (!context.HttpContext.Request.Headers.TryGetValue("Session-Id", out var sessionId) || string.IsNullOrWhiteSpace(sessionId))
         {
             _logger.LogWarning("세션 ID가 없습니다.");
             context.Result = new JsonResult(ApiResponse.Error<EmptyResponse>(ErrorStatusCode.Unauthorized, "SID가 없습니다."));
