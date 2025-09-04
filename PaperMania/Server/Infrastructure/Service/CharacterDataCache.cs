@@ -6,19 +6,14 @@ namespace Server.Infrastructure.Service;
 
 public class CharacterDataCache
 {
-    private readonly string _url;
+    private const string Url =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-hipnb7-1L4DFLEZQdC5S7MmB0DRUhn6-unGKKlL_djdIExwoQPtTv72W6e0CP9uHKe8nhIDGHPK5/pub?output=csv";
     private Dictionary<string, CharacterData> _characters = new();
 
-    public CharacterDataCache(IOptions<GoogleSheetSetting> options)
-    {
-        _url = options.Value.CharacterDataUrl
-               ?? throw new ArgumentNullException(nameof(options.Value.CharacterDataUrl));
-    }
-    
     public async Task Initialize()
     {
         var characterDataDict = await CsvLoader.LoadCsvAsync<string, CharacterData>(
-            _url,
+            Url,
             keySelector: c => c.CharacterId
         );
         
