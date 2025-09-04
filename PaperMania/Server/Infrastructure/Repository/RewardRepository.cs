@@ -1,37 +1,24 @@
 ﻿using Dapper;
+using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
+using Server.Infrastructure.Service;
 
 namespace Server.Infrastructure.Repository;
 
 public class RewardRepository : RepositoryBase, IRewardRepository
 {
-    public RewardRepository(string connectionString) : base(connectionString)
+    private readonly StageRewardCache _cache;
+    
+    public RewardRepository(string connectionString, StageRewardCache cache) : base(connectionString)
     {
+        _cache = cache;
     }
 
-    public async Task<StageReward?> GetStageRewardAsync(int stageNum, int stageSubNum)
+    public StageReward? GetStageReward(int stageNum, int stageSubNum)
     {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-
-        var sql = @"
-            SELECT stage_num AS StageNum, 
-               stage_sub_num AS SubStageNum, 
-               clear_paper_piece AS PaperPiece, 
-               clear_gold AS Gold, 
-               clear_exp AS ClearExp
-        FROM paper_mania_stage_data.stage_reward 
-        WHERE stage_num = @StageNum 
-          AND stage_sub_num = @SubStageNum";
-
-        var result = await db.QueryFirstOrDefaultAsync<StageReward>(sql, new
-        {
-            StageNum = stageNum,
-            SubStageNum = stageSubNum
-        });
-        
-        return result;
+        return _cache.GetStageReward(stageNum, stageSubNum);
     }
 
     public async Task ClaimStageRewardByUserIdAsync(int? userId, StageReward reward)
@@ -47,7 +34,7 @@ public class RewardRepository : RepositoryBase, IRewardRepository
             UPDATE paper_mania_game_data.player_currency_data
             SET gold = gold + @Gold,
                 paper_piece = paper_piece + @PaperPiece
-            WHERE id = @UserId";
+            WHERE user_id = @UserId";
 
             var currencyResult  = await db.ExecuteAsync(updateCurrencySql, new
             {
@@ -59,17 +46,19 @@ public class RewardRepository : RepositoryBase, IRewardRepository
             var updateExpSql = @"
             UPDATE paper_mania_game_data.player_game_data
             SET player_exp = player_exp + @ClearExp
-            WHERE id = @UserId";
+            WHERE user_id = @UserId";
         
             var gameResult = await db.ExecuteAsync(updateExpSql, new
             {
                 ClearExp = reward.ClearExp,
                 UserId = userId
             }, transaction);
-        
-            if (currencyResult == 0 || gameResult == 0)
-                throw new InvalidOperationException($"UserId {userId}에 해당하는 데이터가 없습니다.");
-        
+
+            if (currencyResult == 0)
+                throw new RequestException(ErrorStatusCode.NotFound, $"user {userId}의 player_currency_data 없음");
+            if (gameResult == 0)
+                throw new RequestException(ErrorStatusCode.NotFound, $"user {userId}의 player_game_data 없음");
+            
             await transaction.CommitAsync();
         }
         catch
