@@ -94,7 +94,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Version = "v3",
         Title = "PaperMania API",
-        Description = "API Version 3"
+        Description = "API Version"
     });
 });
 
