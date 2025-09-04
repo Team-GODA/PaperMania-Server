@@ -17,7 +17,7 @@ builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential()
 var env = builder.Environment;
 
 var redisConnectionString = env.IsDevelopment()
-    ? "localhost:6379,abortConnect=false"
+    ? "127.0.0.1:6379,abortConnect=false"
     : "redis:6379,abortConnect=false";
 var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
@@ -90,11 +90,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    options.SwaggerDoc("v3", new Microsoft.OpenApi.Models.OpenApiInfo
     {
-        Version = "v1",
+        Version = "v3",
         Title = "PaperMania API",
-        Description = "API Version"
+        Description = "API Version 3"
     });
 });
 
