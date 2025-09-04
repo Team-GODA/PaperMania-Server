@@ -22,9 +22,6 @@ var redisConnectionString = env.IsDevelopment()
 var redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
-builder.Services.Configure<GoogleAuthSetting>(builder.Configuration.GetSection("GoogleAuth"));
-builder.Services.Configure<GoogleSheetSetting>(builder.Configuration.GetSection("GoogleSheets"));
-
 builder.Services.AddSingleton<StageRewardCache>();
 builder.Services.AddSingleton<CharacterDataCache>();
 

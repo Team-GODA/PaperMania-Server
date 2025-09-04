@@ -6,15 +6,10 @@ namespace Server.Infrastructure.Service;
 
 public class StageRewardCache
 {
-    private readonly string _url;
+    private const string Url =
+        "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjqte_1Pq7_fnmlqnJ_aoZ3xLDyZPuTP83L1buqjstcuk9nkZpVXUw0wYt2wqfI631jrdC4lTweZ2V/pub?output=csv";
     private Dictionary<(int stageNum, int stageSubNum), StageReward> _rewards = new();
 
-    public StageRewardCache(IOptions<GoogleSheetSetting> options)
-    {
-        _url = options.Value.StageRewardUrl
-               ?? throw new ArgumentNullException(nameof(options.Value.StageRewardUrl));
-    }
-    
     public StageReward? GetStageReward(int stageNum, int stageSubNum)
     {
         return _rewards.TryGetValue((stageNum, stageSubNum), out var reward) ? reward : null;
@@ -23,7 +18,7 @@ public class StageRewardCache
     public async Task Initialize()
     {
         var stageRewardsDict = await CsvLoader.LoadCsvAsync<(int,int), StageReward>(
-            _url,
+            Url,
             r => (r.StageNum, r.StageSubNum));
         _rewards.Clear();
 
