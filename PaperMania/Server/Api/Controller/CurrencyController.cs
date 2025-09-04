@@ -1,5 +1,4 @@
 using System.Net;
-using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
@@ -9,8 +8,7 @@ using Server.Application.Port;
 
 namespace Server.Api.Controller
 {
-    [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v3/[controller]")]
     [ApiController]
     [ServiceFilter(typeof(SessionValidationFilter))]
     public class CurrencyController : ControllerBase
@@ -40,7 +38,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
-            _logger.LogInformation($"플레이어 AP 조회 시도 : Id : {userId}");
+            _logger.LogInformation($"플레이어 AP 조회 시도 : UserId : {userId}");
             
             var currentActionPoint = await _currencyService.GetPlayerActionPointAsync(userId);
             var response = new GetPlayerActionPointResponse
@@ -48,8 +46,8 @@ namespace Server.Api.Controller
                 CurrentActionPoint = currentActionPoint
             };                         
                 
-            _logger.LogInformation($"플레이어 AP 조회 성공 : Id : {userId}");
-            return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : Id : {userId}", response));
+            _logger.LogInformation($"플레이어 AP 조회 성공 : UserId : {userId}");
+            return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : UserId : {userId}", response));
         }
 
         /// <summary>
@@ -73,7 +71,7 @@ namespace Server.Api.Controller
                 NewMaxActionPoint = newMaxActionPoint
             };
                 
-            _logger.LogInformation($"플레이어 최대 AP 갱신 성공 : Id : {userId}");
+            _logger.LogInformation($"플레이어 최대 AP 갱신 성공 : UserId : {userId}");
             return Ok(ApiResponse.Ok("플레이어 최대 AP 갱신 성공", response));
         }
 
@@ -90,7 +88,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
-            _logger.LogInformation($"플레이어 AP 사용 시도 : Id : {userId}");
+            _logger.LogInformation($"플레이어 AP 사용 시도 : UserId : {userId}");
             
             await _currencyService.UsePlayerActionPointAsync(userId, request.UsedActionPoint);
             var currentActionPoint = await _currencyService.GetPlayerActionPointAsync(userId);
@@ -100,7 +98,7 @@ namespace Server.Api.Controller
                 CurrentActionPoint = currentActionPoint
             };
 
-            _logger.LogInformation($"플레이어 AP 사용 성공 : Id : {userId}");
+            _logger.LogInformation($"플레이어 AP 사용 성공 : UserId : {userId}");
             return Ok(ApiResponse.Ok("플레이어 AP 사용 성공", response));
         }
 
@@ -115,7 +113,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
-            _logger.LogInformation($"플레이어 골드 조회 시도 : Id : {userId}");
+            _logger.LogInformation($"플레이어 골드 조회 시도 : UserId : {userId}");
             
             var gold = await _currencyService.GetPlayerGoldAsync(userId);
             var response = new GetPlayerGoldResponse
@@ -123,7 +121,7 @@ namespace Server.Api.Controller
                 CurrentGold = gold
             };
                 
-            _logger.LogInformation($"플레이어 골드 조회 성공 : Id {userId}");
+            _logger.LogInformation($"플레이어 골드 조회 성공 : UserId {userId}");
             return Ok(ApiResponse.Ok("플레이어 골드 조회 성공", response));
         }
 
@@ -140,7 +138,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 골드 갱신 시도: Id={userId}, Amount={request.Amount}");
+            _logger.LogInformation($"플레이어 골드 갱신 시도: UserId={userId}, Amount={request.Amount}");
 
             await _currencyService.ModifyPlayerGoldAsync(userId, request.Amount);
                 
@@ -150,7 +148,7 @@ namespace Server.Api.Controller
                 CurrentGold = currentGold
             };
                 
-            _logger.LogInformation($"플레이어 골드 갱신 성공 : Id {userId}");
+            _logger.LogInformation($"플레이어 골드 갱신 성공 : UserId {userId}");
             return Ok(ApiResponse.Ok("플레이어 골드 사용/추가 성공", response));
         }
 
@@ -165,7 +163,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
-            _logger.LogInformation($"플레이어 종이조각 조회 시도 : Id : {userId}");
+            _logger.LogInformation($"플레이어 종이조각 조회 시도 : UserId : {userId}");
 
             var currentPaperPiece = await _currencyService.GetPlayerPaperPieceAsync(userId);
             var response = new GetPlayerPaperPieceResponse
@@ -173,7 +171,7 @@ namespace Server.Api.Controller
                 CurrentPaperPieces = currentPaperPiece
             };
 
-            _logger.LogInformation($"플레이어 종이조각 조회 성공 : Id : {userId}");
+            _logger.LogInformation($"플레이어 종이조각 조회 성공 : UserId : {userId}");
             return Ok(ApiResponse.Ok("플레이어 종이조각 조회 성공", response));
         }
 
@@ -190,7 +188,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 종이 조각 갱신 시도 : Id : {userId}");
+            _logger.LogInformation($"플레이어 종이 조각 갱신 시도 : UserId : {userId}");
             
             await _currencyService.ModifyPlayerPaperPieceAsync(userId, request.Amount);
 
@@ -200,7 +198,7 @@ namespace Server.Api.Controller
                 CurrentPaperPieces = currentPaperPiece
             };
                 
-            _logger.LogInformation($"플레이어 종이 조각 성공 : Id {userId}");
+            _logger.LogInformation($"플레이어 종이 조각 성공 : UserId {userId}");
             return Ok(ApiResponse.Ok("플레이어 종이 조각 성공",  response));
         }
     }

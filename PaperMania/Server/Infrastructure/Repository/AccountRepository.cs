@@ -15,7 +15,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         var db = CreateConnection();
         
         var sql = @"
-            SELECT id AS Id, player_id AS PlayerId, email, password, is_new_account AS IsNewAccount,
+            SELECT id AS UserId, player_id AS PlayerId, email, password, is_new_account AS IsNewAccount,
                    role AS Role, created_at AS CreatedAt
             FROM paper_mania_account_data.player_account_data
             WHERE player_id = @PlayerId
@@ -62,7 +62,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         var sql = @"
             SELECT is_new_account AS IsNewAccount
             FROM paper_mania_account_data.player_account_data
-            WHERE Id = @Id
+            WHERE UserId = @UserId
             LIMIT 1";
         
         return await db.ExecuteScalarAsync<bool>(sql, new { Id = userId });
@@ -76,7 +76,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         var sql = @"
             UPDATE paper_mania_account_data.player_account_data
             SET is_new_account = @IsNew
-            WHERE id = @Id";
+            WHERE id = @UserId";
 
         await db.ExecuteAsync(sql, new { IsNew = isNew, Id = userId });
     }

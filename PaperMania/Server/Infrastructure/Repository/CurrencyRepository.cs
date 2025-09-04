@@ -28,13 +28,13 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
         await db.OpenAsync();
 
         var sql = @"
-            SELECT id AS Id, action_point AS ActionPoint, action_point_max AS MaxActionPoint, 
+            SELECT id AS UserId, action_point AS ActionPoint, action_point_max AS MaxActionPoint, 
                 gold AS Gold, paper_piece AS PaperPiece, last_action_point_updated AS LastActionPointUpdated
             FROM paper_mania_game_data.player_currency_data
-            WHERE id = @Id";
+            WHERE id = @UserId";
         
         var result = await db.QueryFirstOrDefaultAsync<PlayerCurrencyData>(sql, new { Id = userId });
-        return result ?? throw new InvalidOperationException($"플레이어 재화 데이터 NULL : Id : {userId}");
+        return result ?? throw new InvalidOperationException($"플레이어 재화 데이터 NULL : UserId : {userId}");
     }
 
     public async Task UpdatePlayerCurrencyDataAsync(PlayerCurrencyData data)
@@ -49,7 +49,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 last_action_point_updated = @LastActionPointUpdated,
                 gold = @Gold,
                 paper_piece = @PaperPiece
-            WHERE id = @Id";
+            WHERE id = @UserId";
 
         await db.ExecuteAsync(sql, data);
     }

@@ -7,5 +7,5 @@ public interface ICharacterRepository
     Task<IEnumerable<PlayerCharacterData>> GetPlayerCharacterDataByUserIdAsync(int? userId);
     Task<PlayerCharacterData> AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data);
     Task<bool> IsNewCharacterExistAsync(int userId, string characterId);
-    
+    Task AddCharacterPiecesAsync(int userId, string characterId, int amount);
 }
