@@ -26,7 +26,7 @@ public class CharacterService : ICharacterService
 
     public async Task<PlayerCharacterData> AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data)
     {
-        bool exists = await _characterRepository.IsNewCharacterExistAsync(data.Id, data.CharacterId);
+        var exists = await _characterRepository.IsNewCharacterExistAsync(data.Id, data.CharacterId);
         if (exists)
             throw new RequestException(ErrorStatusCode.Conflict, "DUPLICATE_PLAYER_CHARACTER",
             new { CharacterId = data.CharacterId });
