@@ -16,7 +16,7 @@ public class DataRepository : RepositoryBase, IDataRepository
         await db.OpenAsync();
         
         var sql = @"
-            SELECT id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
+            SELECT user_id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
             FROM paper_mania_game_data.player_game_data
             WHERE player_name = @PlayerName
             LIMIT 1";
@@ -30,7 +30,7 @@ public class DataRepository : RepositoryBase, IDataRepository
         await db.OpenAsync();
 
         var sql = @"
-        INSERT INTO paper_mania_game_data.player_game_data (id, player_name)
+        INSERT INTO paper_mania_game_data.player_game_data (user_id, player_name)
         VALUES (@UserId, @PlayerName)";
 
         await db.ExecuteAsync(sql, new { UserId = userId, PlayerName = playerName });
@@ -42,12 +42,12 @@ public class DataRepository : RepositoryBase, IDataRepository
         await db.OpenAsync();
         
         var sql = @"
-            SELECT id AS Id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
+            SELECT user_id AS UserId, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
             FROM paper_mania_game_data.player_game_data
-            WHERE id = @Id
+            WHERE user_id = @UserId
             LIMIT 1";
         
-        return await db.QueryFirstOrDefaultAsync<PlayerGameData>(sql, new { Id = userId });
+        return await db.QueryFirstOrDefaultAsync<PlayerGameData>(sql, new { UserId = userId });
     }
 
     public async Task<PlayerGameData?> UpdatePlayerLevelAsync(int? userId, int newLevel, int newExp)
@@ -58,8 +58,8 @@ public class DataRepository : RepositoryBase, IDataRepository
         var sql = @"
             UPDATE paper_mania_game_data.player_game_data
             SET player_level = @Level, player_exp = @Exp
-            WHERE id = @Id
-            RETURNING id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel;
+            WHERE user_id = @UserId
+            RETURNING user_id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel;
             ";
 
         return await db.QueryFirstOrDefaultAsync<PlayerGameData>(sql, new
@@ -91,9 +91,9 @@ public class DataRepository : RepositoryBase, IDataRepository
         var sql = @"
             UPDATE paper_mania_game_data.player_game_data
             SET player_name = @PlayerName
-            WHERE id = @Id
+            WHERE user_id = @UserId
             RETURNING player_name AS PlayerName";
         
-        await db.ExecuteAsync(sql, new { PlayerName = newPlayerName, Id = userId });
+        await db.ExecuteAsync(sql, new { PlayerName = newPlayerName, UserId = userId });
     }
 }
