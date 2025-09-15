@@ -16,10 +16,11 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
         _cache = cache;
     }
 
-    public async Task<IEnumerable<PlayerCharacterData>> GetPlayerCharacterDataByUserIdAsync(int? userId)
+    public async Task<IEnumerable<PlayerCharacterData>> GetPlayerCharactersDataByUserIdAsync(int? userId)
     {
         if (userId == null)
-            return Enumerable.Empty<PlayerCharacterData>();
+            throw new RequestException(ErrorStatusCode.NotFound, "USER_NOT_FOUND",
+                new { UserId = userId });
 
         await using var db = CreateConnection();
         await db.OpenAsync();
@@ -29,12 +30,12 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
                    character_level AS CharacterLevel,
                    normal_skill_level AS NormalSkillLevel,
                    epic_skill_level AS EpicSkillLevel,
-                   character_pieces AS CharacterPieces
+                   character_pieces AS PieceAmount
             FROM paper_mania_game_data.player_character_data
             WHERE user_id = @UserId
         ";
 
-        var playerCharacters = (await db.QueryAsync<PlayerCharacterData>(sql, new { Id = userId })).ToList();
+        var playerCharacters = (await db.QueryAsync<PlayerCharacterData>(sql, new { UserId = userId })).ToList();
 
         foreach (var pc in playerCharacters)
         {
@@ -43,8 +44,7 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
                 throw new RequestException(ErrorStatusCode.NotFound, "CHARACTER_NOT_FOUND",
                     new { CharacterId = pc.CharacterId });
 
-            pc.CharacterName = baseData.CharacterName;
-            pc.Rarity = baseData.Rarity;
+            pc.Data = baseData;
         }
 
         return playerCharacters;
@@ -56,38 +56,37 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
         await db.OpenAsync();
 
         var sql = @"
-            INSERT INTO paper_mania_game_data.player_character_data (user_id, character_id)
-            VALUES (@UserId, @CharacterId);
+            INSERT INTO paper_mania_game_data.player_character_data
+            (user_id, character_id, character_level, normal_skill_level, epic_skill_level, character_pieces)
+            VALUES (@UserId, @CharacterId, 1, 1, 1, 0);
         ";
 
-        var param = new { UserId = data.UserId, CharacterId = data.CharacterId };
-        await db.ExecuteAsync(sql, param);
+        await db.ExecuteAsync(sql, new { UserId = data.UserId, CharacterId = data.CharacterId });
 
         var baseData = _cache.GetCharacter(data.CharacterId);
         if (baseData == null)
             throw new RequestException(ErrorStatusCode.NotFound, "CHARACTER_NOT_FOUND",
                 new { CharacterId = data.CharacterId });
 
-        data.CharacterName = baseData.CharacterName;
-        data.Rarity = baseData.Rarity;
-
+        data.Data = baseData;
         return data;
     }
 
-    public async Task<bool> IsNewCharacterExistAsync(int userId, string characterId)
+    public async Task<bool> HasCharacterAsync(int userId, string characterId)
     {
         await using var db = CreateConnection();
         await db.OpenAsync();
 
         var sql = @"
-            SELECT 1
-            FROM paper_mania_game_data.player_character_data
-            WHERE user_id = @UserId AND character_id = @CharacterId
-            LIMIT 1;
+            SELECT EXISTS (
+                SELECT 1
+                FROM paper_mania_game_data.player_character_data
+                WHERE user_id = @UserId
+                  AND character_id = @CharacterId
+            );
         ";
 
-        var result = await db.QueryFirstOrDefaultAsync<int?>(sql, new { UserId = userId, CharacterId = characterId });
-        return result.HasValue;
+        return await db.QuerySingleAsync<bool>(sql, new { UserId = userId, CharacterId = characterId });
     }
 
     public async Task AddCharacterPiecesAsync(int userId, string characterId, int amount)
@@ -96,10 +95,10 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
         await db.OpenAsync();
 
         var sql = @"
-            INSERT INTO paper_mania_game_data.player_character_piece (user_id, character_id, pieces)
-            VALUES (@UserId, @CharacterId, @Amount)
-            ON CONFLICT (user_id, character_id)
-            DO UPDATE SET pieces = player_character_piece.pieces + @Amount;
+            UPDATE paper_mania_game_data.player_character_data
+            SET character_pieces = character_pieces + @Amount
+            WHERE user_id = @UserId AND character_id = @CharacterId
+            RETURNING character_pieces;
         ";
 
         await db.ExecuteAsync(sql, new { Amount = amount, UserId = userId, CharacterId = characterId });
