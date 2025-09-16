@@ -3,7 +3,6 @@
 public class PlayerCharacterData
 {
     public int UserId { get; set; }
-    public string CharacterId { get; set; } = null!;
         
     public int CharacterExp { get; set; } = 0;
     public int CharacterLevel { get; set; } = 1;
