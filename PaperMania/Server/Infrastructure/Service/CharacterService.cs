@@ -18,21 +18,17 @@ public class CharacterService : ICharacterService
     
     public async Task<IEnumerable<PlayerCharacterData>> GetPlayerCharacterDataByUserIdAsync(int? userId)
     {
-        if (userId == null)
-            return Enumerable.Empty<PlayerCharacterData>();
-        
-        var playerCharacters = (await _repository.GetPlayerCharacterDataByUserIdAsync(userId))
+        var playerCharacters = (await _repository.GetPlayerCharactersDataByUserIdAsync(userId))
             .ToList();
 
         foreach (var pc in playerCharacters)
         {
-            var baseData = _cache.GetCharacter(pc.CharacterId);
+            var baseData = _cache.GetCharacter(pc.Data.CharacterId);
             if (baseData == null)
                 throw new RequestException(ErrorStatusCode.NotFound, "CHARACTER_NOT_FOUND",
-                    new { CharacterId = pc.CharacterId });
-            
-            pc.CharacterName = baseData.CharacterName;
-            pc.Rarity = baseData.Rarity;
+                    new { CharacterId = pc.Data.CharacterId });
+
+            pc.Data = baseData;
         }
         
         return playerCharacters;
@@ -40,41 +36,38 @@ public class CharacterService : ICharacterService
 
     public async Task<PlayerCharacterData> AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data)
     {
-        var baseData = _cache.GetCharacter(data.CharacterId);
+        var baseData = _cache.GetCharacter(data.Data.CharacterId);
         if (baseData == null)
             throw new RequestException(ErrorStatusCode.NotFound, "CHARACTER_NOT_FOUND",
-                new { CharacterId = data.CharacterId });
+                new { CharacterId = data.Data.CharacterId });
         
-        var exists = await _repository.IsNewCharacterExistAsync(data.UserId, data.CharacterId);
+        var exists = await _repository.HasCharacterAsync(data.UserId, data.Data.CharacterId);
         if (exists)
         {
             if (data.PieceAmount > 0)
-                await _repository.AddCharacterPiecesAsync(data.UserId, data.CharacterId, 10);
+                await _repository.AddCharacterPiecesAsync(data.UserId, data.Data.CharacterId, 10);
             
-            var playerCharacters = await _repository.GetPlayerCharacterDataByUserIdAsync(data.UserId);
-            var existing = playerCharacters.FirstOrDefault(c => c.CharacterId == data.CharacterId)
-                           ?? throw new RequestException(ErrorStatusCode.NotFound, "CHARACTER_NOT_FOUND",
-                               new { CharacterId = data.CharacterId });
-            
-            existing.CharacterName = baseData.CharacterName;
-            existing.Rarity = baseData.Rarity;
+            var playerCharacters = await _repository.GetPlayerCharactersDataByUserIdAsync(data.UserId);
+            var existing = playerCharacters.FirstOrDefault
+                (c => c.Data.CharacterId == data.Data.CharacterId);
+            if (existing == null)
+                throw new RequestException(ErrorStatusCode.NotFound, "CHARACTER_NOT_FOUND",
+                    new { CharacterId = data.Data.CharacterId });
+
+            existing.Data = baseData;
 
             return existing;
         }
-        else
+
+        var newCharacter = new PlayerCharacterData
         {
-            var newCharacter = new PlayerCharacterData
-            {
-                UserId = data.UserId,
-                CharacterId = data.CharacterId
-            };
+            UserId = data.UserId,
+            Data = baseData
+        };
 
-            var inserted = await _repository.AddPlayerCharacterDataByUserIdAsync(newCharacter);
+        var inserted = await _repository.AddPlayerCharacterDataByUserIdAsync(newCharacter);
+        inserted.Data = baseData;
 
-            inserted.CharacterName = baseData.CharacterName;
-            inserted.Rarity = baseData.Rarity;
-
-            return inserted;
-        }
+        return inserted;
     }
 }

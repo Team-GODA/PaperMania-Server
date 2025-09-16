@@ -39,10 +39,10 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
 
         foreach (var pc in playerCharacters)
         {
-            var baseData = _cache.GetCharacter(pc.CharacterId);
+            var baseData = _cache.GetCharacter(pc.Data.CharacterId);
             if (baseData == null)
                 throw new RequestException(ErrorStatusCode.NotFound, "CHARACTER_NOT_FOUND",
-                    new { CharacterId = pc.CharacterId });
+                    new { CharacterId = pc.Data.CharacterId });
 
             pc.Data = baseData;
         }
@@ -61,12 +61,12 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
             VALUES (@UserId, @CharacterId, 1, 1, 1, 0);
         ";
 
-        await db.ExecuteAsync(sql, new { UserId = data.UserId, CharacterId = data.CharacterId });
+        await db.ExecuteAsync(sql, new { UserId = data.UserId, CharacterId = data.Data.CharacterId });
 
-        var baseData = _cache.GetCharacter(data.CharacterId);
+        var baseData = _cache.GetCharacter(data.Data.CharacterId);
         if (baseData == null)
             throw new RequestException(ErrorStatusCode.NotFound, "CHARACTER_NOT_FOUND",
-                new { CharacterId = data.CharacterId });
+                new { CharacterId = data.Data.CharacterId });
 
         data.Data = baseData;
         return data;
