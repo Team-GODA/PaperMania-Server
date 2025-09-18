@@ -24,7 +24,7 @@ public class ExceptionHandlingMiddleware
         catch (GameException ex)
         {
             _logger.LogWarning(ex, "GameException 발생");
-            await WriteErrorAsync(context, ex.StatusCode, ex.Message);
+            await WriteErrorAsync(context, ex.StatusCode, ex.Message, true);
         }
         catch (Exception ex)
         {
@@ -33,10 +33,18 @@ public class ExceptionHandlingMiddleware
         }
     }
 
-    private async Task WriteErrorAsync(HttpContext context, ErrorStatusCode errorCode, string message)
+    private async Task WriteErrorAsync(HttpContext context, ErrorStatusCode errorCode, string message, bool isGameError = false)
     {
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.OK;
+
+        if (isGameError)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.OK;
+        }
+        else
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        }
 
         var response = ApiResponse.Error<object>(errorCode, message);
         await context.Response.WriteAsJsonAsync(response);
