@@ -16,7 +16,7 @@ public class CharacterService : ICharacterService
         _repository = repository;
     }
     
-    public async Task<IEnumerable<PlayerCharacterData>> GetPlayerCharacterDataByUserIdAsync(int? userId)
+    public async Task<IEnumerable<PlayerCharacterData>> GetPlayerCharacterDataByUserIdAsync(int userId)
     {
         var playerCharacters = (await _repository.GetPlayerCharactersDataByUserIdAsync(userId))
             .ToList();

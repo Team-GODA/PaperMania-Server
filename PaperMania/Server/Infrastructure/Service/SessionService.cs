@@ -1,4 +1,6 @@
-﻿using Server.Application.Port;
+﻿using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
+using Server.Application.Port;
 
 namespace Server.Infrastructure.Service;
 
@@ -56,14 +58,18 @@ public class SessionService : ISessionService
         return true;
     }
 
-    public async Task<int?> GetUserIdBySessionIdAsync(string sessionId)
+    public async Task<int> GetUserIdBySessionIdAsync(string sessionId)
     {
         var value = await _cacheService.GetAsync(sessionId);
         if (value != null && int.TryParse(value, out var userId))
             return userId;
 
         _logger.LogWarning($"세션 아이디로 유저 조회 실패: SessionId={sessionId}");
-        return null;
+        throw new RequestException(
+            ErrorStatusCode.NotFound,
+            "USER_NOT_FOUND_BY_SESSION_ID",
+            new { SessionId = sessionId }
+        );
     }
 
     public async Task DeleteSessionAsync(string sessionId)
