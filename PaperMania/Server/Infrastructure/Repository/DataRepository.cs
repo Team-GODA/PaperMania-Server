@@ -66,7 +66,7 @@ public class DataRepository : RepositoryBase, IDataRepository
         {
             Level = newLevel,
             Exp = newExp,
-            Id = userId
+            UserId = userId
         });
     }
 
@@ -92,7 +92,7 @@ public class DataRepository : RepositoryBase, IDataRepository
             UPDATE paper_mania_game_data.player_game_data
             SET player_name = @PlayerName
             WHERE user_id = @UserId
-            RETURNING player_name AS PlayerName";
+            ";
         
         await db.ExecuteAsync(sql, new { PlayerName = newPlayerName, UserId = userId });
     }
