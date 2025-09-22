@@ -4,19 +4,7 @@ public class CharacterData
 {
     public string CharacterId { get; set; } = null!;
     public string CharacterName { get; set; } = null!; 
-    public string RarityString
-    {
-        get => Rarity.ToString();
-        set => Rarity = Enum.Parse<Rarity>(value, ignoreCase: true);
-    }
-    
-    [System.Text.Json.Serialization.JsonIgnore]
-    public Rarity Rarity { get; set; }
-}
-
-public enum Rarity
-{
-    Common,
-    Rare,
-    Epic
+    public int Rarity { get; set; }
+    public int PieceAmount { get; set; } = 0;
+    public int Position { get; set; }
 }

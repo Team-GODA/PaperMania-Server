@@ -25,7 +25,7 @@ namespace Server.Api.Controller
         }
 
         /// <summary>
-        /// 플레이어 이름을 등록합니다.
+        /// 플레이어 데이터을 등록합니다.
         /// </summary>
         /// <param name="request">플레이어 이름 등록 요청 객체</param>
         /// <returns>등록 성공 여부에 대한 응답</returns>
