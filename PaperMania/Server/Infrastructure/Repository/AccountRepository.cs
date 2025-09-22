@@ -62,7 +62,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         var sql = @"
             SELECT is_new_account AS IsNewAccount
             FROM paper_mania_account_data.player_account_data
-            WHERE UserId = @UserId
+            WHERE id = @UserId
             LIMIT 1";
         
         return await db.ExecuteScalarAsync<bool>(sql, new { Id = userId });
