@@ -28,7 +28,15 @@ public static class CsvLoader
             for (int i = 0; i < props.Length && i < cols.Length; i++)
             {
                 var prop = props[i];
-                object? value = Convert.ChangeType(cols[i], prop.PropertyType);
+                object? value;
+                if (prop.PropertyType == typeof(int))
+                {
+                    value = int.TryParse(cols[i], out int num) ? num : 0;
+                }
+                else
+                {
+                    value = cols[i];
+                }
                 prop.SetValue(obj, value);
             }
             
