@@ -6,7 +6,7 @@ public class GameException : Exception
 {
     public ErrorStatusCode StatusCode { get; }
 
-    public GameException(ErrorStatusCode statusCode, string message) : base(message)
+    protected GameException(ErrorStatusCode statusCode, string message) : base(message)
     {
         StatusCode = statusCode;
     }

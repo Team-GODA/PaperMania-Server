@@ -2,15 +2,13 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Application.Port;
-using Asp.Versioning;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
 using Server.Api.Filter;
 
 namespace Server.Api.Controller
 {
-    [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v3/[controller]")]
     [ApiController]
     [ServiceFilter(typeof(SessionValidationFilter))]
     public class DataController : ControllerBase
@@ -27,7 +25,7 @@ namespace Server.Api.Controller
         }
 
         /// <summary>
-        /// 플레이어 이름을 등록합니다.
+        /// 플레이어 데이터을 등록합니다.
         /// </summary>
         /// <param name="request">플레이어 이름 등록 요청 객체</param>
         /// <returns>등록 성공 여부에 대한 응답</returns>
@@ -59,7 +57,7 @@ namespace Server.Api.Controller
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 이름 조회 시도: Id: {userId}");
+            _logger.LogInformation($"플레이어 이름 조회 시도: UserId: {userId}");
 
             var playerName = await _dataService.GetPlayerNameByUserIdAsync(userId);
 
@@ -85,7 +83,7 @@ namespace Server.Api.Controller
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 이름 재설정 시도: Id: {userId}");
+            _logger.LogInformation($"플레이어 이름 재설정 시도: UserId: {userId}");
 
             await _dataService.RenamePlayerNameAsync(userId, request.NewName);
 
@@ -95,7 +93,7 @@ namespace Server.Api.Controller
                 NewPlayerName = request.NewName
             };
 
-            _logger.LogInformation($"플레이어 이름 재설정 성공: Id: {userId}, NewName: {request.NewName}");
+            _logger.LogInformation($"플레이어 이름 재설정 성공: UserId: {userId}, NewName: {request.NewName}");
             return Ok(ApiResponse.Ok("플레이어 이름 재설정 성공", response));
         }
 
@@ -110,7 +108,7 @@ namespace Server.Api.Controller
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 레벨 조회 시도: Id: {userId}");
+            _logger.LogInformation($"플레이어 레벨 조회 시도: UserId: {userId}");
 
             var level = await _dataService.GetPlayerLevelByUserIdAsync(userId);
             var exp = await _dataService.GetPlayerExpByUserIdAsync(userId);
@@ -138,7 +136,7 @@ namespace Server.Api.Controller
             var sessionId =  HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
-            _logger.LogInformation($"플레이어 레벨 갱신 시도: Id: {userId}");
+            _logger.LogInformation($"플레이어 레벨 갱신 시도: UserId: {userId}");
 
             var data = await _dataService.UpdatePlayerLevelByExpAsync(userId, request.NewExp);
 
@@ -152,7 +150,7 @@ namespace Server.Api.Controller
                 NewExp = newExp
             };
 
-            _logger.LogInformation($"플레이어 레벨 갱신 성공: Id: {userId}");
+            _logger.LogInformation($"플레이어 레벨 갱신 성공: UserId: {userId}");
             return Ok(ApiResponse.Ok("플레이어 레벨 갱신 성공", response));
         }
     }

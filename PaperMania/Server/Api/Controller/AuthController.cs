@@ -1,4 +1,3 @@
-using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
@@ -9,8 +8,7 @@ using Server.Domain.Entity;
 
 namespace Server.Api.Controller
 {
-    [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v3/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -50,7 +48,7 @@ namespace Server.Api.Controller
                 Id = newUser.Id
             };
 
-            _logger.LogInformation("회원가입 성공: Id={Id}, PlayerId={PlayerId}", response.Id, request.PlayerId);
+            _logger.LogInformation("회원가입 성공: UserId={UserId}, PlayerId={PlayerId}", response.Id, request.PlayerId);
             return Ok(ApiResponse.Ok("회원가입 성공", response));
         }
 
@@ -69,7 +67,7 @@ namespace Server.Api.Controller
 
             var response = new LoginResponse
             {
-                Id = user.Id,
+                IsNewAccount = user.IsNewAccount,
                 SessionId = sessionId
             };
 

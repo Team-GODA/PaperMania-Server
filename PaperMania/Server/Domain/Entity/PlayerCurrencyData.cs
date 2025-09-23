@@ -2,7 +2,7 @@
 
 public class PlayerCurrencyData
 {
-    public int Id { get; set; }
+    public int UserId { get; set; }
     public int ActionPoint { get; set; }
     public int MaxActionPoint { get; set; }
     public int Gold { get; set; }

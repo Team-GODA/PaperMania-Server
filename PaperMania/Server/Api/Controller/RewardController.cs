@@ -1,4 +1,3 @@
-using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
@@ -9,8 +8,7 @@ using Server.Domain.Entity;
 
 namespace Server.Api.Controller
 {
-    [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v3/[controller]")]
     [ApiController]
     public class RewardController : ControllerBase
     {
@@ -31,15 +29,15 @@ namespace Server.Api.Controller
         /// <param name="stageNum">스테이지 번호</param>
         /// <param name="stageSubNum">서브 스테이지 번호</param>
         /// <returns>스테이지 보상 정보</returns>
-        [HttpGet("stage")]
+        [HttpGet("stage/{stageNum:int}/{stageSubNum:int}")]
         [ProducesResponseType(typeof(BaseResponse<GetStageRewardResponse>), 200)]
-        public async Task<ActionResult<BaseResponse<GetStageRewardResponse>>> GetStageReward(
-            [FromQuery] int stageNum,
-            [FromQuery] int stageSubNum)
+        public ActionResult<BaseResponse<GetStageRewardResponse>> GetStageReward(
+            [FromRoute] int stageNum,
+            [FromRoute] int stageSubNum)
         {
             _logger.LogInformation($"스테이지 보상 조회 시도");
 
-            var reward = await _rewardService.GetStageRewardAsync(stageNum, stageSubNum);
+            var reward = _rewardService.GetStageReward(stageNum, stageSubNum);
             var response = new GetStageRewardResponse
             {
                 StageReward = reward
@@ -57,22 +55,22 @@ namespace Server.Api.Controller
         [HttpPatch("stage")]
         [ServiceFilter(typeof(SessionValidationFilter))]
         [ProducesResponseType(typeof(BaseResponse<ClaimStageRewardResponse>), 200)]
-        public async Task<ActionResult<ActionResult<BaseResponse<ClaimStageRewardResponse>>>> ClaimStageReward(
+        public async Task<ActionResult<BaseResponse<ClaimStageRewardResponse>>> ClaimStageReward(
             [FromBody] ClaimStageRewardRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
             var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
             
-            _logger.LogInformation($"플레이어 스테이지 보상 수령 시도 : Id : {userId}");
+            _logger.LogInformation($"플레이어 스테이지 보상 수령 시도 : UserId : {userId}");
 
             var stageData = new PlayerStageData
             {
-                Id = userId,
+                UserId = userId,
                 StageNum = request.StageNum,
-                SubStageNum = request.SubStageNum
+                StageSubNum = request.SubStageNum
             };
 
-            var stageReward = await _rewardService.GetStageRewardAsync(request.StageNum, request.SubStageNum);
+            var stageReward = _rewardService.GetStageReward(request.StageNum, request.SubStageNum);
             await _rewardService.ClaimStageRewardByUserIdAsync(userId, stageReward!, stageData);
 
             var response = new ClaimStageRewardResponse
@@ -81,7 +79,7 @@ namespace Server.Api.Controller
                 StageReward = stageReward
             };
 
-            _logger.LogInformation($"플레이어 스테이지 보상 수령 성공 : Id : {userId}");
+            _logger.LogInformation($"플레이어 스테이지 보상 수령 성공 : UserId : {userId}");
             return Ok(ApiResponse.Ok("스테이지 보상 수령 성공", response));
         }
     }

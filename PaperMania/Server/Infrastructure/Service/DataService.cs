@@ -37,6 +37,7 @@ public class DataService : IDataService
         }
         
         var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
+        _logger.LogInformation("UserId:{userId}",userId.ToString());
         
         var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
         if (!isNewAccount)
@@ -47,6 +48,7 @@ public class DataService : IDataService
         
         await _dataRepository.AddPlayerDataAsync(userId, playerName);
         await _stageRepository.CreatePlayerStageDataAsync(userId);
+        await _currencyRepository.AddPlayerCurrencyDataByUserIdAsync(userId);
         await _accountRepository.UpdateIsNewAccountAsync(userId, false);
         
         return playerName;

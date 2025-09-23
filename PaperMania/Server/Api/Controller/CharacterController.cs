@@ -1,4 +1,3 @@
-using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
@@ -9,8 +8,7 @@ using Server.Domain.Entity;
 
 namespace Server.Api.Controller
 {
-    [ApiVersion("1.0")]
-    [Route("api/v{version:apiVersion}/[controller]")]
+    [Route("api/v3/[controller]")]
     [ServiceFilter(typeof(SessionValidationFilter))]
     [ApiController]
     public class CharacterController : ControllerBase
@@ -57,26 +55,25 @@ namespace Server.Api.Controller
         /// <returns>추가된 캐릭터 정보</returns>
         [HttpPost]
         [ProducesResponseType(typeof(BaseResponse<AddPlayerCharacterResponse>), 200)]
-        [ProducesResponseType(500)]
         public async Task<ActionResult<BaseResponse<AddPlayerCharacterResponse>>> AddPlayerCharacter(
             [FromBody] AddPlayerCharacterRequest request)
         {
-            _logger.LogInformation($"플레이어 보유 캐릭터 추가 시도: Id: {request.Id}, CharacterId: {request.CharacterId}");
+            _logger.LogInformation($"플레이어 보유 캐릭터 추가 시도: UserId: {request.Id}, CharacterId: {request.Data.CharacterId}");
             
             var data = new PlayerCharacterData
             {
-                Id = request.Id,
-                CharacterId = request.CharacterId
+                UserId = request.Id,
+                Data = request.Data
             };
 
             var addedCharacter = await _characterService.AddPlayerCharacterDataByUserIdAsync(data);
             var response = new AddPlayerCharacterResponse
             {
-                Id = addedCharacter.Id,
-                CharacterId = addedCharacter.CharacterId
+                Id = addedCharacter.UserId,
+                Data = addedCharacter.Data
             };
                 
-            _logger.LogInformation($"플레이어 보유 캐릭터 추가 성공: Id: {request.Id}, CharacterId: {request.CharacterId}");
+            _logger.LogInformation($"플레이어 보유 캐릭터 추가 성공: UserId: {request.Id}, CharacterId: {request.Data.CharacterId}");
             return Ok(ApiResponse.Ok("플레이어 보유 캐릭터 추가 성공", response));
         }
     }

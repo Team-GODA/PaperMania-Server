@@ -20,7 +20,7 @@ public class CurrencyService : ICurrencyService
     {
         var data = await GetPlayerCurrencyDataOrException(userId);
         if (data == null)
-            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CURRNCY_DATA_NOT_FOUND",  new { UserId = userId });
+            throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CURRENCY_DATA_NOT_FOUND",  new { UserId = userId });
         
         var updated = await RegenerateActionPointAsync(data);
         if (updated)
@@ -105,7 +105,7 @@ public class CurrencyService : ICurrencyService
             if (data.PaperPiece < decrease)
             {
                 _logger.LogWarning($"종이 조각 부족: UserId={userId}, 현재={data.PaperPiece}, 요청={decrease}");
-                throw new RequestException(ErrorStatusCode.Conflict, "NOT_ENOUGH_PAPERPIECE", new { UserId =  userId });
+                throw new RequestException(ErrorStatusCode.Conflict, "NOT_ENOUGH_PAPER_PIECE", new { UserId =  userId });
             }
             
             _logger.LogInformation($"플레이어 종이 조각 사용 : UserId={userId}, Amount={decrease}");
