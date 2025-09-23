@@ -65,7 +65,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
             WHERE id = @UserId
             LIMIT 1";
         
-        return await db.ExecuteScalarAsync<bool>(sql, new { Id = userId });
+        return await db.ExecuteScalarAsync<bool>(sql, new { UserId = userId });
     }
     
     public async Task UpdateIsNewAccountAsync(int? userId, bool isNew = true)
