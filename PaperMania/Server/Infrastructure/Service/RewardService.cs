@@ -24,7 +24,7 @@ public class RewardService : IRewardService
 
     public async Task ClaimStageRewardByUserIdAsync(int? userId, StageReward reward, PlayerStageData data)
     {
-        var stageReward = GetStageDataOrException(data.StageNum, data.SubStageNum);
+        var stageReward = GetStageDataOrException(data.StageNum, data.StageSubNum);
         
         if (await _stageRepository.IsClearedStageAsync(data))
             stageReward.PaperPiece = 0;
