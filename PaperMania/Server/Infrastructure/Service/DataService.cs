@@ -37,6 +37,7 @@ public class DataService : IDataService
         }
         
         var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
+        _logger.LogInformation("UserId:{userId}",userId.ToString());
         
         var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
         if (!isNewAccount)
