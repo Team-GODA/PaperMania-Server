@@ -16,7 +16,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
         await db.OpenAsync();
 
         var sql = @"
-            INSERT INTO paper_mania_game_data.player_currency_data (id)
+            INSERT INTO paper_mania_game_data.player_currency_data (user_id)
             VALUES (@UserId)";
 
         await db.ExecuteAsync(sql, new { UserId = userId });
@@ -28,7 +28,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
         await db.OpenAsync();
 
         var sql = @"
-            SELECT id AS UserId, action_point AS ActionPoint, action_point_max AS MaxActionPoint, 
+            SELECT user_id AS UserId, action_point AS ActionPoint, action_point_max AS MaxActionPoint, 
                 gold AS Gold, paper_piece AS PaperPiece, last_action_point_updated AS LastActionPointUpdated
             FROM paper_mania_game_data.player_currency_data
             WHERE id = @UserId";

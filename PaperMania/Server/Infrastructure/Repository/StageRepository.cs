@@ -1,7 +1,6 @@
 ﻿using Dapper;
 using Server.Application.Port;
 using Server.Domain.Entity;
-using Server.Infrastructure.Service;
 
 namespace Server.Infrastructure.Repository;
 

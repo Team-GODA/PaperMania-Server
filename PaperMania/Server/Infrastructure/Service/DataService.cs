@@ -47,6 +47,7 @@ public class DataService : IDataService
         
         await _dataRepository.AddPlayerDataAsync(userId, playerName);
         await _stageRepository.CreatePlayerStageDataAsync(userId);
+        await _currencyRepository.AddPlayerCurrencyDataByUserIdAsync(userId);
         await _accountRepository.UpdateIsNewAccountAsync(userId, false);
         
         return playerName;

@@ -1,6 +1,4 @@
-﻿using Server.Domain.Entity;
-
-namespace Server.Application.Port;
+﻿namespace Server.Application.Port;
 
 public interface ICurrencyService
 {
@@ -9,8 +7,8 @@ public interface ICurrencyService
     Task UsePlayerActionPointAsync(int? userId, int usedActionPoint);
     
     Task<int> GetPlayerGoldAsync(int? userId);
-    Task ModifyPlayerGoldAsync(int? userId, int amount);
-    
     Task<int> GetPlayerPaperPieceAsync(int? userId);
+    
+    Task ModifyPlayerGoldAsync(int? userId, int amount);
     Task ModifyPlayerPaperPieceAsync(int? userId, int amount);
 }
