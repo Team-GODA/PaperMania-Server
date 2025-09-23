@@ -67,7 +67,7 @@ namespace Server.Api.Controller
             {
                 UserId = userId,
                 StageNum = request.StageNum,
-                SubStageNum = request.SubStageNum
+                StageSubNum = request.SubStageNum
             };
 
             var stageReward = _rewardService.GetStageReward(request.StageNum, request.SubStageNum);
