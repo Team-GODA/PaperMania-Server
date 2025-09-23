@@ -15,7 +15,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         var db = CreateConnection();
         
         var sql = @"
-            SELECT id AS UserId, player_id AS PlayerId, email, password, is_new_account AS IsNewAccount,
+            SELECT id AS Id, player_id AS PlayerId, email, password, is_new_account AS IsNewAccount,
                    role AS Role, created_at AS CreatedAt
             FROM paper_mania_account_data.player_account_data
             WHERE player_id = @PlayerId
@@ -78,6 +78,6 @@ public class AccountRepository : RepositoryBase, IAccountRepository
             SET is_new_account = @IsNew
             WHERE id = @UserId";
 
-        await db.ExecuteAsync(sql, new { IsNew = isNew, Id = userId });
+        await db.ExecuteAsync(sql, new { IsNew = isNew, UserId = userId });
     }
 }
