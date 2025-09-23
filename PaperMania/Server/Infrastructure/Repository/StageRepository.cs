@@ -6,6 +6,9 @@ namespace Server.Infrastructure.Repository;
 
 public class StageRepository : RepositoryBase, IStageRepository
 {
+    private const int MaxStageNum = 5;
+    private const int MaxSubStageNum = 5;
+    
     public StageRepository(string connectionString) : base(connectionString)
     {
     }
@@ -18,18 +21,18 @@ public class StageRepository : RepositoryBase, IStageRepository
         var sql = @"
                 INSERT INTO paper_mania_game_data.player_stage_data (user_id, stage_num, stage_sub_num, is_cleared)
                 VALUES (@UserId, @StageNum, @StageSubNum, false);
-";
+        ";
         
         var data = new List<dynamic>();
-        for (int stageNum = 1; stageNum <= 5; stageNum++)
+        for (int stageNum = 1; stageNum <= MaxStageNum; stageNum++)
         {
-            for (int subNum = 1; subNum <= 5; subNum++)
+            for (int subNum = 1; subNum <= MaxSubStageNum; subNum++)
             {
                 data.Add(new PlayerStageData
                 {
                     UserId = userId,
                     StageNum = stageNum,
-                    SubStageNum = subNum
+                    StageSubNum = subNum
                 });
             }
         }
@@ -52,7 +55,7 @@ public class StageRepository : RepositoryBase, IStageRepository
         {
             UserId = data.UserId,
             StageNum = data.StageNum,
-            SubStageNum = data.SubStageNum
+            StageSubNum = data.StageSubNum
         });
 
         return result ?? false;
@@ -73,7 +76,7 @@ public class StageRepository : RepositoryBase, IStageRepository
             UserId = data.UserId,
             IsCleared = data.IsCleared,
             StageNum = data.StageNum,
-            SubStageNum = data.SubStageNum
+            StageSubNum = data.StageSubNum
         });
     }
 }
