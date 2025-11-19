@@ -2,11 +2,11 @@
 
 namespace Server.Api.Middleware;
 
-public class SessionRefresh
+public class SessionRefreshMiddleware
 {
     private readonly RequestDelegate _next;
 
-    public SessionRefresh(RequestDelegate next)
+    public SessionRefreshMiddleware(RequestDelegate next)
     {
         _next = next;
     }
