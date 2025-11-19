@@ -1,4 +1,7 @@
-﻿namespace Server.Api.Extensions;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Server.Api.Middleware;
+
+namespace Server.Api.Extensions;
 
 public static class MiddlewareExtensions
 {
@@ -11,6 +14,15 @@ public static class MiddlewareExtensions
             options.SwaggerEndpoint("/swagger/v3/swagger.json", "PaperMania API V3");
         });
 
+        return app;
+    }
+
+    public static IApplicationBuilder UseCustomMiddleware(
+        this IApplicationBuilder app)
+    {
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
+        app.UseMiddleware<SessionRefreshMiddleware>();
+        
         return app;
     }
 }
