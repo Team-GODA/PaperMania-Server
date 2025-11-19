@@ -39,7 +39,7 @@ jobs:
           docker rm papermania-server || true
           docker run -d \
             --name papermania-server \
-            --network paper-mania-net \
+            --network papermania-net \
             -p 20834:8080 \
             -e AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }} \
             -e AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }} \
