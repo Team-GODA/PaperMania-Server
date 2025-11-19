@@ -42,6 +42,7 @@ app.MapControllers();
 await InitializeCachesAsync(app.Services);
 
 app.Run();
+
 static async Task InitializeCachesAsync(IServiceProvider services)
 {
     using var scope = services.CreateScope();
