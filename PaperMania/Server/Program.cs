@@ -33,10 +33,12 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 app.UseSwaggerConfiguration()
-    .UseCustomMiddleware()
-    .UseHttpsRedirection()
-    .UseAuthorization();
+    .UseCustomMiddleware();
 
+if (!app.Environment.IsProduction())
+    app.UseHttpsRedirection();
+
+app.UseAuthorization();
 app.MapControllers();
 
 await InitializeCachesAsync(app.Services);
