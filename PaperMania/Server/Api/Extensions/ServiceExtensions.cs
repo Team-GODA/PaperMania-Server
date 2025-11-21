@@ -55,8 +55,7 @@ public static class ServiceExtensions
     private static string GetConnectionString(IServiceProvider provider)
     {
         var config = provider.GetRequiredService<IConfiguration>();
-        var keyName = config["DataBase:ConnectionStringKey"]
-                      ?? "PaperManiaDbConnection";
+        var keyName = config["DataBase:ConnectionStringKey"];
         
         var connectionString = config[keyName];
 
