@@ -55,7 +55,7 @@ public static class ServiceExtensions
     private static string GetConnectionString(IServiceProvider provider)
     {
         var config = provider.GetRequiredService<IConfiguration>();
-        var keyName = config["DataBase:ConnectionStringKey"];
+        var keyName = config["Database:ConnectionStringKey"];
         
         var connectionString = config[keyName];
 
