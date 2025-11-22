@@ -55,16 +55,17 @@ public static class ServiceExtensions
     private static string GetConnectionString(IServiceProvider provider)
     {
         var config = provider.GetRequiredService<IConfiguration>();
-        var keyName = config["DataBase:ConnectionStringKey"]
-                      ?? "PaperManiaDbConnection";
-        
+        var keyName = config["Database:ConnectionStringSecretName"];
+
+        if (string.IsNullOrEmpty(keyName))
+            throw new InvalidOperationException(
+                $"DB 연결 Keyname을 찾을 수 없습니다. KeyName: {keyName}");
+            
         var connectionString = config[keyName];
 
         if (string.IsNullOrEmpty(connectionString))
-        {
             throw new InvalidOperationException(
                 $"DB 연결 문자열을 찾을 수 없습니다. Key: {keyName}");
-        }
         
         return connectionString;
     }

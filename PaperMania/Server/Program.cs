@@ -7,11 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 var keyVaultName = builder.Configuration["Azure:KeyVaultName"] 
                    ?? "papermaniadbconnection";
 var keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
+
 builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
 
-var redisConnectionString = builder.Environment.IsDevelopment()
-    ? builder.Configuration["Redis:Development"]
-    : builder.Configuration["Redis:Production"];
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
 
 builder.Services
     .AddCache(redisConnectionString!)
