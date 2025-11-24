@@ -58,6 +58,17 @@ public class SessionService : ISessionService
         return true;
     }
 
+    public async Task<bool> ValidateAndRefreshSessionAsync(string sessionId, int? userId = null)
+    {
+        if (!await ValidateSessionAsync(sessionId, userId))
+            return false;
+        
+        await _cacheService.SetExpirationAsync(sessionId, _sessionTimeout);
+        _logger.LogInformation($"세션 TTL 연장: SessionId={sessionId}, TTL={_sessionTimeout}");
+    
+        return true;
+    }
+
     public async Task<int> GetUserIdBySessionIdAsync(string sessionId)
     {
         var value = await _cacheService.GetAsync(sessionId);
@@ -79,19 +90,5 @@ public class SessionService : ISessionService
         await _cacheService.RemoveAsync(sessionId);
         
         _logger.LogInformation($"[DeleteSessionAsync] 세션 삭제 완료: SessionId={sessionId}");
-    }
-    
-    public async Task RefreshSessionAsync(string sessionId)
-    {
-        bool exists = await _cacheService.ExistsAsync(sessionId);
-        if (exists)
-        {
-            await _cacheService.SetExpirationAsync(sessionId, _sessionTimeout);
-            _logger.LogInformation($"[RefreshSessionAsync] 세션 TTL 연장: SessionId={sessionId}, TTL={_sessionTimeout}");
-        }
-        else
-        {
-            _logger.LogWarning($"[RefreshSessionAsync] TTL 연장 실패: 세션 없음 또는 만료됨 SessionId={sessionId}");
-        }
     }
 }
