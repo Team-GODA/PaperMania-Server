@@ -9,6 +9,7 @@ public class SessionService : ISessionService
     private readonly ICacheService _cacheService;
     private readonly ILogger<SessionService> _logger;
     private readonly TimeSpan _sessionTimeout = TimeSpan.FromHours(24);
+    private const string SESSION_PREFIX = "session";
 
     public SessionService(ICacheService cacheService, ILogger<SessionService> logger)
     {
@@ -19,10 +20,15 @@ public class SessionService : ISessionService
     public async Task<string> CreateSessionAsync(int userId)
     {
         var sessionId = GenerateSessionId();
+        var sessionKey = GenerateSessionKey(sessionId);
         
         _logger.LogInformation($"세션 아이디 생성: 유저 아이디: {userId}, 세션 아이디: {sessionId}");
         
-        await _cacheService.SetAsync(sessionId, userId.ToString(), _sessionTimeout);
+        await _cacheService.SetAsync(
+            sessionKey, 
+            userId.ToString(), 
+            _sessionTimeout
+            );
         
         _logger.LogInformation($"[CreateSessionAsync] 세션 저장 완료: SessionId={sessionId}, TTL={_sessionTimeout}");
         
@@ -32,6 +38,11 @@ public class SessionService : ISessionService
     private string GenerateSessionId()
     {
         return Guid.NewGuid().ToString();
+    }
+
+    private string GenerateSessionKey(string sessionId)
+    {
+        return $"{SESSION_PREFIX}:{sessionId}";
     }
 
     public async Task<bool> ValidateSessionAsync(string sessionId, int? userId = null)
