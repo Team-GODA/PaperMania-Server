@@ -12,8 +12,11 @@ public class CacheService : ICacheService
         _db = redis.GetDatabase();
     }
     
-    public async Task SetAsync(string key, string value, TimeSpan? expiration = null)
+    public async Task SetAsync(string key, string value, TimeSpan? expiration = null, string? prefix = null)
     {
+        if (!string.IsNullOrEmpty(prefix))
+            key = $"{prefix}:{key}";
+        
         await _db.StringSetAsync(key, value, expiration);
     }
 
