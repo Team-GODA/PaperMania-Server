@@ -110,4 +110,10 @@ public class AccountService : IAccountService
             throw new RequestException(ErrorStatusCode.Conflict, "INVALID_GOOGLE_TOKEN");
         }
     }
+
+    public async Task ValidateUserBySessionIdAsync(string sessionId)
+    {
+        if (!await _sessionService.ValidateAndRefreshSessionAsync(sessionId))
+            throw new RequestException(ErrorStatusCode.Unauthorized, "INVALID_SESSION");
+    }
 }
