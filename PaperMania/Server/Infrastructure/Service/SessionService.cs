@@ -20,7 +20,7 @@ public class SessionService : ISessionService
     public async Task<string> CreateSessionAsync(int userId)
     {
         var sessionId = GenerateSessionId();
-        var sessionKey = GenerateSessionKey(sessionId);
+        var sessionKey = GetSessionKey(sessionId);
         
         _logger.LogInformation($"세션 아이디 생성: 유저 아이디: {userId}, 세션 아이디: {sessionId}");
         
@@ -40,14 +40,17 @@ public class SessionService : ISessionService
         return Guid.NewGuid().ToString();
     }
 
-    private string GenerateSessionKey(string sessionId)
+    private string GetSessionKey(string sessionId)
     {
         return $"{SESSION_PREFIX}:{sessionId}";
     }
 
     public async Task<bool> ValidateSessionAsync(string sessionId, int? userId = null)
     {
-        var exists = await _cacheService.ExistsAsync(sessionId);
+        var sessionKey = GetSessionKey(sessionId);
+        _logger.LogInformation($"[DEBUG] ValidateSessionAsync - SessionKey={sessionKey}");
+        
+        var exists = await _cacheService.ExistsAsync(sessionKey);
         if (!exists)
         {
             _logger.LogWarning($"세션 존재하지 않음: SessionId={sessionId}");
@@ -58,7 +61,7 @@ public class SessionService : ISessionService
 
         if (userId.HasValue)
         {
-            var storedUserId = await GetUserIdBySessionIdAsync(sessionId);
+            var storedUserId = await GetUserIdBySessionIdAsync(sessionKey);
             if (storedUserId != userId)
             {
                 _logger.LogWarning($"유저 검증 실패: UserId ; {storedUserId} != {userId}");
@@ -82,7 +85,9 @@ public class SessionService : ISessionService
 
     public async Task<int> GetUserIdBySessionIdAsync(string sessionId)
     {
-        var value = await _cacheService.GetAsync(sessionId);
+        var sessionKey = GetSessionKey(sessionId);
+        
+        var value = await _cacheService.GetAsync(sessionKey);
         if (value != null && int.TryParse(value, out var userId))
             return userId;
 
@@ -96,9 +101,11 @@ public class SessionService : ISessionService
 
     public async Task DeleteSessionAsync(string sessionId)
     {
+        var sessionKey = GetSessionKey(sessionId);
+        
         _logger.LogInformation($"[DeleteSessionAsync] 세션 삭제 요청: SessionId={sessionId}");
         
-        await _cacheService.RemoveAsync(sessionId);
+        await _cacheService.RemoveAsync(sessionKey);
         
         _logger.LogInformation($"[DeleteSessionAsync] 세션 삭제 완료: SessionId={sessionId}");
     }
