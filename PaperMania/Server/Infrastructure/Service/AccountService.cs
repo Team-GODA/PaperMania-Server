@@ -113,7 +113,10 @@ public class AccountService : IAccountService
 
     public async Task ValidateUserBySessionIdAsync(string sessionId)
     {
+        if (string.IsNullOrEmpty(sessionId))
+            throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_SESSION");
+        
         if (!await _sessionService.ValidateAndRefreshSessionAsync(sessionId))
-            throw new RequestException(ErrorStatusCode.Unauthorized, "INVALID_SESSION");
+            throw new RequestException(ErrorStatusCode.Unauthorized, "SESSION_EXPIRED");
     }
 }
