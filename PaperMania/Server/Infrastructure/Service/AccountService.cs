@@ -57,7 +57,7 @@ public class AccountService : IAccountService
     {
         var user = await _repository.GetAccountDataByPlayerIdAsync(playerId);
         _logger.LogInformation("UserId : {UserId}", user?.Id.ToString() ?? "null");
-        _logger.LogInformation("PlayerId : {PlayerId}", user?.PlayerId.ToString() ?? "null");
+        _logger.LogInformation("PlayerId : {PlayerId}", user?.PlayerId ?? "null");
 
         if (user == null)
             throw new RequestException(ErrorStatusCode.NotFound, "USER_NOT_FOUND", new { PlayerId = playerId, Password = password });
