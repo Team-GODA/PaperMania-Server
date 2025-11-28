@@ -16,51 +16,41 @@ public class CacheService : ICacheService
         _logger = logger;
     }
 
-    private string BuildKey(string key, string? prefix)
+    public async Task SetAsync(string key, string value, TimeSpan? expiration = null)
     {
-        return string.IsNullOrEmpty(prefix) ? key : $"{prefix}:{key}";
-    }
-    
-    public async Task SetAsync(string key, string value, TimeSpan? expiration = null, string? prefix = null)
-    {
-        var cachekey = BuildKey(key, prefix);
-        _logger.LogInformation($"Cache SET: {cachekey} = {value}");
+        _logger.LogInformation($"Cache SET: {key} = {value}");
         
-        await _db.StringSetAsync(cachekey, value, expiration);
+        await _db.StringSetAsync(key, value, expiration);
     }
 
-    public async Task<string?> GetAsync(string key, string? prefix = null)
+    public async Task<string?> GetAsync(string key)
     {
-        var cachekey = BuildKey(key, prefix);
         var value = await _db.StringGetAsync(key);
         
-        _logger.LogInformation($"Cache GET: {cachekey} = {value}");
+        _logger.LogInformation($"Cache GET: {key} = {value}");
         
         return value.IsNullOrEmpty ? null : value.ToString();
     }
 
-    public async Task RemoveAsync(string key, string? prefix = null)
+    public async Task RemoveAsync(string key)
     {
-        var cachekey = BuildKey(key, prefix);
-        _logger.LogInformation($"Cache DELETE: {cachekey}");
+        _logger.LogInformation($"Cache DELETE: {key}");
         
-        await _db.KeyDeleteAsync(cachekey);
+        await _db.KeyDeleteAsync(key);
     }
 
-    public async Task<bool> ExistsAsync(string key, string? prefix = null)
+    public async Task<bool> ExistsAsync(string key)
     {
-        var cachekey = BuildKey(key, prefix);
-        var exists = await _db.KeyExistsAsync(cachekey);
+        var exists = await _db.KeyExistsAsync(key);
 
-        _logger.LogInformation($"Cache EXISTS: {cachekey} = {exists}");
+        _logger.LogInformation($"Cache EXISTS: {key} = {exists}");
         
         return exists;
     }
 
-    public async Task SetExpirationAsync(string key, TimeSpan expiration, string? prefix = null)
+    public async Task SetExpirationAsync(string key, TimeSpan expiration)
     {
-        var cachekey = BuildKey(key, prefix);
-        _logger.LogInformation($"Cache EXPIRE: {cachekey} = {expiration}");
+        _logger.LogInformation($"Cache EXPIRE: {key} = {expiration}");
         
         await _db.KeyExpireAsync(key, expiration);
     }
