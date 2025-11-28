@@ -1,4 +1,5 @@
-﻿using Server.Application.Port;
+﻿using System.Text.Json;
+using Server.Application.Port;
 using StackExchange.Redis;
 
 namespace Server.Infrastructure.Service;
@@ -62,5 +63,33 @@ public class CacheService : ICacheService
         _logger.LogInformation($"Cache EXPIRE: {cachekey} = {expiration}");
         
         await _db.KeyExpireAsync(key, expiration);
+    }
+
+    public async Task SetHashAsync(string key, string field, string value)
+    {
+        _logger.LogInformation($"Cache SET HSET: {key} -> {field} = {value}");
+        await _db.HashSetAsync(key, field, value);
+    }
+
+    public async Task<string?> HashGetAsync(string key, string field)
+    {
+        var value = await _db.HashGetAsync(key, field);
+        
+        _logger.LogInformation($"Cache GET HSET: {key} -> {field} = {value}");
+        return value.IsNullOrEmpty ? null : value.ToString();
+    }
+
+    public async Task HashDeleteAsync(string key, string field)
+    {
+        _logger.LogInformation($"Cache DELETE HSET: {key} -> {field}");
+        await _db.HashDeleteAsync(key, field);
+    }
+
+    public async Task<bool> HashExistsAsync(string key, string field)
+    {
+        var exists = await _db.HashExistsAsync(key, field);
+        
+        _logger.LogInformation($"Cache EXIST HSET: {key} -> {field} = {exists}");
+        return exists;
     }
 }

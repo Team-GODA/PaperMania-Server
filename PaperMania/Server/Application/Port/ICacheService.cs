@@ -7,4 +7,9 @@ public interface ICacheService
     Task RemoveAsync(string key, string? prefix = null);
     Task<bool> ExistsAsync(string key, string? prefix = null);
     Task SetExpirationAsync(string key, TimeSpan expiration, string? prefix = null);
+
+    Task SetHashAsync(string key, string field, string value);
+    Task<string?> HashGetAsync(string key, string field);
+    Task HashDeleteAsync(string key, string field);
+    Task<bool> HashExistsAsync(string key, string field);
 }
