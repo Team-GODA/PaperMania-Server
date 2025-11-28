@@ -13,15 +13,41 @@ namespace Server.Api.Controller
     public class AuthController : ControllerBase
     {
         private readonly IAccountService _accountService;
+        private readonly ISessionService _sessionService;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(IAccountService accountService, 
+            ISessionService sessionService,
             ILogger<AuthController> logger)
         {
             _accountService = accountService;
+            _sessionService = sessionService;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Session-Id를 통해 유효한 유저인지 확인합니다.
+        /// </summary>
+        /// <param name="request">유저 확인을 유한 header의 Session-Id의 값</param>
+        /// <returns>유효한 유저 확인 후 해당 유저 ID와 성공 </returns>>
+        [HttpPost("validate")]
+        [ServiceFilter(typeof(SessionValidationFilter))]
+        [ProducesResponseType(typeof(BaseResponse<ValidateUserResponse>), 200)]
+        public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUserBySessionId()
+        {
+            var sessionId = HttpContext.Items["SessionId"] as string;
+            
+            await _accountService.ValidateUserBySessionIdAsync(sessionId);
+            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
+
+            var response = new ValidateUserResponse
+            {
+                UserId = userId,
+                IsValidated = true
+            };
+
+            return Ok(ApiResponse.Ok("유저 인증 성공", response));
+        }
         
         /// <summary>
         /// 신규 회원가입을 처리합니다.
@@ -102,8 +128,8 @@ namespace Server.Api.Controller
         /// </summary>
         /// <returns>로그아웃 결과</returns>
         [HttpPost("logout")]
-        [ProducesResponseType(typeof(BaseResponse<EmptyResponse>), 200)]
         [ServiceFilter(typeof(SessionValidationFilter))]
+        [ProducesResponseType(typeof(BaseResponse<EmptyResponse>), 200)]
         public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;

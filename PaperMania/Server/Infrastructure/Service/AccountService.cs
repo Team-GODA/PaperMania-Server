@@ -57,7 +57,7 @@ public class AccountService : IAccountService
     {
         var user = await _repository.GetAccountDataByPlayerIdAsync(playerId);
         _logger.LogInformation("UserId : {UserId}", user?.Id.ToString() ?? "null");
-        _logger.LogInformation("PlayerId : {PlayerId}", user?.PlayerId.ToString() ?? "null");
+        _logger.LogInformation("PlayerId : {PlayerId}", user?.PlayerId ?? "null");
 
         if (user == null)
             throw new RequestException(ErrorStatusCode.NotFound, "USER_NOT_FOUND", new { PlayerId = playerId, Password = password });
@@ -109,5 +109,14 @@ public class AccountService : IAccountService
             _logger.LogWarning("구글 토큰 검증 실패: {Message}", ex.Message);
             throw new RequestException(ErrorStatusCode.Conflict, "INVALID_GOOGLE_TOKEN");
         }
+    }
+
+    public async Task ValidateUserBySessionIdAsync(string sessionId)
+    {
+        if (string.IsNullOrEmpty(sessionId))
+            throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_SESSION");
+        
+        if (!await _sessionService.ValidateAndRefreshSessionAsync(sessionId))
+            throw new RequestException(ErrorStatusCode.Unauthorized, "SESSION_EXPIRED");
     }
 }

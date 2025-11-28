@@ -9,6 +9,7 @@ public class SessionService : ISessionService
     private readonly ICacheService _cacheService;
     private readonly ILogger<SessionService> _logger;
     private readonly TimeSpan _sessionTimeout = TimeSpan.FromHours(24);
+    private const string SESSION_PREFIX = "session";
 
     public SessionService(ICacheService cacheService, ILogger<SessionService> logger)
     {
@@ -19,10 +20,15 @@ public class SessionService : ISessionService
     public async Task<string> CreateSessionAsync(int userId)
     {
         var sessionId = GenerateSessionId();
+        var sessionKey = GetSessionKey(sessionId);
         
         _logger.LogInformation($"세션 아이디 생성: 유저 아이디: {userId}, 세션 아이디: {sessionId}");
         
-        await _cacheService.SetAsync(sessionId, userId.ToString(), _sessionTimeout);
+        await _cacheService.SetAsync(
+            sessionKey, 
+            userId.ToString(), 
+            _sessionTimeout
+            );
         
         _logger.LogInformation($"[CreateSessionAsync] 세션 저장 완료: SessionId={sessionId}, TTL={_sessionTimeout}");
         
@@ -34,9 +40,17 @@ public class SessionService : ISessionService
         return Guid.NewGuid().ToString();
     }
 
+    private string GetSessionKey(string sessionId)
+    {
+        return $"{SESSION_PREFIX}:{sessionId}";
+    }
+
     public async Task<bool> ValidateSessionAsync(string sessionId, int? userId = null)
     {
-        var exists = await _cacheService.ExistsAsync(sessionId);
+        var sessionKey = GetSessionKey(sessionId);
+        _logger.LogInformation($"[DEBUG] ValidateSessionAsync - SessionKey={sessionKey}");
+        
+        var exists = await _cacheService.ExistsAsync(sessionKey);
         if (!exists)
         {
             _logger.LogWarning($"세션 존재하지 않음: SessionId={sessionId}");
@@ -47,7 +61,7 @@ public class SessionService : ISessionService
 
         if (userId.HasValue)
         {
-            var storedUserId = await GetUserIdBySessionIdAsync(sessionId);
+            var storedUserId = await GetUserIdBySessionIdAsync(sessionKey);
             if (storedUserId != userId)
             {
                 _logger.LogWarning($"유저 검증 실패: UserId ; {storedUserId} != {userId}");
@@ -58,9 +72,22 @@ public class SessionService : ISessionService
         return true;
     }
 
+    public async Task<bool> ValidateAndRefreshSessionAsync(string sessionId, int? userId = null)
+    {
+        if (!await ValidateSessionAsync(sessionId, userId))
+            return false;
+        
+        await _cacheService.SetExpirationAsync(sessionId, _sessionTimeout);
+        _logger.LogInformation($"세션 TTL 연장: SessionId={sessionId}, TTL={_sessionTimeout}");
+    
+        return true;
+    }
+
     public async Task<int> GetUserIdBySessionIdAsync(string sessionId)
     {
-        var value = await _cacheService.GetAsync(sessionId);
+        var sessionKey = GetSessionKey(sessionId);
+        
+        var value = await _cacheService.GetAsync(sessionKey);
         if (value != null && int.TryParse(value, out var userId))
             return userId;
 
@@ -74,24 +101,12 @@ public class SessionService : ISessionService
 
     public async Task DeleteSessionAsync(string sessionId)
     {
+        var sessionKey = GetSessionKey(sessionId);
+        
         _logger.LogInformation($"[DeleteSessionAsync] 세션 삭제 요청: SessionId={sessionId}");
         
-        await _cacheService.RemoveAsync(sessionId);
+        await _cacheService.RemoveAsync(sessionKey);
         
         _logger.LogInformation($"[DeleteSessionAsync] 세션 삭제 완료: SessionId={sessionId}");
-    }
-    
-    public async Task RefreshSessionAsync(string sessionId)
-    {
-        bool exists = await _cacheService.ExistsAsync(sessionId);
-        if (exists)
-        {
-            await _cacheService.SetExpirationAsync(sessionId, _sessionTimeout);
-            _logger.LogInformation($"[RefreshSessionAsync] 세션 TTL 연장: SessionId={sessionId}, TTL={_sessionTimeout}");
-        }
-        else
-        {
-            _logger.LogWarning($"[RefreshSessionAsync] TTL 연장 실패: 세션 없음 또는 만료됨 SessionId={sessionId}");
-        }
     }
 }
