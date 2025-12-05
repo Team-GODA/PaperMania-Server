@@ -2,38 +2,47 @@
 
 public static class CacheKey
 {
-    /// <summary>
-    /// 플레이어 계정 데이터
-    /// Key: PlayerAccountData:{userId}
-    /// </summary>
-    public static string PlayerAccountDataByUserId(int userId)
-        => $"PlayerAccountData:{userId}";
-    
-    /// <summary>
-    /// 플레이어 계정 데이터
-    /// Key: PlayerAccountData:PlayerId:{playerId}
-    /// </summary>
-    public static string PlayerAccountDataByPlayerId(string playerId)
-        => $"PlayerAccountData:PlayerId:{playerId}";
-    
-    /// <summary>
-    /// 플레이어 게임 데이터
-    /// Key: PlayerGameData:{userId}
-    /// </summary>
-    public static string PlayerGameData(int userId)
-        => $"PlayerGameData:{userId}";
-    
-    /// <summary>
-    /// 세션 데이터
-    /// Key: Session:{sessionId}
-    /// </summary>
-    public static string Session(string sessionId)
-        => $"Session:{sessionId}";
-    
-    /// <summary>
-    /// UserId로 SessionId 조회
-    /// Key: Session:UserId:{userId}
-    /// </summary>
-    public static string SessionByUserId(int? userId)
-        => $"Session:UserId:{userId}";
+
+    // Player 관련 클래스
+    public static class Player
+    {
+        /// <summary>
+        /// 계정 데이터 (UserId로 조회)
+        /// </summary>
+        public static string Account(int userId)
+            => $"Player:Account:{userId}";
+        
+        /// <summary>
+        /// 계정 데이터 (PlayerId로 조회)
+        /// </summary>
+        public static string AccountByPlayerId(string playerId)
+            => $"Player:Account:PlayerId:{playerId}";
+        
+        /// <summary>
+        /// 게임 데이터
+        /// </summary>
+        public static string GameData(int userId)
+            => $"Player:Game:{userId}";
+        
+        /// <summary>
+        /// 재화 데이터
+        /// </summary>
+        public static string CurrencyData(int userId)
+            => $"Player:Currency:{userId}";
+    }
+
+    public static class Session
+    {
+        /// <summary>
+        /// 세션 데이터 (Primary: SessionId로 UserId 찾기)
+        /// </summary>
+        public static string ById(string sessionId)
+            => $"Session:{sessionId}"
+        
+        /// <summary>
+        /// 세션 역방향 매핑 (Secondary: UserId로 SessionId 찾기)
+        /// </summary>
+        public static string ByUserId(int userId)
+            => $"Session:UserId:{userId}";
+    }
 }
