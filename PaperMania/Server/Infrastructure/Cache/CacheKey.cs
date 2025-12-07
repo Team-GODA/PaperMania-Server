@@ -36,7 +36,7 @@ public static class CacheKey
         /// <summary>
         /// 세션 데이터 (Primary: SessionId로 UserId 찾기)
         /// </summary>
-        public static string ById(string sessionId)
+        public static string BySessionId(string sessionId)
             => $"Session:{sessionId}"
         
         /// <summary>
