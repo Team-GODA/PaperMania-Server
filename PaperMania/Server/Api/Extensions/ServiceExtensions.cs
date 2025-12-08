@@ -1,5 +1,6 @@
 ﻿using Server.Api.Filter;
 using Server.Application.Port;
+using Server.Application.UseCase.Auth;
 using Server.Infrastructure.Repository;
 using Server.Infrastructure.Service;
 using StackExchange.Redis;
@@ -93,6 +94,10 @@ public static class ServiceExtensions
         services.AddScoped<ICharacterService, CharacterService>();
         services.AddScoped<IRewardService, RewardService>();
         services.AddScoped<SessionValidationFilter>();
+
+        services.AddScoped<IRegisterUseCase, RegisterService>();
+        services.AddScoped<ILoginUseCase, LoginService>();
+        services.AddScoped<ILogoutUseCase, LogoutService>();
         
         return services;
     }
