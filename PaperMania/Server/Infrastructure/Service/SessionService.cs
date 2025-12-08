@@ -47,33 +47,10 @@ public class SessionService : ISessionService
     private string GenerateSessionId()
         => Guid.NewGuid().ToString();
 
-    public async Task<bool> ValidateSessionAsync(string sessionId, int? userId = null)
+    public async Task<bool> ValidateSessionAsync(string sessionId)
     {
         var value = await _cacheService.GetAsync(CacheKey.Session.BySessionId(sessionId));
-        
-        if (value == null)
-        {
-            _logger.LogWarning($"세션이 존재하지 않음: SessionId={sessionId}");
-            return false;
-        }
-
-        if (userId.HasValue)
-        {
-            if (!int.TryParse(value, out var storedUserId))
-            {
-                _logger.LogError($"세션 데이터 파싱 실패: SessionId={sessionId}, Value={value}");
-                return false;
-            }
-            
-            if (storedUserId != userId.Value)
-            {
-                _logger.LogWarning(
-                    $"세션 UserId 불일치: UserId={userId}, ");
-                return false;
-            }
-        }
-        
-        return true;
+        return !string.IsNullOrEmpty(value);
     }
 
     public async Task RefreshSessionAsync(string sessionId)
@@ -91,6 +68,14 @@ public class SessionService : ISessionService
 
     public async Task<int> GetUserIdBySessionIdAsync(string sessionId)
     {
+        if (!await ValidateSessionAsync(sessionId))
+        {
+            _logger.LogWarning($"세션 검증 실패: SessionId={sessionId}");
+            throw new RequestException(
+                ErrorStatusCode.Unauthorized,
+                "INVALID_SESSION");
+        }
+        
         var userIdStr = await _cacheService.GetAsync(CacheKey.Session.BySessionId(sessionId));
         if (userIdStr != null && int.TryParse(userIdStr, out var userId))
             return userId;
