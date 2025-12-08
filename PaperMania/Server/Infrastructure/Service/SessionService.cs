@@ -1,4 +1,5 @@
 ﻿using Server.Api.Dto.Response;
+using Server.Application.Configure;
 using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Infrastructure.Cache;
@@ -9,7 +10,6 @@ public class SessionService : ISessionService
 {
     private readonly ICacheService _cacheService;
     private readonly ILogger<SessionService> _logger;
-    private readonly TimeSpan _sessionTimeout = TimeSpan.FromDays(31);
 
     public SessionService(ICacheService cacheService, 
         ILogger<SessionService> logger)
@@ -36,9 +36,9 @@ public class SessionService : ISessionService
 
         await Task.WhenAll(
             _cacheService.SetAsync(
-                CacheKey.Session.BySessionId(sessionId), userId.ToString(), _sessionTimeout),
+                CacheKey.Session.BySessionId(sessionId), userId.ToString(), CacheTTLConfig.Session.Timeout),
             _cacheService.SetAsync(
-                CacheKey.Session.ByUserId(userId), sessionId, _sessionTimeout)
+                CacheKey.Session.ByUserId(userId), sessionId, CacheTTLConfig.Session.Timeout)
             );
         
         return sessionId;
@@ -50,14 +50,28 @@ public class SessionService : ISessionService
     public async Task<bool> ValidateSessionAsync(string sessionId, int? userId = null)
     {
         var value = await _cacheService.GetAsync(CacheKey.Session.BySessionId(sessionId));
+        
         if (value == null)
         {
-            _logger.LogWarning($"세션이 존재하지 않음: UserId={userId}");
+            _logger.LogWarning($"세션이 존재하지 않음: SessionId={sessionId}");
             return false;
         }
 
-        if (userId.HasValue && int.TryParse(value, out var storedUserId))
-            return storedUserId == userId;
+        if (userId.HasValue)
+        {
+            if (!int.TryParse(value, out var storedUserId))
+            {
+                _logger.LogError($"세션 데이터 파싱 실패: SessionId={sessionId}, Value={value}");
+                return false;
+            }
+            
+            if (storedUserId != userId.Value)
+            {
+                _logger.LogWarning(
+                    $"세션 UserId 불일치: UserId={userId}, ");
+                return false;
+            }
+        }
         
         return true;
     }
@@ -68,9 +82,9 @@ public class SessionService : ISessionService
 
         await Task.WhenAll(
             _cacheService.SetExpirationAsync(
-                CacheKey.Session.BySessionId(sessionId), _sessionTimeout),
+                CacheKey.Session.BySessionId(sessionId), CacheTTLConfig.Session.Timeout),
             _cacheService.SetExpirationAsync(
-                CacheKey.Session.ByUserId(userId), _sessionTimeout));
+                CacheKey.Session.ByUserId(userId), CacheTTLConfig.Session.Timeout));
         
         _logger.LogInformation($"세션 TTL 갱신: UserId={userId}");
     }
