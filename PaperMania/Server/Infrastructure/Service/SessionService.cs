@@ -9,7 +9,7 @@ public class SessionService : ISessionService
 {
     private readonly ICacheService _cacheService;
     private readonly ILogger<SessionService> _logger;
-    private readonly TimeSpan _sessionTimeout = TimeSpan.FromHours(24);
+    private readonly TimeSpan _sessionTimeout = TimeSpan.FromDays(31);
 
     public SessionService(ICacheService cacheService, 
         ILogger<SessionService> logger)
@@ -20,11 +20,26 @@ public class SessionService : ISessionService
     
     public async Task<string> CreateSessionAsync(int userId)
     {
+        var existingSessionId = await _cacheService.GetAsync(CacheKey.Session.ByUserId(userId));
+        if (existingSessionId != null)
+        {
+            await Task.WhenAll(
+                _cacheService.DeleteAsync(CacheKey.Session.BySessionId(existingSessionId)),
+                _cacheService.DeleteAsync(CacheKey.Session.ByUserId(userId))
+            );
+            _logger.LogInformation($"기존 세션 삭제: UserId={userId}, SessionId={existingSessionId}");
+        }
+        
         var sessionId = GenerateSessionId();
         
         _logger.LogInformation($"세션 생성: UserId={userId}, SessionId={sessionId}");
 
-        await _cacheService.SetAsync(CacheKey.Session.BySessionId(sessionId), userId.ToString(), _sessionTimeout);
+        await Task.WhenAll(
+            _cacheService.SetAsync(
+                CacheKey.Session.BySessionId(sessionId), userId.ToString(), _sessionTimeout),
+            _cacheService.SetAsync(
+                CacheKey.Session.ByUserId(userId), sessionId, _sessionTimeout)
+            );
         
         return sessionId;
     }
@@ -34,22 +49,15 @@ public class SessionService : ISessionService
 
     public async Task<bool> ValidateSessionAsync(string sessionId, int? userId = null)
     {
-        var exists = await _cacheService.ExistsAsync(CacheKey.Session.BySessionId(sessionId));
-        if (!exists)
+        var value = await _cacheService.GetAsync(CacheKey.Session.BySessionId(sessionId));
+        if (value == null)
         {
-            _logger.LogWarning($"세션 존재하지 않음: SessionId={sessionId}");
+            _logger.LogWarning($"세션이 존재하지 않음: UserId={userId}");
             return false;
         }
 
-        if (userId.HasValue)
-        {
-            var storedUserId = await GetUserIdBySessionIdAsync(sessionId);
-            if (storedUserId != userId)
-            {
-                _logger.LogWarning($"유저 검증 실패: UserId ; {storedUserId} != {userId}");
-                return false;
-            }
-        }
+        if (userId.HasValue && int.TryParse(value, out var storedUserId))
+            return storedUserId == userId;
         
         return true;
     }
@@ -57,20 +65,24 @@ public class SessionService : ISessionService
     public async Task RefreshSessionAsync(string sessionId)
     {
         var userId = await GetUserIdBySessionIdAsync(sessionId);
+
+        await Task.WhenAll(
+            _cacheService.SetExpirationAsync(
+                CacheKey.Session.BySessionId(sessionId), _sessionTimeout),
+            _cacheService.SetExpirationAsync(
+                CacheKey.Session.ByUserId(userId), _sessionTimeout));
         
-        await _cacheService.SetExpirationAsync(CacheKey.Session.BySessionId(sessionId), _sessionTimeout);
-        await _cacheService.SetExpirationAsync(CacheKey.Session.ByUserId(userId), _sessionTimeout);
-        
-        _logger.LogInformation($"세션 TTL 갱신: SessionId={sessionId}, UserId={userId}");
+        _logger.LogInformation($"세션 TTL 갱신: UserId={userId}");
     }
 
     public async Task<int> GetUserIdBySessionIdAsync(string sessionId)
     {
-        var value = await _cacheService.GetAsync(CacheKey.Session.BySessionId(sessionId));
-        if (value != null && int.TryParse(value, out var userId))
+        var userIdStr = await _cacheService.GetAsync(CacheKey.Session.BySessionId(sessionId));
+        if (userIdStr != null && int.TryParse(userIdStr, out var userId))
             return userId;
-
+        
         _logger.LogWarning($"세션 아이디로 유저 조회 실패: SessionId={sessionId}");
+        
         throw new RequestException(
             ErrorStatusCode.NotFound,
             "USER_NOT_FOUND_BY_SESSION_ID",
@@ -80,10 +92,23 @@ public class SessionService : ISessionService
 
     public async Task DeleteSessionAsync(string sessionId)
     {
-        _logger.LogInformation($"[DeleteSessionAsync] 세션 삭제 요청: SessionId={sessionId}");
+        _logger.LogInformation($"세션 삭제 요청: SessionId={sessionId}");
         
-        await _cacheService.RemoveAsync(CacheKey.Session(sessionId));
+        var userIdStr = await _cacheService.GetAsync(CacheKey.Session.BySessionId(sessionId));
+    
+        if (userIdStr != null && int.TryParse(userIdStr, out var userId))
+        {
+            await Task.WhenAll(
+                _cacheService.DeleteAsync(CacheKey.Session.BySessionId(sessionId)),
+                _cacheService.DeleteAsync(CacheKey.Session.ByUserId(userId))
+            );
         
-        _logger.LogInformation($"[DeleteSessionAsync] 세션 삭제 완료: SessionId={sessionId}");
+            _logger.LogInformation($"세션 삭제 완료: SessionId={sessionId}, UserId={userId}");
+        }
+        else
+        {
+            await _cacheService.DeleteAsync(CacheKey.Session.BySessionId(sessionId));
+            _logger.LogWarning($"세션 삭제 (UserId 없음): SessionId={sessionId}");
+        }
     }
 }
