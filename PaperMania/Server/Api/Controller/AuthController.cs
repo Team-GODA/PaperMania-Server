@@ -3,7 +3,6 @@ using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;
-using Server.Api.Filter;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Auth.Command;  
 
@@ -13,17 +12,20 @@ namespace Server.Api.Controller
     [ApiController]
     public class AuthController : ControllerBase
     {
+        private readonly IValidateUseCase _validateUseCase;
         private readonly IRegisterUseCase _registerUseCase;
         private readonly ILoginUseCase _loginUseCase;
         private readonly ILogoutUseCase _logoutUseCase;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
+            IValidateUseCase validateUseCase,
             IRegisterUseCase registerUseCase,
             ILoginUseCase loginUseCase,
             ILogoutUseCase logoutUseCase,
             ILogger<AuthController> logger)
         {
+            _validateUseCase = validateUseCase;
             _registerUseCase = registerUseCase;
             _loginUseCase = loginUseCase;
             _logoutUseCase = logoutUseCase;
@@ -36,21 +38,21 @@ namespace Server.Api.Controller
         /// <param name="request">유저 확인을 유한 header의 Session-Id의 값</param>
         /// <returns>유효한 유저 확인 후 해당 유저 ID와 성공 </returns>>
         [HttpPost("validate")]
-        [ServiceFilter(typeof(SessionValidationFilter))]
+        [SessionAuthorize]
         [ProducesResponseType(typeof(BaseResponse<ValidateUserResponse>), 200)]
-        // public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUserBySessionId()
-        // {
-        //     var sessionId = HttpContext.Items["SessionId"] as string;
-        //     
-        //
-        //     var response = new ValidateUserResponse
-        //     {
-        //         UserId = userId,
-        //         IsValidated = true
-        //     };
-        //
-        //     return Ok(ApiResponse.Ok("유저 인증 성공", response));
-        // }
+        public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUser()
+        {
+            _logger.LogInformation("유저 인증 시도");
+            
+            var sessionId = HttpContext.Items["SessionId"] as string;
+
+            var response = await _validateUseCase.ExecuteAsync(
+                new ValidateCommand(sessionId));
+            
+            _logger.LogInformation($"유저 인증 성공: UserId={response.UserId}");
+        
+            return Ok(ApiResponse.Ok("유저 인증 성공", response));
+        }
         
         /// <summary>
         /// 신규 회원가입을 처리합니다.
@@ -68,7 +70,7 @@ namespace Server.Api.Controller
                 new RegisterCommand(request.PlayerId, request.Email, request.Password)
             );
 
-            _logger.LogInformation("회원가입 성공: {PlayerId}", request.PlayerId);
+            _logger.LogInformation("회원가입 성공: PlayerId={PlayerId}", request.PlayerId);
 
             return Ok(ApiResponse.Ok("회원가입 성공", response));
         }
@@ -94,35 +96,13 @@ namespace Server.Api.Controller
         }
 
         /// <summary>
-        /// 구글 로그인 API
-        /// </summary>
-        /// <param name="request">구글 로그인 요청 정보</param>
-        /// <returns>로그인 결과</returns>
-        // [HttpPost("login/google")]
-        // [ProducesResponseType(typeof(BaseResponse<GoogleLoginResponse>), 200)]
-        // public async Task<ActionResult<BaseResponse<GoogleLoginResponse>>> LoginByGoogle([FromBody] GoogleLoginRequest request)
-        // {
-        //     _logger.LogInformation("구글 로그인 시도");
-        //
-        //     var sessionId = await _accountService.LoginByGoogleAsync(request.IdToken);
-        //
-        //     var response = new GoogleLoginResponse
-        //     {
-        //         SessionId = sessionId!,
-        //     };
-        //
-        //     _logger.LogInformation("구글 로그인 성공");
-        //     return Ok(ApiResponse.Ok("구글 로그인 성공", response));
-        // }
-
-        /// <summary>
         /// 로그아웃 API
         /// </summary>
         /// <returns>로그아웃 결과</returns>
         [HttpPost("logout")]
         [SessionAuthorize]
         [ProducesResponseType(typeof(BaseResponse<EmptyResponse>), 200)]
-        public async Task<IActionResult> Logout()
+        public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
 
