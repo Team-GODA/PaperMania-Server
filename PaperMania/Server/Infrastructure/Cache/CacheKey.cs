@@ -37,7 +37,7 @@ public static class CacheKey
         /// 세션 데이터 (Primary: SessionId로 UserId 찾기)
         /// </summary>
         public static string BySessionId(string sessionId)
-            => $"Session:{sessionId}"
+            => $"Session:{sessionId}";
         
         /// <summary>
         /// 세션 역방향 매핑 (Secondary: UserId로 SessionId 찾기)
