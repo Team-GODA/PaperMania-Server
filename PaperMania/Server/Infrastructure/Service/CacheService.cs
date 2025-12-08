@@ -32,7 +32,7 @@ public class CacheService : ICacheService
         return value.IsNullOrEmpty ? null : value.ToString();
     }
 
-    public async Task RemoveAsync(string key)
+    public async Task DeleteAsync(string key)
     {
         _logger.LogInformation($"Cache DELETE: {key}");
         
