@@ -23,21 +23,26 @@ public class SessionValidationFilter : IAsyncActionFilter
         {
             _logger.LogWarning("세션 ID가 없습니다.");
             context.Result = new JsonResult(
-                ApiResponse.Error<EmptyResponse>(ErrorStatusCode.Unauthorized, "SESSION_ID_REQUIRED")
+                ApiResponse.Error<EmptyResponse>(ErrorStatusCode.Unauthorized, 
+                    "SESSION_ID_REQUIRED")
                 );
             
             return;
         }
+        
+        var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
 
         var isValid = await _sessionService.ValidateSessionAsync(sessionId!); 
         if (!isValid)
         {
-            _logger.LogWarning($"유효하지 않은 세션: SessionId={sessionId}");
-            context.Result = new JsonResult(ApiResponse.Error<EmptyResponse>(ErrorStatusCode.Unauthorized, "INVALID_SESSION"));
+            _logger.LogWarning("유효하지 않은 세션");
+            context.Result = new JsonResult(ApiResponse.Error<EmptyResponse>(ErrorStatusCode.Unauthorized,
+                "INVALID_SESSION"));
             return;
         }
 
         context.HttpContext.Items["SessionId"] = sessionId.ToString();
+        context.HttpContext.Items["UserId"] = userId;
 
         await next();
     }
