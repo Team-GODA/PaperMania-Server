@@ -116,7 +116,7 @@ public class AccountService : IAccountService
         if (string.IsNullOrEmpty(sessionId))
             throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_SESSION");
         
-        if (!await _sessionService.ValidateAndRefreshSessionAsync(sessionId))
+        if (!await _sessionService.ValidateSessionAsync(sessionId))
             throw new RequestException(ErrorStatusCode.Unauthorized, "SESSION_EXPIRED");
     }
 }
