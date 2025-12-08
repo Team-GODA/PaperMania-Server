@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;
 using Server.Api.Filter;
-using Server.Application.Port;
-using Server.Domain.Entity;
+using Server.Application.UseCase.Auth;
+using Server.Application.UseCase.Auth.Command;  
 
 namespace Server.Api.Controller
 {
@@ -12,16 +13,20 @@ namespace Server.Api.Controller
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAccountService _accountService;
-        private readonly ISessionService _sessionService;
+        private readonly IRegisterUseCase _registerUseCase;
+        private readonly ILoginUseCase _loginUseCase;
+        private readonly ILogoutUseCase _logoutUseCase;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAccountService accountService, 
-            ISessionService sessionService,
+        public AuthController(
+            IRegisterUseCase registerUseCase,
+            ILoginUseCase loginUseCase,
+            ILogoutUseCase logoutUseCase,
             ILogger<AuthController> logger)
         {
-            _accountService = accountService;
-            _sessionService = sessionService;
+            _registerUseCase = registerUseCase;
+            _loginUseCase = loginUseCase;
+            _logoutUseCase = logoutUseCase;
             _logger = logger;
         }
 
@@ -33,21 +38,19 @@ namespace Server.Api.Controller
         [HttpPost("validate")]
         [ServiceFilter(typeof(SessionValidationFilter))]
         [ProducesResponseType(typeof(BaseResponse<ValidateUserResponse>), 200)]
-        public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUserBySessionId()
-        {
-            var sessionId = HttpContext.Items["SessionId"] as string;
-            
-            await _accountService.ValidateUserBySessionIdAsync(sessionId);
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId);
-
-            var response = new ValidateUserResponse
-            {
-                UserId = userId,
-                IsValidated = true
-            };
-
-            return Ok(ApiResponse.Ok("유저 인증 성공", response));
-        }
+        // public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUserBySessionId()
+        // {
+        //     var sessionId = HttpContext.Items["SessionId"] as string;
+        //     
+        //
+        //     var response = new ValidateUserResponse
+        //     {
+        //         UserId = userId,
+        //         IsValidated = true
+        //     };
+        //
+        //     return Ok(ApiResponse.Ok("유저 인증 성공", response));
+        // }
         
         /// <summary>
         /// 신규 회원가입을 처리합니다.
@@ -59,22 +62,14 @@ namespace Server.Api.Controller
         [ProducesResponseType(typeof(BaseResponse<RegisterResponse>), 200)]
         public async Task<ActionResult<BaseResponse<RegisterResponse>>> Register([FromBody] RegisterRequest request)
         {
-            _logger.LogInformation("회원가입 시도: Email={Email}, PlayerId={PlayerId}", request.Email, request.PlayerId);
+            _logger.LogInformation("회원가입 시도: {Email}, {PlayerId}", request.Email, request.PlayerId);
 
-            var newUser = new PlayerAccountData
-            {
-                PlayerId = request.PlayerId,
-                Email = request.Email
-            };
+            var response = await _registerUseCase.ExecuteAsync(
+                new RegisterCommand(request.PlayerId, request.Email, request.Password)
+            );
 
-            await _accountService.RegisterAsync(newUser, request.Password);
+            _logger.LogInformation("회원가입 성공: {PlayerId}", request.PlayerId);
 
-            var response = new RegisterResponse
-            {   
-                Id = newUser.Id
-            };
-
-            _logger.LogInformation("회원가입 성공: UserId={UserId}, PlayerId={PlayerId}", response.Id, request.PlayerId);
             return Ok(ApiResponse.Ok("회원가입 성공", response));
         }
 
@@ -89,15 +84,12 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation("로그인 시도: PlayerId={PlayerId}", request.PlayerId);
 
-            var (sessionId, user) = await _accountService.LoginAsync(request.PlayerId, request.Password);
-
-            var response = new LoginResponse
-            {
-                IsNewAccount = user.IsNewAccount,
-                SessionId = sessionId
-            };
+            var response = await _loginUseCase.ExecuteAsync(
+                new LoginCommand(request.PlayerId, request.Password)
+                );
 
             _logger.LogInformation($"로그인 성공: PlayerId={request.PlayerId}");
+            
             return Ok(ApiResponse.Ok("로그인 성공", response));
         }
 
@@ -106,39 +98,40 @@ namespace Server.Api.Controller
         /// </summary>
         /// <param name="request">구글 로그인 요청 정보</param>
         /// <returns>로그인 결과</returns>
-        [HttpPost("login/google")]
-        [ProducesResponseType(typeof(BaseResponse<GoogleLoginResponse>), 200)]
-        public async Task<ActionResult<BaseResponse<GoogleLoginResponse>>> LoginByGoogle([FromBody] GoogleLoginRequest request)
-        {
-            _logger.LogInformation("구글 로그인 시도");
-
-            var sessionId = await _accountService.LoginByGoogleAsync(request.IdToken);
-
-            var response = new GoogleLoginResponse
-            {
-                SessionId = sessionId!,
-            };
-
-            _logger.LogInformation("구글 로그인 성공");
-            return Ok(ApiResponse.Ok("구글 로그인 성공", response));
-        }
+        // [HttpPost("login/google")]
+        // [ProducesResponseType(typeof(BaseResponse<GoogleLoginResponse>), 200)]
+        // public async Task<ActionResult<BaseResponse<GoogleLoginResponse>>> LoginByGoogle([FromBody] GoogleLoginRequest request)
+        // {
+        //     _logger.LogInformation("구글 로그인 시도");
+        //
+        //     var sessionId = await _accountService.LoginByGoogleAsync(request.IdToken);
+        //
+        //     var response = new GoogleLoginResponse
+        //     {
+        //         SessionId = sessionId!,
+        //     };
+        //
+        //     _logger.LogInformation("구글 로그인 성공");
+        //     return Ok(ApiResponse.Ok("구글 로그인 성공", response));
+        // }
 
         /// <summary>
         /// 로그아웃 API
         /// </summary>
         /// <returns>로그아웃 결과</returns>
         [HttpPost("logout")]
-        [ServiceFilter(typeof(SessionValidationFilter))]
+        [SessionAuthorize]
         [ProducesResponseType(typeof(BaseResponse<EmptyResponse>), 200)]
-        public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout()
+        public async Task<IActionResult> Logout()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            
-            _logger.LogInformation("로그아웃 시도: SessionId={SessionId}", sessionId);
 
-            await _accountService.LogoutAsync(sessionId!);
+            _logger.LogInformation("로그아웃 시도: {SessionId}", sessionId);
 
-            _logger.LogInformation("로그아웃 성공: SessionId={SessionId}", sessionId);
+            await _logoutUseCase.ExecuteAsync(new LogoutCommand(sessionId));
+
+            _logger.LogInformation("로그아웃 성공: {SessionId}", sessionId);
+
             return Ok(ApiResponse.Ok<EmptyResponse>("로그아웃 성공"));
         }
     }
