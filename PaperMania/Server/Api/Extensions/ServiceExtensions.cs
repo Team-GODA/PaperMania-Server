@@ -88,7 +88,6 @@ public static class ServiceExtensions
         this IServiceCollection services)
     {
         services.AddScoped<ISessionService, SessionService>();
-        services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IDataService, DataService>();
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<ICharacterService, CharacterService>();
@@ -98,6 +97,7 @@ public static class ServiceExtensions
         services.AddScoped<IRegisterUseCase, RegisterService>();
         services.AddScoped<ILoginUseCase, LoginService>();
         services.AddScoped<ILogoutUseCase, LogoutService>();
+        services.AddScoped<IValidateUseCase, ValidateService>();
         
         return services;
     }
