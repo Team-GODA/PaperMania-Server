@@ -12,40 +12,49 @@ public class AddPlayerService : IAddPlayerDataUseCase
     private readonly ICurrencyRepository _currencyRepository;
     private readonly ISessionService _sessionService;
     private readonly IStageRepository _stageRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AddPlayerService(
         IDataRepository  dataRepository,
         IAccountRepository  accountRepository,
         ICurrencyRepository currencyRepository,
         ISessionService sessionService,
-        IStageRepository stageRepository)
+        IStageRepository stageRepository,
+        IUnitOfWork unitOfWork)
     {
         _dataRepository = dataRepository;
         _accountRepository = accountRepository;
         _currencyRepository = currencyRepository;
         _sessionService = sessionService;
         _stageRepository = stageRepository;
+        _unitOfWork = unitOfWork;
     }
     
     public async Task ExecuteAsync(AddPlayerDataCommand request)
     {
         var existName = await _dataRepository.ExistsPlayerNameAsync(request.PlayerName);
         if (existName != null)
-            throw new RequestException(ErrorStatusCode.Conflict, 
-                "PLAYER_NAME_EXIST",  new { PlayerName = request.PlayerName });
-        
-        var userId = await _sessionService.GetUserIdBySessionIdAsync(request.SessionId);
-        
-        var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
-        if (!isNewAccount)
-            throw new RequestException(ErrorStatusCode.Conflict, 
-                "PLAYER_DATA_EXIST",  new { PlayerName = request.PlayerName });
+            throw new RequestException(ErrorStatusCode.Conflict,
+                "PLAYER_NAME_EXIST", new { PlayerName = request.PlayerName });
 
-        await Task.WhenAll(
-            _dataRepository.AddPlayerDataAsync(userId, request.PlayerName),
-            _currencyRepository.AddPlayerCurrencyDataByUserIdAsync(userId),
-            _stageRepository.CreatePlayerStageDataAsync(userId),
-            _accountRepository.UpdateIsNewAccountAsync(userId, false)
-        );
+        var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
+
+        var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
+        if (isNewAccount == null)
+            throw new RequestException(ErrorStatusCode.NotFound,
+                "ACCOUNT_NOT_FOUND", new { UserId = userId });
+
+        if (!isNewAccount.Value)
+            throw new RequestException(ErrorStatusCode.Conflict,
+                "PLAYER_DATA_EXIST", new { PlayerName = request.PlayerName });
+
+    
+        await _unitOfWork.ExecuteAsync(async () =>
+        {
+            await _dataRepository.AddPlayerDataAsync(userId, request.PlayerName);
+            await _currencyRepository.AddPlayerCurrencyDataByUserIdAsync(userId);
+            await _stageRepository.CreatePlayerStageDataAsync(userId);
+            await _accountRepository.UpdateIsNewAccountAsync(userId, false);
+        });
     }
 }
