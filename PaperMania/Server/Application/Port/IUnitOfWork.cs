@@ -11,4 +11,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     Task BeginTransactionAsync();
     Task CommitAsync();
     Task RollbackAsync();
+
+    Task ExecuteAsync(Func<Task> action);
+    Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> action);
 }

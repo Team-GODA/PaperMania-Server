@@ -8,34 +8,49 @@ namespace Server.Application.UseCase.Auth;
 
 public class LoginService : ILoginUseCase
 {
-    private readonly IAccountRepository _repository;
+    private readonly IAccountRepository _accountRepository;
     private readonly ISessionService _sessionService;
+    private readonly IUnitOfWork _unitOfWork;
     
-    public LoginService(IAccountRepository repository,
-        ISessionService sessionService)
+    public LoginService(
+        IAccountRepository accountRepository,
+        ISessionService sessionService,
+        IUnitOfWork unitOfWork)
     {
-        _repository = repository;
+        _accountRepository = accountRepository;
         _sessionService = sessionService;
+        _unitOfWork = unitOfWork;
     }
     
     public async Task<LoginResult> ExecuteAsync(LoginCommand request)
     {
-        var user = await _repository.GetAccountDataByPlayerIdAsync(request.PlayerId);
-
-        if (user == null)
-            throw new RequestException(ErrorStatusCode.NotFound, 
-                "USER_NOT_FOUND", new { PlayerId = request.PlayerId });
+        return await _unitOfWork.ExecuteAsync(async () =>
+        {
+            var account = await _accountRepository.FindByPlayerIdAsync(request.PlayerId);
+            
+            if (account == null)
+                throw new RequestException(
+                    ErrorStatusCode.NotFound, 
+                    "USER_NOT_FOUND");
         
-        bool isVerified = BCrypt.Net.BCrypt.Verify(request.Password, user.Password);
-        if (!isVerified)
-            throw new RequestException(ErrorStatusCode.Conflict, 
-                "PASSWORD_NOT_VERIFIED", new { PlayerId = request.PlayerId });
+            if (string.IsNullOrEmpty(account.Password))
+                throw new RequestException(ErrorStatusCode.ServerError, 
+                    "NO_PASSWORD_DATA");
+            
+            var isVerified = BCrypt.Net.BCrypt.Verify(request.Password, account.Password);
+            if (!isVerified)
+                throw new RequestException(ErrorStatusCode.Unauthorized,
+                    "PASSWORD_NOT_VERIFIED", new { PlayerId = request.PlayerId });
 
-        var sessionId = await _sessionService.CreateSessionAsync(user.Id);
+            var sessionId = await _sessionService.CreateSessionAsync(account.Id);
+            if (string.IsNullOrEmpty(sessionId))
+                throw new RequestException(ErrorStatusCode.ServerError,
+                    "SESSION_CREATE_FAILED");
 
-        return new LoginResult(
-            SessionId: sessionId,
-            IsNewAccount: user.IsNewAccount
-        );
+            return new LoginResult(
+                SessionId: sessionId,
+                IsNewAccount: account.IsNewAccount
+            );
+        });
     }
 }

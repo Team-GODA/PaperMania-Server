@@ -90,6 +90,37 @@ public class UnitOfWork : IUnitOfWork
         _disposed = true;
     }
     
+    public async Task ExecuteAsync(Func<Task> action)
+    {
+        await BeginTransactionAsync();
+        try
+        {
+            await action();
+            await CommitAsync();
+        }
+        catch
+        {
+            await RollbackAsync();
+            throw;
+        }
+    }
+    
+    public async Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> action)
+    {
+        await BeginTransactionAsync();
+        try
+        {
+            var result = await action();
+            await CommitAsync();
+            return result;
+        }
+        catch
+        {
+            await RollbackAsync();
+            throw;
+        }
+    }
+    
     private void ThrowIfDisposed()
     {
         if (_disposed)
