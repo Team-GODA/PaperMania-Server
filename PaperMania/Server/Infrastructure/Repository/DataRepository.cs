@@ -73,7 +73,7 @@ public class DataRepository : RepositoryBase, IDataRepository
                 transaction));
     }
 
-    public async Task<PlayerGameData?> GetPlayerDataByIdAsync(int? userId)
+    public async Task<PlayerGameData?> FindPlayerDataByUserIdAsync(int? userId)
     {
         return await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<PlayerGameData>(
@@ -96,7 +96,7 @@ public class DataRepository : RepositoryBase, IDataRepository
                 transaction));
     }
 
-    public async Task<LevelDefinition?> GetLevelDataAsync(int currentLevel)
+    public async Task<LevelDefinition?> FindLevelDataAsync(int currentLevel)
     {
         return await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<LevelDefinition>(

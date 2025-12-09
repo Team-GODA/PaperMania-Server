@@ -1,4 +1,6 @@
 ﻿using Dapper;
+using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -49,16 +51,20 @@ public class AccountRepository : RepositoryBase, IAccountRepository
     {
     }
     
-    public async Task<PlayerAccountData?> GetAccountDataByPlayerIdAsync(string playerId)
+    public async Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId)
     {
-        return await ExecuteAsync(async (connection, transaction) =>
+        var account = await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
                 Sql.GetByPlayerId, 
                 new { PlayerId = playerId },
                 transaction));
+        
+        
+
+        return account;
     }
 
-    public async Task<PlayerAccountData?> GetAccountDataByEmailAsync(string email)
+    public async Task<PlayerAccountData?> FindByEmailAsync(string email)
     {
         return await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<PlayerAccountData>(

@@ -30,7 +30,7 @@ public class SessionValidationFilter : IAsyncActionFilter
             return;
         }
         
-        var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+        var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
 
         var isValid = await _sessionService.ValidateSessionAsync(sessionId!); 
         if (!isValid)
