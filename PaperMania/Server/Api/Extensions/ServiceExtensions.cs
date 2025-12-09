@@ -1,6 +1,7 @@
 ﻿using Server.Api.Filter;
 using Server.Application.Port;
 using Server.Application.UseCase.Auth;
+using Server.Application.UseCase.Data;
 using Server.Infrastructure.Repository;
 using Server.Infrastructure.Service;
 using StackExchange.Redis;
@@ -12,6 +13,12 @@ public static class ServiceExtensions
     public static IServiceCollection AddRepositories(
         this IServiceCollection services)
     {
+        services.AddScoped<IUnitOfWork>(provider =>
+        {
+            var connectionString = GetConnectionString(provider);
+            return new UnitOfWork(connectionString);
+        });
+        
         services.AddScoped<IAccountRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
@@ -88,16 +95,17 @@ public static class ServiceExtensions
         this IServiceCollection services)
     {
         services.AddScoped<ISessionService, SessionService>();
-        services.AddScoped<IDataService, DataService>();
-        services.AddScoped<ICurrencyService, CurrencyService>();
-        services.AddScoped<ICharacterService, CharacterService>();
-        services.AddScoped<IRewardService, RewardService>();
         services.AddScoped<SessionValidationFilter>();
 
         services.AddScoped<IRegisterUseCase, RegisterService>();
         services.AddScoped<ILoginUseCase, LoginService>();
         services.AddScoped<ILogoutUseCase, LogoutService>();
         services.AddScoped<IValidateUseCase, ValidateService>();
+
+        services.AddScoped<IAddPlayerDataUseCase, AddPlayerService>();
+        services.AddScoped<IGetPlayerNameByUserIdUseCase, GetPlayerNameByUserIdService>();
+        services.AddScoped<IGetPLayerLevelByUserIdUseCase, GetPlayerLevelByUserIdService>();
+        services.AddScoped<IGetPlayerExpByUserIdUseCase, GetPlayerExpByUserIdService>();
         
         return services;
     }
