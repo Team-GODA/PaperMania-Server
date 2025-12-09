@@ -55,11 +55,11 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<GetPlayerNameResponse>>> GetPlayerName()
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 이름 조회 시도: UserId: {userId}");
 
-            var playerName = await _dataService.GetPlayerNameByUserIdAsync(userId);
+            var playerName = await _dataService.FindPlayerNameByUserIdAsync(userId);
 
             var response = new GetPlayerNameResponse
             {
@@ -81,7 +81,7 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<RenamePlayerNameResponse>>> RenamePlayerName([FromBody] RenamePlayerNameRequest request)
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 이름 재설정 시도: UserId: {userId}");
 
@@ -106,12 +106,12 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<GetPlayerLevelResponse>>> GetPlayerLevel()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 레벨 조회 시도: UserId: {userId}");
 
-            var level = await _dataService.GetPlayerLevelByUserIdAsync(userId);
-            var exp = await _dataService.GetPlayerExpByUserIdAsync(userId);
+            var level = await _dataService.FindPlayerLevelByUserIdAsync(userId);
+            var exp = await _dataService.FindPlayerExpByUserIdAsync(userId);
 
             var response = new GetPlayerLevelResponse
             {
@@ -134,7 +134,7 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<UpdatePlayerLevelByExpResponse>>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request)
         {
             var sessionId =  HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 레벨 갱신 시도: UserId: {userId}");
 

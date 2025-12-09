@@ -36,7 +36,7 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<GetPlayerActionPointResponse>>> GetPlayerActionPointById()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 AP 조회 시도 : UserId : {userId}");
             
@@ -61,7 +61,7 @@ namespace Server.Api.Controller
             [FromBody] UpdatePlayerMaxActionPointRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 최대 AP 갱신 시도");
             
@@ -86,7 +86,7 @@ namespace Server.Api.Controller
             [FromBody] UsePlayerActionPointRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 AP 사용 시도 : UserId : {userId}");
             
@@ -111,7 +111,7 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<GetPlayerGoldResponse>>> GetPlayerGold()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 골드 조회 시도 : UserId : {userId}");
             
@@ -136,7 +136,7 @@ namespace Server.Api.Controller
             [FromBody] ModifyGoldRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 골드 갱신 시도: UserId={userId}, Amount={request.Amount}");
 
@@ -161,7 +161,7 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<GetPlayerPaperPieceResponse>>> GetPlayerPaperPiece()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 종이조각 조회 시도 : UserId : {userId}");
 
@@ -186,7 +186,7 @@ namespace Server.Api.Controller
             [FromBody] ModifyPaperPieceRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
 
             _logger.LogInformation($"플레이어 종이 조각 갱신 시도 : UserId : {userId}");
             

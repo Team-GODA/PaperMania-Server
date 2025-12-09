@@ -34,7 +34,7 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<GetAllPlayerCharactersResponse>>> GetAllPlayerCharacters()
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 보유 캐릭터 데이터 조회 시도: ID: {userId}");
 

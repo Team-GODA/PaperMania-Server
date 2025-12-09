@@ -59,7 +59,7 @@ namespace Server.Api.Controller
             [FromBody] ClaimStageRewardRequest request)
         {
             var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.GetUserIdBySessionIdAsync(sessionId!);
+            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
             
             _logger.LogInformation($"플레이어 스테이지 보상 수령 시도 : UserId : {userId}");
 
