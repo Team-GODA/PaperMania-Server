@@ -6,78 +6,97 @@ namespace Server.Infrastructure.Repository;
 
 public class AccountRepository : RepositoryBase, IAccountRepository
 {
-    public AccountRepository(string connectionString) :  base(connectionString)
+    private static class Sql
     {
-    }
-    
-    public async Task<PlayerAccountData?> GetAccountDataByPlayerIdAsync(string playerId)
-    {
-        var db = CreateConnection();
-        
-        var sql = @"
-            SELECT id AS Id, player_id AS PlayerId, email, password, is_new_account AS IsNewAccount,
+        public const string GetByPlayerId = @"
+            SELECT id AS Id, player_id AS PlayerId, email AS Email, 
+                   password AS Password, is_new_account AS IsNewAccount,
                    role AS Role, created_at AS CreatedAt
             FROM paper_mania_account_data.player_account_data
             WHERE player_id = @PlayerId
             LIMIT 1";
 
-        return await db.QueryFirstOrDefaultAsync<PlayerAccountData>(sql, new { PlayerId = playerId });
-    }
-
-    public async Task<PlayerAccountData?> GetAccountDataByEmailAsync(string email)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-        
-        var sql = @"
-            SELECT id, player_id AS PlayerId, email, password, is_new_account AS IsNewAccount,
+        public const string GetByEmail = @"
+            SELECT id AS Id, player_id AS PlayerId, email AS Email, 
+                   password AS Password, is_new_account AS IsNewAccount,
                    role AS Role, created_at AS CreatedAt
             FROM paper_mania_account_data.player_account_data
             WHERE email = @Email
             LIMIT 1";
-        
-        return await db.QueryFirstOrDefaultAsync<PlayerAccountData>(sql, new { Email = email });
+
+        public const string InsertAccount = @"
+            INSERT INTO paper_mania_account_data.player_account_data 
+                (player_id, email, password, is_new_account, role)
+            VALUES (@PlayerId, @Email, @Password, @IsNewAccount, @Role)
+            RETURNING id";
+
+        public const string IsNewAccount = @"
+            SELECT is_new_account
+            FROM paper_mania_account_data.player_account_data
+            WHERE id = @UserId
+            LIMIT 1";
+
+        public const string UpdateIsNewAccount = @"
+            UPDATE paper_mania_account_data.player_account_data
+            SET is_new_account = @IsNew
+            WHERE id = @UserId";
+    }
+    
+    public AccountRepository(
+        string connectionString, 
+        IUnitOfWork? unitOfWork = null) 
+        : base(connectionString, unitOfWork)
+    {
+    }
+    
+    public async Task<PlayerAccountData?> GetAccountDataByPlayerIdAsync(string playerId)
+    {
+        return await ExecuteAsync(async (connection, transaction) =>
+            await connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
+                Sql.GetByPlayerId, 
+                new { PlayerId = playerId },
+                transaction));
+    }
+
+    public async Task<PlayerAccountData?> GetAccountDataByEmailAsync(string email)
+    {
+        return await ExecuteAsync(async (connection, transaction) =>
+            await connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
+                Sql.GetByEmail, 
+                new { Email = email },
+                transaction));
     }
 
     public async Task<PlayerAccountData?> AddAccountAsync(PlayerAccountData player)
     {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
+        var id = await ExecuteAsync(async (connection, transaction) =>
+            await connection.QuerySingleAsync<int>(
+                Sql.InsertAccount, 
+                player,
+                transaction));
         
-        var sql = @"
-            INSERT INTO paper_mania_account_data.player_account_data (player_id, email, password, is_new_account, role)
-            VALUES (@PlayerId, @Email, @Password, @IsNewAccount, @Role)
-            RETURNING id";
-    
-        var id = await db.QuerySingleAsync<int>(sql, player);
         player.Id = id;
         return player;
     }
     
-    public async Task<bool> IsNewAccountAsync(int? userId)
+    public async Task<bool?> IsNewAccountAsync(int userId)
     {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-        
-        var sql = @"
-            SELECT is_new_account AS IsNewAccount
-            FROM paper_mania_account_data.player_account_data
-            WHERE id = @UserId
-            LIMIT 1";
-        
-        return await db.ExecuteScalarAsync<bool>(sql, new { UserId = userId });
+        return await ExecuteAsync(async (connection, transaction) =>
+            await connection.ExecuteScalarAsync<bool>(
+                Sql.IsNewAccount, 
+                new { UserId = userId },
+                transaction));
     }
     
-    public async Task UpdateIsNewAccountAsync(int? userId, bool isNew = true)
+    public async Task UpdateIsNewAccountAsync(int userId, bool isNew = true)
     {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
+        var rowsAffected = await ExecuteAsync(async (connection, transaction) =>
+            await connection.ExecuteAsync(
+                Sql.UpdateIsNewAccount,
+                new { IsNew = isNew, UserId = userId },
+                transaction));
         
-        var sql = @"
-            UPDATE paper_mania_account_data.player_account_data
-            SET is_new_account = @IsNew
-            WHERE id = @UserId";
-
-        await db.ExecuteAsync(sql, new { IsNew = isNew, UserId = userId });
+        if (rowsAffected == 0)
+            throw new InvalidOperationException($"ACCOUNT_NOT_FOUND: userId = {userId}");
     }
 }

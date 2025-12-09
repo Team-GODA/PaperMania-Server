@@ -6,51 +6,64 @@ namespace Server.Infrastructure.Repository;
 
 public class CurrencyRepository : RepositoryBase, ICurrencyRepository
 {
-    public CurrencyRepository(string connectionString) : base(connectionString)
+    private static class Sql
     {
-    }
-    
-    public async Task AddPlayerCurrencyDataByUserIdAsync(int? userId)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-
-        var sql = @"
+        public const string AddPlayerCurrencyData = @"
             INSERT INTO paper_mania_game_data.player_currency_data (user_id)
-            VALUES (@UserId)";
-
-        await db.ExecuteAsync(sql, new { UserId = userId });
-    }
-
-    public async Task<PlayerCurrencyData> GetPlayerCurrencyDataByUserIdAsync(int? userId)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-
-        var sql = @"
+            VALUES (@UserId)
+            ";
+        
+        public const string GetPlayerCurrencyData = @"
             SELECT user_id AS UserId, action_point AS ActionPoint, action_point_max AS MaxActionPoint, 
                 gold AS Gold, paper_piece AS PaperPiece, last_action_point_updated AS LastActionPointUpdated
             FROM paper_mania_game_data.player_currency_data
-            WHERE id = @UserId";
+            WHERE id = @UserId
+            ";
         
-        var result = await db.QueryFirstOrDefaultAsync<PlayerCurrencyData>(sql, new { Id = userId });
-        return result ?? throw new InvalidOperationException($"플레이어 재화 데이터 NULL : UserId : {userId}");
-    }
-
-    public async Task UpdatePlayerCurrencyDataAsync(PlayerCurrencyData data)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-
-        var sql = @"
+        public const string UpdatePlayerCurrencyData = @"
             UPDATE paper_mania_game_data.player_currency_data
             SET action_point = @ActionPoint,
                 action_point_max = @MaxActionPoint,
                 last_action_point_updated = @LastActionPointUpdated,
                 gold = @Gold,
                 paper_piece = @PaperPiece
-            WHERE id = @UserId";
+            WHERE id = @UserId
+            ";
+    }
+    
+    public CurrencyRepository(
+        string connectionString,
+        IUnitOfWork? unitOfWork = null) 
+        : base(connectionString, unitOfWork)
+    {
+    }
+    
+    public async Task AddPlayerCurrencyDataByUserIdAsync(int? userId)
+    {
+        await ExecuteAsync(async (connection, transaction) =>
+            await connection.ExecuteAsync(
+                Sql.AddPlayerCurrencyData,
+                new { UserId = userId },
+                transaction));
+    }
 
-        await db.ExecuteAsync(sql, data);
+    public async Task<PlayerCurrencyData> GetPlayerCurrencyDataByUserIdAsync(int? userId)
+    {
+        var result = await ExecuteAsync(async (connection, transaction) =>
+            await connection.QueryFirstOrDefaultAsync<PlayerCurrencyData>(
+                Sql.GetPlayerCurrencyData,
+                new { UserId = userId },
+                transaction));
+        
+        return result ?? throw new InvalidOperationException($"플레이어 재화 데이터 NULL : UserId : {userId}");
+    }
+
+    public async Task UpdatePlayerCurrencyDataAsync(PlayerCurrencyData data)
+    {
+        await ExecuteAsync(async (connection, transaction) =>
+            await connection.ExecuteAsync(
+                Sql.UpdatePlayerCurrencyData,
+                data,
+                transaction));
     }
 }

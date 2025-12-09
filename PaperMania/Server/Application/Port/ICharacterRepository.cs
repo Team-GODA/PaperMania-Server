@@ -5,7 +5,7 @@ namespace Server.Application.Port;
 public interface ICharacterRepository
 {
     Task<IEnumerable<PlayerCharacterData>> GetPlayerCharactersDataByUserIdAsync(int userId);
-    Task<PlayerCharacterData> AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data);
+    Task AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data);
     Task<bool> HasCharacterAsync(int userId, string characterId);
     Task AddCharacterPiecesAsync(int userId, string characterId, int amount);
 }
