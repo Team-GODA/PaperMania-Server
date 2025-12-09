@@ -1,14 +1,48 @@
 ﻿using Npgsql;
+using Server.Application.Port;
 
 namespace Server.Infrastructure.Repository;
 
 public class RepositoryBase
 { 
     private readonly string _connectionString;
+    private readonly IUnitOfWork? _unitOfWork;
 
-    protected RepositoryBase(string connectionString)
+    protected RepositoryBase(
+        string connectionString,
+        IUnitOfWork? unitOfWork)
     {
         _connectionString = connectionString;
+        _unitOfWork = unitOfWork;
     }
-    protected NpgsqlConnection CreateConnection() => new NpgsqlConnection(_connectionString);
+
+    protected async Task<T> ExecuteAsync<T>(
+        Func<NpgsqlConnection, NpgsqlTransaction?, Task<T>> query)
+    {
+        if (_unitOfWork?.Connection != null)
+        {
+            var connection = (NpgsqlConnection)_unitOfWork.Connection;
+            var transaction = _unitOfWork.Transaction as NpgsqlTransaction;
+            return await query(connection, transaction);
+        }
+        
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        return await query(conn, null);
+    }
+    
+    protected async Task ExecuteAsync(
+        Func<NpgsqlConnection, NpgsqlTransaction?, Task> query)
+    {
+        if (_unitOfWork?.Connection != null)
+        {
+            var connection = (NpgsqlConnection)_unitOfWork.Connection;
+            var transaction = _unitOfWork.Transaction as NpgsqlTransaction;
+            await query(connection, transaction);
+        }
+        
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        await query(conn, null);
+    }
 }
