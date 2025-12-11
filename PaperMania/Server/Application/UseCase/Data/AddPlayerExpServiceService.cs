@@ -1,0 +1,46 @@
+﻿using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
+using Server.Application.Port;
+using Server.Application.UseCase.Data.Command;
+using Server.Application.UseCase.Data.Result;
+
+namespace Server.Application.UseCase.Data;
+
+public class AddPlayerExpService : IAddPlayerExpService
+{
+    private readonly IDataRepository _repository;
+
+    public AddPlayerExpService(
+        IDataRepository repository
+    )
+    {
+        _repository = repository;
+    }
+    
+    public async Task<UpdatePlayerLevelByExpResult> ExecuteAsync(AddPlayerExpServiceCommand request)
+    {
+        var data = await _repository.FindPlayerDataByUserIdAsync(request.UserId);
+        if (data == null)
+            throw new RequestException(
+                ErrorStatusCode.NotFound,
+                "PLAYER_DATA_NOT_FOUND");
+
+        data.PlayerExp += request.Exp;
+
+        while (true)
+        {
+            var levelData = await _repository.FindLevelDataAsync(data.PlayerLevel);
+            if (levelData == null || data.PlayerExp < levelData.MaxExp)
+                break;
+            
+            data.PlayerExp -= levelData.MaxExp;
+            data.PlayerLevel++;
+        }
+
+        await _repository.UpdatePlayerLevelAsync(request.UserId, data.PlayerLevel, data.PlayerExp);
+        return new UpdatePlayerLevelByExpResult(
+            Level:data.PlayerLevel,
+            Exp:data.PlayerExp
+            );
+    }
+}
