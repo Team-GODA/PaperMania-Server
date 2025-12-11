@@ -19,13 +19,13 @@ public class RepositoryBase
     protected async Task<T> ExecuteAsync<T>(
         Func<NpgsqlConnection, NpgsqlTransaction?, Task<T>> query)
     {
-        if (_unitOfWork?.Connection != null)
+        if (_unitOfWork != null && _unitOfWork.Transaction != null)
         {
             var connection = (NpgsqlConnection)_unitOfWork.Connection;
             var transaction = _unitOfWork.Transaction as NpgsqlTransaction;
             return await query(connection, transaction);
         }
-        
+
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync();
         return await query(conn, null);
@@ -34,13 +34,14 @@ public class RepositoryBase
     protected async Task ExecuteAsync(
         Func<NpgsqlConnection, NpgsqlTransaction?, Task> query)
     {
-        if (_unitOfWork?.Connection != null)
+        if (_unitOfWork != null && _unitOfWork.Transaction != null)
         {
             var connection = (NpgsqlConnection)_unitOfWork.Connection;
             var transaction = _unitOfWork.Transaction as NpgsqlTransaction;
             await query(connection, transaction);
+            return;
         }
-        
+
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync();
         await query(conn, null);

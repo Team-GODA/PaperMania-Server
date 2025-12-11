@@ -1,9 +1,12 @@
-﻿using Server.Api.Dto.Response;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
-using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
+
+namespace Server.Application.UseCase.Auth;
 
 public class LoginService : ILoginUseCase
 {
@@ -33,7 +36,9 @@ public class LoginService : ILoginUseCase
 
         if (account == null || string.IsNullOrEmpty(account.Password))
         {
-            BCrypt.Net.BCrypt.Verify(request.Password, s_dummyPassword);
+            using var sha = SHA256.Create();
+            
+            sha.ComputeHash(Encoding.UTF8.GetBytes(s_dummyPassword));
 
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
