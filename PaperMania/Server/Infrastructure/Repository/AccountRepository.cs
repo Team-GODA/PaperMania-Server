@@ -51,7 +51,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
     {
     }
     
-    public async Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId)
+    public async Task<PlayerAccountData?> FindByPlayerIdAsync(string? playerId)
     {
         var account = await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
@@ -59,12 +59,10 @@ public class AccountRepository : RepositoryBase, IAccountRepository
                 new { PlayerId = playerId },
                 transaction));
         
-        
-
         return account;
     }
 
-    public async Task<PlayerAccountData?> FindByEmailAsync(string email)
+    public async Task<PlayerAccountData?> FindByEmailAsync(string? email)
     {
         return await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
@@ -73,7 +71,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
                 transaction));
     }
 
-    public async Task<PlayerAccountData?> AddAccountAsync(PlayerAccountData player)
+    public async Task<PlayerAccountData?> AddAccountAsync(PlayerAccountData? player)
     {
         var id = await ExecuteAsync(async (connection, transaction) =>
             await connection.QuerySingleAsync<int>(
@@ -85,7 +83,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         return player;
     }
     
-    public async Task<bool?> IsNewAccountAsync(int userId)
+    public async Task<bool?> IsNewAccountAsync(int? userId)
     {
         return await ExecuteAsync(async (connection, transaction) =>
             await connection.ExecuteScalarAsync<bool>(
@@ -94,7 +92,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
                 transaction));
     }
     
-    public async Task UpdateIsNewAccountAsync(int userId, bool isNew = true)
+    public async Task UpdateIsNewAccountAsync(int? userId, bool isNew = true)
     {
         var rowsAffected = await ExecuteAsync(async (connection, transaction) =>
             await connection.ExecuteAsync(
