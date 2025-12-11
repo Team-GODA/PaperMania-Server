@@ -7,8 +7,9 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
 {
     IDbConnection Connection { get; }
     IDbTransaction Transaction { get; }
-    
-    Task BeginTransactionAsync();
+
+    Task BeginTransactionAsync(
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
     Task CommitAsync();
     Task RollbackAsync();
 
