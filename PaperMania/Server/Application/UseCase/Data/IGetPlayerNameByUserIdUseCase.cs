@@ -1,6 +1,9 @@
-﻿namespace Server.Application.UseCase.Data;
+﻿using Server.Application.UseCase.Data.Command;
+using Server.Application.UseCase.Data.Result;
+
+namespace Server.Application.UseCase.Data;
 
 public interface IGetPlayerNameByUserIdUseCase
 {
-    Task<string> ExecuteAsync(int userId); 
+    Task<GetPlayerNameByUserIdResult> ExecuteAsync(GetPlayerNameByUserIdCommand request); 
 }

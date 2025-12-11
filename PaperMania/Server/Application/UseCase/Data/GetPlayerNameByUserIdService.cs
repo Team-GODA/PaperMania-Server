@@ -1,34 +1,41 @@
-﻿using Server.Api.Dto.Response;
-using Server.Application.Exceptions;
-using Server.Application.Port;
+﻿    using Server.Api.Dto.Response;
+    using Server.Application.Exceptions;
+    using Server.Application.Port;
+    using Server.Application.UseCase.Data.Command;
+    using Server.Application.UseCase.Data.Result;
 
-namespace Server.Application.UseCase.Data;
+    namespace Server.Application.UseCase.Data;
 
-public class GetPlayerNameByUserIdService : IGetPlayerNameByUserIdUseCase
-{
-    private readonly IDataRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public GetPlayerNameByUserIdService(
-        IDataRepository repository,
-        IUnitOfWork unitOfWork)
+    public class GetPlayerNameByUserIdService : IGetPlayerNameByUserIdUseCase
     {
-        _repository = repository;
-        _unitOfWork = unitOfWork;
-    }
-    
-    public async Task<string> ExecuteAsync(int userId)
-    {
-        return await _unitOfWork.ExecuteAsync(async () =>
+        private readonly IDataRepository _repository;
+
+        public GetPlayerNameByUserIdService(
+            IDataRepository repository
+            )
         {
-            var data = await _repository.FindPlayerDataByUserIdAsync(userId);
-            if (data == null)
+            _repository = repository;
+        }
+        
+        public async Task<GetPlayerNameByUserIdResult> ExecuteAsync(GetPlayerNameByUserIdCommand request)
+        {
+            try
+            {
+                var data = await _repository.FindPlayerDataByUserIdAsync(request.UserId);
+                if (data == null)
+                    throw new RequestException(
+                        ErrorStatusCode.NotFound,
+                        "PLAYER_NOT_FOUND");
+
+                return new GetPlayerNameByUserIdResult(
+                    PlayerName:data.PlayerName
+                );
+            }
+            catch (Exception)
+            {
                 throw new RequestException(
-                    ErrorStatusCode.NotFound,
-                    "PLAYER_NOT_FOUND",
-                    new { UserId = userId });
-            
-            return data!.PlayerName;
-        });
+                    ErrorStatusCode.ServerError,
+                    "GET_PLAYER_NAME_ERROR");
+            }
+        }
     }
-}
