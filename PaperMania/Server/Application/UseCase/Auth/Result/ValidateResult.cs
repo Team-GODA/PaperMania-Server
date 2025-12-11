@@ -1,6 +1,6 @@
 ﻿namespace Server.Application.UseCase.Auth.Result;
 
 public record ValidateResult(
-    int UserId,
+    int? UserId,
     bool IsValidated
     );

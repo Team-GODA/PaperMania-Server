@@ -1,4 +1,6 @@
-﻿using Server.Application.Port;
+﻿using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
+using Server.Application.Port;
 using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
 
@@ -7,26 +9,44 @@ namespace Server.Application.UseCase.Auth;
 public class ValidateService : IValidateUseCase
 {
     private readonly ISessionService _sessionService;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public ValidateService(
-        ISessionService sessionService,
-        IUnitOfWork unitOfWork)
+    public ValidateService(ISessionService sessionService)
     {
         _sessionService = sessionService;
-        _unitOfWork = unitOfWork;
     }
     
     public async Task<ValidateResult> ExecuteAsync(ValidateCommand request)
     {
-        return await _unitOfWork.ExecuteAsync(async () =>
+        try
         {
+            var isValid = await _sessionService.ValidateSessionAsync(request.SessionId);
+            if (!isValid)
+                throw new RequestException(
+                    ErrorStatusCode.Unauthorized,
+                    "INVALID_SESSION"
+                );
+            
             var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
+            if (userId == null)
+                throw new RequestException(
+                    ErrorStatusCode.ServerError,
+                    "SESSION_DATA_CORRUPTED");
 
             return new ValidateResult(
                 UserId: userId,
                 IsValidated: true
             );
-        });
+        }
+        catch (RequestException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new RequestException(
+                ErrorStatusCode.ServerError,
+                "VALIDATE_ERROR"
+            );
+        }
     }
 }
