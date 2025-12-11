@@ -11,7 +11,7 @@ public class RegisterService : IRegisterUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
-    
+
     public RegisterService(
         IAccountRepository repository,
         IUnitOfWork unitOfWork)
@@ -19,39 +19,53 @@ public class RegisterService : IRegisterUseCase
         _repository = repository;
         _unitOfWork = unitOfWork;
     }
-    
+
     public async Task<RegisterResult?> ExecuteAsync(RegisterCommand request)
     {
+        if (string.IsNullOrWhiteSpace(request.PlayerId))
+            throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_PLAYER_ID");
+
+        if (string.IsNullOrWhiteSpace(request.Email))
+            throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_EMAIL");
+
+        if (!request.Email.Contains("@"))
+            throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_EMAIL_FORMAT");
+
+        if (string.IsNullOrWhiteSpace(request.Password))
+            throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_PASSWORD");
+
+
         return await _unitOfWork.ExecuteAsync(async () =>
         {
-            var existByEmail = await _repository.FindByEmailAsync(request.Email);
-            if (existByEmail != null)
-                throw new RequestException(ErrorStatusCode.Conflict,
-                    "DUPLICATE_EMAIL", new { PlayerId = request.PlayerId, Email = existByEmail.Email });
+            var checkTasks = await Task.WhenAll(
+                _repository.FindByEmailAsync(request.Email),
+                _repository.FindByPlayerIdAsync(request.PlayerId)
+            );
 
-            var existByPlayerId = await _repository.FindByPlayerIdAsync(request.PlayerId);
+            var existByEmail = checkTasks[0];
+            var existByPlayerId = checkTasks[1];
+
+            if (existByEmail != null)
+                throw new RequestException(ErrorStatusCode.Conflict, "DUPLICATE_EMAIL");
+
             if (existByPlayerId != null)
-                throw new RequestException(ErrorStatusCode.Conflict,
-                    "DUPLICATE_PLAYER_ID", new { PlayerId = request.PlayerId });
+                throw new RequestException(ErrorStatusCode.Conflict, "DUPLICATE_PLAYER_ID");
 
             var newAccount = new PlayerAccountData
             {
                 PlayerId = request.PlayerId,
                 Email = request.Email,
-                Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                Password = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 11),
                 IsNewAccount = true,
                 Role = "user"
             };
 
             var createdPlayer = await _repository.AddAccountAsync(newAccount);
-            if (createdPlayer == null)
-                throw new RequestException(
-                    ErrorStatusCode.ServerError,
-                    "CREATE_ACCOUNT_FAILED");
 
-            return new RegisterResult(
-                Id: createdPlayer.Id
-            );
+            if (createdPlayer == null)
+                throw new RequestException(ErrorStatusCode.ServerError, "CREATE_ACCOUNT_FAILED");
+
+            return new RegisterResult(createdPlayer.Id);
         });
     }
 }
