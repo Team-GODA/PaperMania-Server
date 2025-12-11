@@ -34,19 +34,26 @@ public class AddPlayerService : IAddPlayerDataUseCase
     {
         var existName = await _dataRepository.ExistsPlayerNameAsync(request.PlayerName);
         if (existName != null)
-            throw new RequestException(ErrorStatusCode.Conflict,
-                "PLAYER_NAME_EXIST", new { PlayerName = request.PlayerName });
+            throw new RequestException(
+                ErrorStatusCode.Conflict,
+                "PLAYER_NAME_EXIST");
 
         var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
+        if (userId == null)
+            throw new RequestException(
+                ErrorStatusCode.Unauthorized,
+                "SESSION_DATA_CORRUPTED");
 
         var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
         if (isNewAccount == null)
-            throw new RequestException(ErrorStatusCode.NotFound,
-                "ACCOUNT_NOT_FOUND", new { UserId = userId });
+            throw new RequestException(
+                ErrorStatusCode.NotFound,
+                "ACCOUNT_NOT_FOUND");
 
         if (!isNewAccount.Value)
-            throw new RequestException(ErrorStatusCode.Conflict,
-                "PLAYER_DATA_EXIST", new { PlayerName = request.PlayerName });
+            throw new RequestException(
+                ErrorStatusCode.Conflict,
+                "PLAYER_DATA_EXIST");
 
     
         await _unitOfWork.ExecuteAsync(async () =>
