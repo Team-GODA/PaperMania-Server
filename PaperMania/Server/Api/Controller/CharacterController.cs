@@ -38,10 +38,8 @@ namespace Server.Api.Controller
             
             _logger.LogInformation($"플레이어 보유 캐릭터 데이터 조회 시도: ID: {userId}");
 
-            var data = await _characterService.GetPlayerCharacterDataByUserIdAsync(userId);
             var response = new GetAllPlayerCharactersResponse
             {
-                PlayerCharacters = data
             };
 
             _logger.LogInformation($"플레이어 보유 캐릭터 데이터 조회 성공: ID: {userId}");
