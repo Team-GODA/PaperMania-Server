@@ -42,8 +42,6 @@ public class SessionValidationFilter : IAsyncActionFilter
         }
 
         context.HttpContext.Items["SessionId"] = sessionId.ToString();
-        context.HttpContext.Items["UserId"] = userId;
-
         await next();
     }
 }
