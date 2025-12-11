@@ -1,35 +1,35 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
+using Server.Application.UseCase.Data.Command;
+using Server.Application.UseCase.Data.Result;
 
 namespace Server.Application.UseCase.Data;
 
-public class GetPlayerLevelByUserIdService : IGetPLayerLevelByUserIdUseCase
+public class GetPlayerLevelByUserIdService : IGetPlayerLevelByUserIdUseCase
 {
     private readonly IDataRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
 
     public GetPlayerLevelByUserIdService(
-        IDataRepository repository,
-        IUnitOfWork unitOfWork)
+        IDataRepository repository
+        )
     {
         _repository = repository;
-        _unitOfWork = unitOfWork;
     }
 
 
-    public async Task<int> ExecuteAsync(int userId)
+    public async Task<GetPlayerLevelByUserIdResult> ExecuteAsync(GetPlayerLevelByUserIdCommand request)
     {
-        return await _unitOfWork.ExecuteAsync(async () =>
-        {
-            var data = await _repository.FindPlayerDataByUserIdAsync(userId);
-            if (data == null)
-                throw new RequestException(
-                    ErrorStatusCode.NotFound,
-                    "PLAYER_NOT_FOUND",
-                    new { UserId = userId });
-            
-            return data!.PlayerLevel;
-        });
+        var data = await _repository.FindPlayerDataByUserIdAsync(request.UserId);
+        if (data == null)
+            throw new RequestException(
+                ErrorStatusCode.NotFound,
+                "PLAYER_NOT_FOUND",
+                new { UserId = request.UserId });
+
+        return new GetPlayerLevelByUserIdResult(
+            Level: data.PlayerLevel,
+            Exp: data.PlayerExp
+        );
     }
 }
