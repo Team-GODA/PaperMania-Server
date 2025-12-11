@@ -61,12 +61,13 @@ public class SessionService : ISessionService
             _cacheService.SetExpirationAsync(
                 CacheKey.Session.BySessionId(sessionId), CacheTTLConfig.Session.Timeout),
             _cacheService.SetExpirationAsync(
-                CacheKey.Session.ByUserId(userId), CacheTTLConfig.Session.Timeout));
+                CacheKey.Session.ByUserId(userId), CacheTTLConfig.Session.Timeout)
+            );
         
         _logger.LogInformation($"세션 TTL 갱신: UserId={userId}");
     }
 
-    public async Task<int> FindUserIdBySessionIdAsync(string sessionId)
+    public async Task<int?> FindUserIdBySessionIdAsync(string sessionId)
     {
         if (!await ValidateSessionAsync(sessionId))
         {

@@ -21,13 +21,13 @@ public static class CacheKey
         /// <summary>
         /// 게임 데이터
         /// </summary>
-        public static string GameData(int userId)
+        public static string GameData(int? userId)
             => $"Player:Game:{userId}";
         
         /// <summary>
         /// 재화 데이터
         /// </summary>
-        public static string CurrencyData(int userId)
+        public static string CurrencyData(int? userId)
             => $"Player:Currency:{userId}";
     }
 
@@ -36,13 +36,13 @@ public static class CacheKey
         /// <summary>
         /// 세션 데이터 (Primary: SessionId로 UserId 찾기)
         /// </summary>
-        public static string BySessionId(string sessionId)
+        public static string BySessionId(string? sessionId)
             => $"Session:{sessionId}";
         
         /// <summary>
         /// 세션 역방향 매핑 (Secondary: UserId로 SessionId 찾기)
         /// </summary>
-        public static string ByUserId(int userId)
+        public static string ByUserId(int? userId)
             => $"Session:UserId:{userId}";
     }
 }
