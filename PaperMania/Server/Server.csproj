@@ -24,7 +24,6 @@
 
     <ItemGroup>
       <Folder Include="Api\Controller\" />
-      <Folder Include="Application\UseCase\Data\Result\" />
     </ItemGroup>
 
     <ItemGroup>
