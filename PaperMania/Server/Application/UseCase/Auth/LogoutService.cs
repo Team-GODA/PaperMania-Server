@@ -8,25 +8,27 @@ namespace Server.Application.UseCase.Auth;
 public class LogoutService : ILogoutUseCase
 {
     private readonly ISessionService _sessionService;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public LogoutService(
-        ISessionService sessionService,
-        IUnitOfWork unitOfWork)
+    public LogoutService(ISessionService sessionService)
     {
         _sessionService = sessionService;
-        _unitOfWork = unitOfWork;
     }
     
     public async Task ExecuteAsync(LogoutCommand request)
     {
-        if (string.IsNullOrWhiteSpace(request.SessionId))
-            throw new RequestException(ErrorStatusCode.BadRequest,
-                "INVALID_SESSION_ID");
-        
-        await _unitOfWork.ExecuteAsync(async () =>
+        try
         {
             await _sessionService.DeleteSessionAsync(request.SessionId);
-        });
+        }
+        catch (RequestException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            throw new RequestException(
+                ErrorStatusCode.ServerError,
+                "LOGOUT_ERROR");
+        }
     }
 }
