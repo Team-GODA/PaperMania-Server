@@ -16,19 +16,6 @@ public class LogoutService : ILogoutUseCase
     
     public async Task ExecuteAsync(LogoutCommand request)
     {
-        try
-        {
-            await _sessionService.DeleteSessionAsync(request.SessionId);
-        }
-        catch (RequestException)
-        {
-            throw;
-        }
-        catch (Exception)
-        {
-            throw new RequestException(
-                ErrorStatusCode.ServerError,
-                "LOGOUT_ERROR");
-        }
+        await _sessionService.DeleteSessionAsync(request.SessionId);
     }
 }

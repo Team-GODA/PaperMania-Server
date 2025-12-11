@@ -19,23 +19,14 @@
         
         public async Task<GetPlayerNameByUserIdResult> ExecuteAsync(GetPlayerNameByUserIdCommand request)
         {
-            try
-            {
-                var data = await _repository.FindPlayerDataByUserIdAsync(request.UserId);
-                if (data == null)
-                    throw new RequestException(
-                        ErrorStatusCode.NotFound,
-                        "PLAYER_NOT_FOUND");
-
-                return new GetPlayerNameByUserIdResult(
-                    PlayerName:data.PlayerName
-                );
-            }
-            catch (Exception)
-            {
+            var data = await _repository.FindPlayerDataByUserIdAsync(request.UserId);
+            if (data == null)
                 throw new RequestException(
-                    ErrorStatusCode.ServerError,
-                    "GET_PLAYER_NAME_ERROR");
-            }
+                    ErrorStatusCode.NotFound,
+                    "PLAYER_NOT_FOUND");
+
+            return new GetPlayerNameByUserIdResult(
+                PlayerName:data.PlayerName
+            );
         }
     }

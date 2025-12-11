@@ -29,45 +29,34 @@ public class LoginService : ILoginUseCase
         if (string.IsNullOrWhiteSpace(request.Password))
             throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_PASSWORD");
 
-        try
+        var account = await _accountRepository.FindByPlayerIdAsync(request.PlayerId);
+
+        if (account == null || string.IsNullOrEmpty(account.Password))
         {
-            var account = await _accountRepository.FindByPlayerIdAsync(request.PlayerId);
+            BCrypt.Net.BCrypt.Verify(request.Password, s_dummyPassword);
 
-            if (account == null || string.IsNullOrEmpty(account.Password))
-            {
-                BCrypt.Net.BCrypt.Verify(request.Password, s_dummyPassword);
-
-                throw new RequestException(
-                    ErrorStatusCode.Unauthorized,
-                    "INVALID_CREDENTIALS");
-            }
-
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, account.Password))
-            {
-                throw new RequestException(
-                    ErrorStatusCode.Unauthorized,
-                    "INVALID_CREDENTIALS");
-            }
-
-            var sessionId = await _sessionService.CreateSessionAsync(account.Id);
-
-            if (string.IsNullOrEmpty(sessionId))
-                throw new RequestException(
-                    ErrorStatusCode.ServerError,
-                    "SESSION_CREATE_FAILED");
-
-            return new LoginResult(
-                SessionId: sessionId,
-                IsNewAccount: account.IsNewAccount
-            );
+            throw new RequestException(
+                ErrorStatusCode.Unauthorized,
+                "INVALID_CREDENTIALS");
         }
-        catch (RequestException)
+
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, account.Password))
         {
-            throw;
+            throw new RequestException(
+                ErrorStatusCode.Unauthorized,
+                "INVALID_CREDENTIALS");
         }
-        catch (Exception)
-        {
-            throw new RequestException(ErrorStatusCode.ServerError, "LOGIN_ERROR");
-        }
+
+        var sessionId = await _sessionService.CreateSessionAsync(account.Id);
+
+        if (string.IsNullOrEmpty(sessionId))
+            throw new RequestException(
+                ErrorStatusCode.ServerError,
+                "SESSION_CREATE_FAILED");
+
+        return new LoginResult(
+            SessionId: sessionId,
+            IsNewAccount: account.IsNewAccount
+        );
     }
 }

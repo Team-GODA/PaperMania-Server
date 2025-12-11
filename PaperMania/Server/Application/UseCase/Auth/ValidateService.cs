@@ -17,36 +17,22 @@ public class ValidateService : IValidateUseCase
     
     public async Task<ValidateResult> ExecuteAsync(ValidateCommand request)
     {
-        try
-        {
-            var isValid = await _sessionService.ValidateSessionAsync(request.SessionId);
-            if (!isValid)
-                throw new RequestException(
-                    ErrorStatusCode.Unauthorized,
-                    "INVALID_SESSION"
-                );
-            
-            var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
-            if (userId == null)
-                throw new RequestException(
-                    ErrorStatusCode.ServerError,
-                    "SESSION_DATA_CORRUPTED");
-
-            return new ValidateResult(
-                UserId: userId,
-                IsValidated: true
+        var isValid = await _sessionService.ValidateSessionAsync(request.SessionId);
+        if (!isValid)
+            throw new RequestException(
+                ErrorStatusCode.Unauthorized,
+                "INVALID_SESSION"
             );
-        }
-        catch (RequestException)
-        {
-            throw;
-        }
-        catch (Exception)
-        {
+            
+        var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
+        if (userId == null)
             throw new RequestException(
                 ErrorStatusCode.ServerError,
-                "VALIDATE_ERROR"
-            );
-        }
+                "SESSION_DATA_CORRUPTED");
+
+        return new ValidateResult(
+            UserId: userId,
+            IsValidated: true
+        );
     }
 }
