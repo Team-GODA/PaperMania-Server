@@ -104,8 +104,8 @@ public static class ServiceExtensions
 
         services.AddScoped<IAddPlayerDataUseCase, AddPlayerService>();
         services.AddScoped<IGetPlayerNameByUserIdUseCase, GetPlayerNameByUserIdService>();
-        services.AddScoped<IGetPLayerLevelByUserIdUseCase, GetPlayerLevelByUserIdService>();
-        services.AddScoped<IGetPlayerExpByUserIdUseCase, GetPlayerExpByUserIdService>();
+        services.AddScoped<IGetPlayerLevelByUserIdUseCase, GetPlayerLevelByUserIdService>();
+        services.AddScoped<IAddPlayerExpService, AddPlayerExpService>();
         
         return services;
     }
