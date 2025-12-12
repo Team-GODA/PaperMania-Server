@@ -1,56 +1,66 @@
-﻿using System.Security.Cryptography;
-using System.Text;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
+using Server.Domain.Entity;
+using Server.Infrastructure.Cache;
 
 namespace Server.Application.UseCase.Auth;
 
 public class LoginService : ILoginUseCase
 {
-    private readonly IAccountRepository _accountRepository;
+    private readonly IAccountRepository _repository;
     private readonly ISessionService _sessionService;
-
-    private static readonly string s_dummyPassword =
-        "$2a$11$dummyhashfordatabasedummyhashfordatabase";
+    private readonly ICacheService _cacheService;
 
     public LoginService(
         IAccountRepository accountRepository,
-        ISessionService sessionService)
+        ISessionService sessionService,
+        ICacheService cacheService)
     {
-        _accountRepository = accountRepository;
+        _repository = accountRepository;
         _sessionService = sessionService;
+        _cacheService = cacheService;
     }
 
     public async Task<LoginResult> ExecuteAsync(LoginCommand request)
     {
-        if (string.IsNullOrWhiteSpace(request.PlayerId))
-            throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_PLAYER_ID");
+        VaildateInput(request);
 
-        if (string.IsNullOrWhiteSpace(request.Password))
-            throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_PASSWORD");
+        var cached = await _cacheService.GetAsync(CacheKey.Player.AccountByPlayerId(request.PlayerId));
 
-        var account = await _accountRepository.FindByPlayerIdAsync(request.PlayerId);
+        PlayerAccountData? account;
+        if (cached != null)
+        {
+            account = JsonSerializer.Deserialize<PlayerAccountData>(cached);
+        }
+        else
+        {
+            account = await _repository.FindByPlayerIdAsync(request.PlayerId);
+
+            await _cacheService.SetAsync(CacheKey.Player.AccountByPlayerId(account!.PlayerId),
+                JsonSerializer.Serialize(account), TimeSpan.FromDays(30));
+        }
 
         if (account == null || string.IsNullOrEmpty(account.Password))
         {
-            using var sha = SHA256.Create();
-            
-            sha.ComputeHash(Encoding.UTF8.GetBytes(s_dummyPassword));
+            BCrypt.Net.BCrypt.Verify(request.Password, 
+                BCrypt.Net.BCrypt.HashPassword("dummy", 10));
 
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
                 "INVALID_CREDENTIALS");
         }
 
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, account.Password))
-        {
+        var isVerified = BCrypt.Net.BCrypt.Verify(request.Password, account.Password);
+
+        if (!isVerified)
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
                 "INVALID_CREDENTIALS");
-        }
 
         var sessionId = await _sessionService.CreateSessionAsync(account.Id);
 
@@ -63,5 +73,18 @@ public class LoginService : ILoginUseCase
             SessionId: sessionId,
             IsNewAccount: account.IsNewAccount
         );
+    }
+
+    private void VaildateInput(LoginCommand request)
+    {
+        if (string.IsNullOrWhiteSpace(request.PlayerId))
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_PLAYER_ID");
+
+        if (string.IsNullOrWhiteSpace(request.Password))
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_PASSWORD");
     }
 }

@@ -1,6 +1,4 @@
 ﻿using Dapper;
-using Server.Api.Dto.Response;
-using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Domain.Entity;
 
@@ -53,40 +51,40 @@ public class AccountRepository : RepositoryBase, IAccountRepository
     
     public async Task<PlayerAccountData?> FindByPlayerIdAsync(string? playerId)
     {
-        var account = await ExecuteAsync(async (connection, transaction) =>
-            await connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
+        return await QueryAsync(connection =>
+            connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
                 Sql.GetByPlayerId, 
-                new { PlayerId = playerId },
-                transaction));
-        
-        return account;
+                new { PlayerId = playerId }
+                )
+            );
     }
 
     public async Task<PlayerAccountData?> FindByEmailAsync(string? email)
     {
-        return await ExecuteAsync(async (connection, transaction) =>
-            await connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
+        return await QueryAsync(connection =>
+            connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
                 Sql.GetByEmail, 
-                new { Email = email },
-                transaction));
+                new { Email = email }
+                )
+            );
     }
 
-    public async Task<PlayerAccountData?> AddAccountAsync(PlayerAccountData? player)
+    public async Task<PlayerAccountData?> AddAccountAsync(PlayerAccountData? account)
     {
-        var id = await ExecuteAsync(async (connection, transaction) =>
-            await connection.QuerySingleAsync<int>(
+        var id = await ExecuteAsync((connection, transaction) =>
+            connection.QuerySingleAsync<int>(
                 Sql.InsertAccount, 
-                player,
+                account,
                 transaction));
         
-        player.Id = id;
-        return player;
+        account.Id = id;
+        return account;
     }
     
     public async Task<bool?> IsNewAccountAsync(int? userId)
     {
-        return await ExecuteAsync(async (connection, transaction) =>
-            await connection.ExecuteScalarAsync<bool>(
+        return await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteScalarAsync<bool>(
                 Sql.IsNewAccount, 
                 new { UserId = userId },
                 transaction));
@@ -94,8 +92,8 @@ public class AccountRepository : RepositoryBase, IAccountRepository
     
     public async Task UpdateIsNewAccountAsync(int? userId, bool isNew = true)
     {
-        var rowsAffected = await ExecuteAsync(async (connection, transaction) =>
-            await connection.ExecuteAsync(
+        var rowsAffected = await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteAsync(
                 Sql.UpdateIsNewAccount,
                 new { IsNew = isNew, UserId = userId },
                 transaction));

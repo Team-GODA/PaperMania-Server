@@ -1,8 +1,7 @@
-﻿using System.Text.Json;
-using Server.Application.Port;
+﻿using Server.Application.Port;
 using StackExchange.Redis;
 
-namespace Server.Infrastructure.Service;
+namespace Server.Infrastructure.Cache;
 
 public class CacheService : ICacheService
 {

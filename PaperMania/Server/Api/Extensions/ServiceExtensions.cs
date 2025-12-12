@@ -2,6 +2,7 @@
 using Server.Application.Port;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Data;
+using Server.Infrastructure.Cache;
 using Server.Infrastructure.Repository;
 using Server.Infrastructure.Service;
 using StackExchange.Redis;
