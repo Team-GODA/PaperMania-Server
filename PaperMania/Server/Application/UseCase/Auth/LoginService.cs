@@ -6,7 +6,6 @@ using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
 using Server.Domain.Entity;
 using Server.Infrastructure.Cache;
-using Server.Api.Attribute;
 
 namespace Server.Application.UseCase.Auth;
 
@@ -28,7 +27,7 @@ public class LoginService : ILoginUseCase
 
     public async Task<LoginResult> ExecuteAsync(LoginCommand request)
     {
-        VaildateInput(request);
+        ValidateInput(request);
 
         var cached = await _cacheService.GetAsync(CacheKey.Account.ByPlayerId(request.PlayerId));
 
@@ -41,8 +40,12 @@ public class LoginService : ILoginUseCase
         {
             account = await _repository.FindByPlayerIdAsync(request.PlayerId);
 
-            await _cacheService.SetAsync(CacheKey.Account.ByPlayerId(account!.PlayerId),
-                JsonSerializer.Serialize(account), TimeSpan.FromDays(30));
+            if (account != null)
+                await _cacheService.SetAsync(
+                    CacheKey.Account.ByPlayerId(account!.PlayerId),
+                    JsonSerializer.Serialize(account), 
+                    TimeSpan.FromDays(30)
+                    );
         }
 
         if (account == null || string.IsNullOrEmpty(account.Password))
@@ -75,7 +78,7 @@ public class LoginService : ILoginUseCase
         );
     }
 
-    private void VaildateInput(LoginCommand request)
+    private static void ValidateInput(LoginCommand request)
     {
         if (string.IsNullOrWhiteSpace(request.PlayerId))
             throw new RequestException(
