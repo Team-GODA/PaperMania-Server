@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
@@ -7,6 +6,7 @@ using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
 using Server.Domain.Entity;
 using Server.Infrastructure.Cache;
+using Server.Api.Attribute;
 
 namespace Server.Application.UseCase.Auth;
 
@@ -30,7 +30,7 @@ public class LoginService : ILoginUseCase
     {
         VaildateInput(request);
 
-        var cached = await _cacheService.GetAsync(CacheKey.Player.AccountByPlayerId(request.PlayerId));
+        var cached = await _cacheService.GetAsync(CacheKey.Account.ByPlayerId(request.PlayerId));
 
         PlayerAccountData? account;
         if (cached != null)
@@ -41,7 +41,7 @@ public class LoginService : ILoginUseCase
         {
             account = await _repository.FindByPlayerIdAsync(request.PlayerId);
 
-            await _cacheService.SetAsync(CacheKey.Player.AccountByPlayerId(account!.PlayerId),
+            await _cacheService.SetAsync(CacheKey.Account.ByPlayerId(account!.PlayerId),
                 JsonSerializer.Serialize(account), TimeSpan.FromDays(30));
         }
 
