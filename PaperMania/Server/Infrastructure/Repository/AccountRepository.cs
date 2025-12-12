@@ -28,7 +28,9 @@ public class AccountRepository : RepositoryBase, IAccountRepository
             INSERT INTO paper_mania_account_data.player_account_data 
                 (player_id, email, password, is_new_account, role)
             VALUES (@PlayerId, @Email, @Password, @IsNewAccount, @Role)
-            RETURNING id";
+            RETURNING id AS Id, player_id AS PlayerId, email AS Email, 
+                      password AS Password, is_new_account AS IsNewAccount,
+                      role AS Role, created_at AS CreatedAt";
 
         public const string IsNewAccount = @"
             SELECT is_new_account
@@ -49,54 +51,71 @@ public class AccountRepository : RepositoryBase, IAccountRepository
     {
     }
     
-    public async Task<PlayerAccountData?> FindByPlayerIdAsync(string? playerId)
+    public async Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(playerId);
+        
         return await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
                 Sql.GetByPlayerId, 
                 new { PlayerId = playerId }
-                )
-            );
+            )
+        );
     }
 
-    public async Task<PlayerAccountData?> FindByEmailAsync(string? email)
+    public async Task<PlayerAccountData?> FindByEmailAsync(string email)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+        
         return await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
                 Sql.GetByEmail, 
                 new { Email = email }
-                )
-            );
+            )
+        );
     }
 
-    public async Task<PlayerAccountData?> AddAccountAsync(PlayerAccountData? account)
+    public async Task<PlayerAccountData> AddAccountAsync(PlayerAccountData? account)
     {
-        var id = await ExecuteAsync((connection, transaction) =>
-            connection.QuerySingleAsync<int>(
+        ArgumentNullException.ThrowIfNull(account);
+        
+        return await ExecuteAsync((connection, transaction) =>
+            connection.QuerySingleAsync<PlayerAccountData>(
                 Sql.InsertAccount, 
                 account,
-                transaction));
-        
-        account.Id = id;
-        return account;
+                transaction)
+        );
     }
     
-    public async Task<bool?> IsNewAccountAsync(int? userId)
+    public async Task<bool> IsNewAccountAsync(int userId)
     {
-        return await ExecuteAsync((connection, transaction) =>
-            connection.ExecuteScalarAsync<bool>(
+        if (userId <= 0)
+            throw new ArgumentException("UserId must be positive", nameof(userId));
+        
+        var result = await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteScalarAsync<bool?>(
                 Sql.IsNewAccount, 
                 new { UserId = userId },
-                transaction));
+                transaction)
+        );
+        
+        if (result == null)
+            throw new InvalidOperationException($"ACCOUNT_NOT_FOUND: userId = {userId}");
+        
+        return result.Value;
     }
     
-    public async Task UpdateIsNewAccountAsync(int? userId, bool isNew = true)
+    public async Task UpdateIsNewAccountAsync(int userId, bool isNew)
     {
+        if (userId <= 0)
+            throw new ArgumentException("UserId must be positive", nameof(userId));
+        
         var rowsAffected = await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
                 Sql.UpdateIsNewAccount,
                 new { IsNew = isNew, UserId = userId },
-                transaction));
+                transaction)
+        );
         
         if (rowsAffected == 0)
             throw new InvalidOperationException($"ACCOUNT_NOT_FOUND: userId = {userId}");
