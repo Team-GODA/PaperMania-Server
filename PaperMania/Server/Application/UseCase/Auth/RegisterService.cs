@@ -55,7 +55,7 @@ public class RegisterService : IRegisterUseCase
             {
                 PlayerId = request.PlayerId,
                 Email = request.Email,
-                Password = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 11),
+                Password = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 10),
                 IsNewAccount = true,
                 Role = "user"
             };
