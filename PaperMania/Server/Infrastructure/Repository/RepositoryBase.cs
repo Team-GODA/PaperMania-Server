@@ -46,4 +46,18 @@ public class RepositoryBase
         await conn.OpenAsync();
         await query(conn, null);
     }
+    
+    protected async Task<T> QueryAsync<T>(
+        Func<NpgsqlConnection, Task<T>> query)
+    {
+        if (_unitOfWork?.Transaction != null)
+        {
+            var connection = (NpgsqlConnection)_unitOfWork.Connection;
+            return await query(connection);
+        }
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        return await query(conn);
+    }
 }

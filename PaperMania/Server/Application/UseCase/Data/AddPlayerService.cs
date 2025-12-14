@@ -45,12 +45,7 @@ public class AddPlayerService : IAddPlayerDataUseCase
                 "SESSION_DATA_CORRUPTED");
 
         var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
-        if (isNewAccount == null)
-            throw new RequestException(
-                ErrorStatusCode.NotFound,
-                "ACCOUNT_NOT_FOUND");
-
-        if (!isNewAccount.Value)
+        if (!isNewAccount)
             throw new RequestException(
                 ErrorStatusCode.Conflict,
                 "PLAYER_DATA_EXIST");

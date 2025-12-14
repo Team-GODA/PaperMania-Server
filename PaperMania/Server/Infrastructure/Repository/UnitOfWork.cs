@@ -39,6 +39,31 @@ public class UnitOfWork : IUnitOfWork
         }
     }
     
+    private async Task EnsureConnectionAsync()
+    {
+        if (_connection?.State == ConnectionState.Open)
+            return;
+
+        if (_transaction != null)
+            throw new InvalidOperationException("TRANSACTION_ALREADY_STARTED");
+
+        try
+        {
+            if (_connection != null)
+                await _connection.DisposeAsync();
+            
+            _connection = new NpgsqlConnection(_connectionString);
+            await _connection.OpenAsync();
+            
+            _logger?.LogDebug("데이터베이스 연결 열림");
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError(ex, "데이터베이스 연결 실패");
+            throw;
+        }
+    }
+    
     private void EnsureConnection()
     {
         if (_connection?.State == ConnectionState.Open)
@@ -73,7 +98,7 @@ public class UnitOfWork : IUnitOfWork
 
         try
         {
-            EnsureConnection();
+            await EnsureConnectionAsync();
             _transaction = await _connection!.BeginTransactionAsync(isolationLevel);
             
             _logger?.LogDebug("트랜잭션 시작: IsolationLevel = {IsolationLevel}", isolationLevel);
@@ -149,7 +174,7 @@ public class UnitOfWork : IUnitOfWork
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    protected void Dispose(bool disposing)
     {
         if (_disposed) return;
 
@@ -180,7 +205,7 @@ public class UnitOfWork : IUnitOfWork
         _disposed = true;
     }
 
-    protected virtual async ValueTask DisposeAsyncCore()
+    protected async ValueTask DisposeAsyncCore()
     {
         if (_disposed) return;
 

@@ -2,22 +2,24 @@
 
 public static class CacheKey
 {
-
-    // Player 관련 클래스
-    public static class Player
+    public static class Account
     {
         /// <summary>
         /// 계정 데이터 (UserId로 조회)
         /// </summary>
-        public static string Account(int userId)
+        public static string ByUserId(int userId)
             => $"Player:Account:{userId}";
         
         /// <summary>
         /// 계정 데이터 (PlayerId로 조회)
         /// </summary>
-        public static string AccountByPlayerId(string playerId)
+        public static string ByPlayerId(string playerId)
             => $"Player:Account:PlayerId:{playerId}";
-        
+    }
+    
+    // Player 관련 클래스
+    public static class Player
+    {
         /// <summary>
         /// 게임 데이터
         /// </summary>
