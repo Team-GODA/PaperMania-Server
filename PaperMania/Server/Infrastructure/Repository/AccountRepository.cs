@@ -87,7 +87,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         );
     }
     
-    public async Task<bool> IsNewAccountAsync(int userId)
+    public async Task<bool> IsNewAccountAsync(int? userId)
     {
         if (userId <= 0)
             throw new ArgumentException("UserId must be positive", nameof(userId));
@@ -105,7 +105,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         return result.Value;
     }
     
-    public async Task UpdateIsNewAccountAsync(int userId, bool isNew)
+    public async Task UpdateIsNewAccountAsync(int? userId, bool isNew)
     {
         if (userId <= 0)
             throw new ArgumentException("UserId must be positive", nameof(userId));
