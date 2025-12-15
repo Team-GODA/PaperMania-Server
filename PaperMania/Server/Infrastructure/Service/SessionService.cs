@@ -67,7 +67,7 @@ public class SessionService : ISessionService
         _logger.LogInformation($"세션 TTL 갱신: UserId={userId}");
     }
 
-    public async Task<int?> FindUserIdBySessionIdAsync(string sessionId)
+    public async Task<int> FindUserIdBySessionIdAsync(string sessionId)
     {
         if (!await ValidateSessionAsync(sessionId))
         {
