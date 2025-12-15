@@ -1,8 +1,9 @@
 ﻿using Server.Application.UseCase.Data.Command;
+using Server.Application.UseCase.Data.Result;
 
 namespace Server.Application.UseCase.Data;
 
 public interface IAddPlayerDataUseCase
 {
-    Task ExecuteAsync(AddPlayerDataCommand request);
+    Task<AddPlayerDataResult> ExecuteAsync(AddPlayerDataCommand request);
 }

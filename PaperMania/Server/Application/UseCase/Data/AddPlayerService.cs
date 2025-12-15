@@ -2,6 +2,7 @@
 using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Application.UseCase.Data.Command;
+using Server.Application.UseCase.Data.Result;
 
 namespace Server.Application.UseCase.Data;
 
@@ -30,7 +31,7 @@ public class AddPlayerService : IAddPlayerDataUseCase
         _unitOfWork = unitOfWork;
     }
     
-    public async Task ExecuteAsync(AddPlayerDataCommand request)
+    public async Task<AddPlayerDataResult> ExecuteAsync(AddPlayerDataCommand request)
     {
         var existName = await _dataRepository.ExistsPlayerNameAsync(request.PlayerName);
         if (existName != null)
@@ -49,7 +50,6 @@ public class AddPlayerService : IAddPlayerDataUseCase
             throw new RequestException(
                 ErrorStatusCode.Conflict,
                 "PLAYER_DATA_EXIST");
-
     
         await _unitOfWork.ExecuteAsync(async () =>
         {
@@ -58,5 +58,9 @@ public class AddPlayerService : IAddPlayerDataUseCase
             await _stageRepository.CreatePlayerStageDataAsync(userId);
             await _accountRepository.UpdateIsNewAccountAsync(userId, false);
         });
+
+        return new AddPlayerDataResult(
+            PlayerName: request.PlayerName
+        );
     }
 }
