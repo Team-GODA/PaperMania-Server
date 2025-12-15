@@ -47,7 +47,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 transaction));
     }
 
-    public async Task<PlayerCurrencyData> GetPlayerCurrencyDataByUserIdAsync(int? userId)
+    public async Task<PlayerCurrencyData> FindPlayerCurrencyDataByUserIdAsync(int? userId)
     {
         var result = await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<PlayerCurrencyData>(
