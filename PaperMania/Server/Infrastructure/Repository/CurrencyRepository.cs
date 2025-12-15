@@ -17,7 +17,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
             SELECT user_id AS UserId, action_point AS ActionPoint, action_point_max AS MaxActionPoint, 
                 gold AS Gold, paper_piece AS PaperPiece, last_action_point_updated AS LastActionPointUpdated
             FROM paper_mania_game_data.player_currency_data
-            WHERE id = @UserId
+            WHERE user_id = @UserId
             ";
         
         public const string UpdatePlayerCurrencyData = @"
@@ -27,7 +27,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 last_action_point_updated = @LastActionPointUpdated,
                 gold = @Gold,
                 paper_piece = @PaperPiece
-            WHERE id = @UserId
+            WHERE user_id = @UserId
             ";
     }
     
@@ -38,7 +38,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
     {
     }
     
-    public async Task AddPlayerCurrencyDataByUserIdAsync(int? userId)
+    public async Task AddPlayerCurrencyDataByUserIdAsync(int userId)
     {
         await ExecuteAsync(async (connection, transaction) =>
             await connection.ExecuteAsync(
@@ -47,7 +47,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 transaction));
     }
 
-    public async Task<PlayerCurrencyData> FindPlayerCurrencyDataByUserIdAsync(int? userId)
+    public async Task<PlayerCurrencyData> FindPlayerCurrencyDataByUserIdAsync(int userId)
     {
         var result = await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<PlayerCurrencyData>(
