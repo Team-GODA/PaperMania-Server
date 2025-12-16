@@ -1,6 +1,7 @@
 ﻿using Server.Api.Filter;
 using Server.Application.Port;
 using Server.Application.UseCase.Auth;
+using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Data;
 using Server.Infrastructure.Cache;
 using Server.Infrastructure.Repository;
@@ -68,7 +69,7 @@ public static class ServiceExtensions
 
         if (string.IsNullOrEmpty(keyName))
             throw new InvalidOperationException(
-                $"DB 연결 Keyname을 찾을 수 없습니다. KeyName: {keyName}");
+                $"DB 연결 KeyName을 찾을 수 없습니다. KeyName: {keyName}");
             
         var connectionString = config[keyName];
 
@@ -98,15 +99,18 @@ public static class ServiceExtensions
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<SessionValidationFilter>();
 
-        services.AddScoped<IRegisterUseCase, RegisterService>();
-        services.AddScoped<ILoginUseCase, LoginService>();
-        services.AddScoped<ILogoutUseCase, LogoutService>();
-        services.AddScoped<IValidateUseCase, ValidateService>();
+        services.AddScoped<IRegisterUseCase, RegisterUseCase>();
+        services.AddScoped<ILoginUseCase, LoginUseCase>();
+        services.AddScoped<ILogoutUseCase, LogoutUseCase>();
+        services.AddScoped<IValidateUseCase, ValidateUseCase>();
 
-        services.AddScoped<IAddPlayerDataUseCase, AddPlayerService>();
-        services.AddScoped<IGetPlayerNameByUserIdUseCase, GetPlayerNameByUserIdService>();
-        services.AddScoped<IGetPlayerLevelByUserIdUseCase, GetPlayerLevelByUserIdService>();
-        services.AddScoped<IAddPlayerExpService, AddPlayerExpService>();
+        services.AddScoped<ICreatePlayerDataUseCase, CreatePlayerDataUseCase>();
+        services.AddScoped<IGetPlayerNameByUserIdUseCase, GetPlayerNameByUserIdUseCase>();
+        services.AddScoped<IGetPlayerLevelByUserIdUseCase, GetPlayerLevelByUserIdUseCase>();
+        services.AddScoped<IAddPlayerExpService, AddPlayerExpUseCase>();
+        
+        services.AddScoped<IGetActionPointUseCase, GetActionPointUseCase>();
+        services.AddScoped<IRegenerateActionPointUseCase, RegenerateActionPointUseCase>();
         
         return services;
     }
