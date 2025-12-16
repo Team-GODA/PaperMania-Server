@@ -1,10 +1,9 @@
-﻿using System.Text.Json;
-using Server.Api.Dto.Response;
+﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
-using Server.Domain.Entity;
+using Server.Domain.Service;
 using Server.Infrastructure.Cache;
 
 namespace Server.Application.UseCase.Auth;
@@ -12,61 +11,47 @@ namespace Server.Application.UseCase.Auth;
 public class LoginUseCase : ILoginUseCase
 {
     private readonly IAccountRepository _repository;
+    private readonly UserService _userService;
     private readonly ISessionService _sessionService;
-    private readonly ICacheService _cacheService;
+    private readonly CacheWrapper _cache;
 
     public LoginUseCase(
         IAccountRepository accountRepository,
+        UserService userService,
         ISessionService sessionService,
-        ICacheService cacheService)
+        CacheWrapper cache)
     {
         _repository = accountRepository;
+        _userService = userService;
         _sessionService = sessionService;
-        _cacheService = cacheService;
+        _cache = cache;
     }
 
     public async Task<LoginResult> ExecuteAsync(LoginCommand request)
     {
         ValidateInput(request);
 
-        var cached = await _cacheService.GetAsync(CacheKey.Account.ByPlayerId(request.PlayerId));
-
-        PlayerAccountData? account;
-        if (cached != null)
-        {
-            account = JsonSerializer.Deserialize<PlayerAccountData>(cached);
-        }
-        else
-        {
-            account = await _repository.FindByPlayerIdAsync(request.PlayerId);
-
-            if (account != null)
-                await _cacheService.SetAsync(
-                    CacheKey.Account.ByPlayerId(account.PlayerId),
-                    JsonSerializer.Serialize(account), 
-                    TimeSpan.FromDays(30)
-                    );
-        }
+        var account = await _cache.FetchAsync(
+            key: CacheKey.Account.ByPlayerId(request.PlayerId),
+            fetchFunc: () => _repository.FindByPlayerIdAsync(request.PlayerId),
+            expiration: TimeSpan.FromDays(30)
+            );
 
         if (account == null || string.IsNullOrEmpty(account.Password))
         {
-            BCrypt.Net.BCrypt.Verify(request.Password, 
-                BCrypt.Net.BCrypt.HashPassword("dummy", 10));
-
+            _userService.VerifyPassword(request.Password, "DUMMY_HASH");
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
                 "INVALID_CREDENTIALS");
         }
 
-        var isVerified = BCrypt.Net.BCrypt.Verify(request.Password, account.Password);
-
+        var isVerified = _userService.VerifyPassword(request.Password, account.Password);
         if (!isVerified)
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
                 "INVALID_CREDENTIALS");
 
         var sessionId = await _sessionService.CreateSessionAsync(account.Id);
-
         if (string.IsNullOrEmpty(sessionId))
             throw new RequestException(
                 ErrorStatusCode.ServerError,

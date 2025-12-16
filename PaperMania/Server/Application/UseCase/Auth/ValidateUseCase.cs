@@ -17,18 +17,21 @@ public class ValidateUseCase : IValidateUseCase
     
     public async Task<ValidateResult> ExecuteAsync(ValidateCommand request)
     {
-        var isValid = await _sessionService.ValidateSessionAsync(request.SessionId);
-        if (!isValid)
-            throw new RequestException(
-                ErrorStatusCode.Unauthorized,
-                "INVALID_SESSION"
-            );
-            
-        var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
+        ValidateInput(request);
+        var isValidated = await _sessionService.ValidateSessionAsync(request.SessionId);
 
         return new ValidateResult(
-            UserId: userId,
-            IsValidated: true
+            IsValidated: isValidated
         );
+    }
+    
+    private static void ValidateInput(ValidateCommand request)
+    {
+        if (string.IsNullOrWhiteSpace(request.SessionId))
+        {
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_SESSION_ID");
+        }
     }
 }

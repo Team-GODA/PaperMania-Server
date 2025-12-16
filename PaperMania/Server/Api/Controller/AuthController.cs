@@ -49,7 +49,7 @@ namespace Server.Api.Controller
             var response = await _validateUseCase.ExecuteAsync(
                 new ValidateCommand(sessionId));
             
-            _logger.LogInformation($"유저 인증 성공: UserId={response.UserId}");
+            _logger.LogInformation($"유저 인증 성공");
         
             return Ok(ApiResponse.Ok("유저 인증 성공", response));
         }
