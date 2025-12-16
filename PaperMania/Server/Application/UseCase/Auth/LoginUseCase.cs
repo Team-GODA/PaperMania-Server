@@ -3,29 +3,28 @@ using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
-using Server.Domain.Entity;
 using Server.Domain.Service;
 
 namespace Server.Application.UseCase.Auth;
 
-public class AuthUseCase
+public class LoginUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly ISessionService _sessionService;
     private readonly UserService _userService;
 
-    public AuthUseCase(
+    public LoginUseCase(
         IAccountRepository repository,
         ISessionService sessionService,
         UserService userService
-        )
+    )
     {
         _repository = repository;
         _sessionService = sessionService;
         _userService = userService;
     }
     
-    public async Task<LoginResult> LoginAsync(LoginCommand request)
+    public async Task<LoginResult> ExecuteAsync(LoginCommand request)
     {
         request.Validate();
         
@@ -52,46 +51,6 @@ public class AuthUseCase
         return new LoginResult(
             sessionId,
             account.IsNewAccount
-            );
-    }
-
-    public async Task RegisterAsync(RegisterCommand request)
-    {
-        request.Validate();
-
-        var exists = await _repository.ExistsByPlayerIdAsync(request.PlayerId);
-        if (exists)
-            throw new RequestException(
-                ErrorStatusCode.Conflict,
-                "PLAYER_ID_ALREADY_EXISTS"
-            );
-
-        var hashedPassword = _userService.HashPassword(request.Password);
-        
-        var newAccount = new PlayerAccountData
-        {
-            PlayerId = request.PlayerId,
-            Email = request.Email,
-            Password = hashedPassword,
-            IsNewAccount = true,
-            Role = "user"
-        };
-        
-        await _repository.CreateAsync(newAccount);
-    }
-
-    public async Task ValidateAsync(string sessionId)
-    {
-        if (string.IsNullOrWhiteSpace(sessionId) ||
-            !await _sessionService.ValidateSessionAsync(sessionId))
-            throw new RequestException(
-                ErrorStatusCode.Unauthorized,
-                "INVALID_SESSION_ID");
-    }
-
-    public async Task LogoutAsync(string sessionId)
-    {
-        if (!string.IsNullOrWhiteSpace(sessionId))
-            await _sessionService.DeleteSessionAsync(sessionId);
+        );
     }
 }
