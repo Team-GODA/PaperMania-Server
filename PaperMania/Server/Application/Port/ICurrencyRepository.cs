@@ -9,4 +9,5 @@ public interface ICurrencyRepository
     Task UpdateDataAsync(PlayerCurrencyData data);
     
     Task RegenerateActionPointAsync(int userId, int newActionPoint, DateTime lastUpdated);
+    Task SetActionPointToMaxAsync(int userId);
 }

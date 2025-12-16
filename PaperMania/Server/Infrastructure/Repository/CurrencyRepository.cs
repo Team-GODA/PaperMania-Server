@@ -36,6 +36,13 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 last_action_point_updated = @LastUpdated
             WHERE user_id = @UserId
             ";
+
+        public const string SetActionPointToMax = @"
+            UPDATE paper_mania_game_data.player_currency_data
+            SET action_point = action_point_max,
+                last_action_point_updated = @LastUpdated
+            WHERE user_id = @UserId
+            ";
     }
     
     public CurrencyRepository(
@@ -88,6 +95,20 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                     UserId = userId, 
                     NewActionPoint = newActionPoint ,
                     LastUpdated = lastUpdated.ToUniversalTime()
+                },
+                transaction)
+        );
+    }
+
+    public async Task SetActionPointToMaxAsync(int userId)
+    {
+        await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteAsync(
+                Sql.SetActionPointToMax,
+                new
+                {
+                    UserId = userId,
+                    LastUpdated = DateTime.UtcNow
                 },
                 transaction)
         );
