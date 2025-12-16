@@ -12,28 +12,19 @@ namespace Server.Api.Controller
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IValidateUseCase _validateUseCase;
-        private readonly IRegisterUseCase _registerUseCase;
-        private readonly ILoginUseCase _loginUseCase;
-        private readonly ILogoutUseCase _logoutUseCase;
+        private readonly IAuthUseCase _authUseCase;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
-            IValidateUseCase validateUseCase,
-            IRegisterUseCase registerUseCase,
-            ILoginUseCase loginUseCase,
-            ILogoutUseCase logoutUseCase,
+            IAuthUseCase authUseCase,
             ILogger<AuthController> logger)
         {
-            _validateUseCase = validateUseCase;
-            _registerUseCase = registerUseCase;
-            _loginUseCase = loginUseCase;
-            _logoutUseCase = logoutUseCase;
+            _authUseCase  = authUseCase;
             _logger = logger;
         }
 
         /// <summary>
-        /// Session-Id를 통해 유효한 유저인지 확인합니다.
+        /// 세션 유효 인증 API
         /// </summary>
         /// <param name="request">유저 확인을 유한 header의 Session-Id의 값</param>
         /// <returns>유효한 유저 확인 후 해당 유저 ID와 성공 </returns>>
@@ -46,16 +37,15 @@ namespace Server.Api.Controller
             
             var sessionId = HttpContext.Items["SessionId"] as string;
 
-            var response = await _validateUseCase.ExecuteAsync(
-                new ValidateCommand(sessionId));
+            await _authUseCase.ValidateAsync(sessionId);
             
             _logger.LogInformation($"유저 인증 성공");
         
-            return Ok(ApiResponse.Ok("유저 인증 성공", response));
+            return Ok(ApiResponse.Ok<EmptyResponse>("유저 인증 성공"));
         }
         
         /// <summary>
-        /// 신규 회원가입을 처리합니다.
+        /// 신규 회원가입 API
         /// </summary>
         /// <param name="request">회원가입에 필요한 이메일, 비밀번호, PlayerId 등의 정보</param>
         /// <returns>회원가입 성공 시 생성된 사용자 ID</returns>
@@ -66,17 +56,21 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation("회원가입 시도: {Email}, {PlayerId}", request.Email, request.PlayerId);
 
-            var response = await _registerUseCase.ExecuteAsync(
-                new RegisterCommand(request.PlayerId, request.Email, request.Password)
-            );
+            await _authUseCase.RegisterAsync(
+                new RegisterCommand(
+                    request.PlayerId,
+                    request.Email,
+                    request.Password
+                    )
+                );
 
             _logger.LogInformation("회원가입 성공: PlayerId={PlayerId}", request.PlayerId);
 
-            return Ok(ApiResponse.Ok("회원가입 성공", response));
+            return Ok(ApiResponse.Ok<EmptyResponse>("회원가입 성공"));
         }
 
         /// <summary>
-        /// 로그인 요청을 처리합니다.
+        /// 로그인 APi
         /// </summary>
         /// <param name="request">로그인에 필요한 PlayerId와 비밀번호</param>
         /// <returns>로그인 결과</returns>
@@ -86,9 +80,17 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation("로그인 시도: PlayerId={PlayerId}", request.PlayerId);
 
-            var response = await _loginUseCase.ExecuteAsync(
-                new LoginCommand(request.PlayerId, request.Password)
+            var result = await _authUseCase.LoginAsync(
+                new LoginCommand(
+                    request.PlayerId,
+                    request.Password
+                    )
                 );
+
+            var response = new LoginResponse
+            {
+                IsNewAccount = result.IsNewAccount
+            };
 
             _logger.LogInformation($"로그인 성공: PlayerId={request.PlayerId}");
             
@@ -108,7 +110,7 @@ namespace Server.Api.Controller
 
             _logger.LogInformation("로그아웃 시도: {SessionId}", sessionId);
 
-            await _logoutUseCase.ExecuteAsync(new LogoutCommand(sessionId));
+            await _authUseCase.LogoutAsync(sessionId);
 
             _logger.LogInformation("로그아웃 성공: {SessionId}", sessionId);
 

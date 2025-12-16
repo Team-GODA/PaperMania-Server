@@ -2,7 +2,6 @@
 {
     public class LoginResponse
     {
-        public string SessionId { get; set; } = "";
         public bool IsNewAccount { get; set; } = true;
     }
 }
