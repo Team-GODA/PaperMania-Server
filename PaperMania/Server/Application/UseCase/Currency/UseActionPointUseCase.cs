@@ -2,6 +2,7 @@
 using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Application.UseCase.Currency.Command;
+using Server.Application.UseCase.Currency.Result;
 
 namespace Server.Application.UseCase.Currency;
 
@@ -19,9 +20,9 @@ public class UseActionPointUseCase : IUseActionPointUseCase
         _transactionScope = transactionScope;
     }
     
-    public async Task ExecuteAsync(UseActionPointCommand request)
+    public async Task<UseActionPointResult> ExecuteAsync(UseActionPointCommand request)
     {
-        await _transactionScope.ExecuteAsync(async () =>
+        return await _transactionScope.ExecuteAsync(async () =>
         {
             var data = await _repository.FindByUserIdAsync(request.UserId);
             if (data == null)
@@ -38,6 +39,10 @@ public class UseActionPointUseCase : IUseActionPointUseCase
             data.LastActionPointUpdated = DateTime.UtcNow;
             
             await _repository.UpdateDataAsync(data);
+
+            return new UseActionPointResult(
+                data.ActionPoint
+                );
         });
     }
 }
