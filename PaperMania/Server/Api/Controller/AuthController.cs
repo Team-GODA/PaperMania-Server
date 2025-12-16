@@ -12,14 +12,23 @@ namespace Server.Api.Controller
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly AuthUseCase _authUseCase;
+        private readonly LoginUseCase _loginUseCase;
+        private readonly RegisterUseCase _registerUseCase;
+        private readonly LogoutUseCase _logoutUseCase;
+        private readonly ValidateUseCase _validateUseCase;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
-            AuthUseCase authUseCase,
+            LoginUseCase loginUseCase,
+            RegisterUseCase registerUseCase,
+            LogoutUseCase logoutUseCase,
+            ValidateUseCase validateUseCase,
             ILogger<AuthController> logger)
         {
-            _authUseCase  = authUseCase;
+            _loginUseCase = loginUseCase;
+            _registerUseCase = registerUseCase;
+            _logoutUseCase = logoutUseCase;
+            _validateUseCase = validateUseCase;
             _logger = logger;
         }
 
@@ -37,7 +46,7 @@ namespace Server.Api.Controller
             
             var sessionId = HttpContext.Items["SessionId"] as string;
 
-            await _authUseCase.ValidateAsync(sessionId);
+            await _validateUseCase.ExecuteAsync(sessionId);
             
             _logger.LogInformation($"유저 인증 성공");
         
@@ -56,7 +65,7 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation("회원가입 시도: {Email}, {PlayerId}", request.Email, request.PlayerId);
 
-            await _authUseCase.RegisterAsync(
+            await _registerUseCase.ExecuteAsync(
                 new RegisterCommand(
                     request.PlayerId,
                     request.Email,
@@ -80,7 +89,7 @@ namespace Server.Api.Controller
         {
             _logger.LogInformation("로그인 시도: PlayerId={PlayerId}", request.PlayerId);
 
-            var result = await _authUseCase.LoginAsync(
+            var result = await _loginUseCase.ExecuteAsync(
                 new LoginCommand(
                     request.PlayerId,
                     request.Password
@@ -110,7 +119,7 @@ namespace Server.Api.Controller
 
             _logger.LogInformation("로그아웃 시도: {SessionId}", sessionId);
 
-            await _authUseCase.LogoutAsync(sessionId);
+            await _logoutUseCase.ExecuteAsync(sessionId);
 
             _logger.LogInformation("로그아웃 성공: {SessionId}", sessionId);
 
