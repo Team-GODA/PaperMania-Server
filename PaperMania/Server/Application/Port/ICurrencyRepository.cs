@@ -7,4 +7,6 @@ public interface ICurrencyRepository
     Task CreateByUserIdAsync(int userId);
     Task<PlayerCurrencyData?> FindByUserIdAsync(int userId);
     Task UpdateDataAsync(PlayerCurrencyData data);
+    
+    Task RegenerateActionPointAsync(int userId, int newActionPoint, DateTime lastUpdated);
 }

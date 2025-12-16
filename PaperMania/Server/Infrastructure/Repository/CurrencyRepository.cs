@@ -29,6 +29,13 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 paper_piece = @PaperPiece
             WHERE user_id = @UserId
             ";
+
+        public const string RegenerateActionPoint = @"
+            UPDATE paper_mania_game_data.player_currency_data
+            SET action_point = action_point = @NewActionPoint,
+                last_action_point_updated = @LastUpdated
+            WHERE user_id = @UserId
+            ";
     }
     
     public CurrencyRepository(
@@ -40,11 +47,12 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
     
     public async Task CreateByUserIdAsync(int userId)
     {
-        await ExecuteAsync(async (connection, transaction) =>
-            await connection.ExecuteAsync(
+        await ExecuteAsync((connection, transaction) =>
+             connection.ExecuteAsync(
                 Sql.AddPlayerCurrencyData,
                 new { UserId = userId },
-                transaction));
+                transaction)
+             );
     }
 
     public async Task<PlayerCurrencyData?> FindByUserIdAsync(int userId)
@@ -59,10 +67,29 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
 
     public async Task UpdateDataAsync(PlayerCurrencyData data)
     {
-        await ExecuteAsync(async (connection, transaction) =>
-            await connection.ExecuteAsync(
+        await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteAsync(
                 Sql.UpdatePlayerCurrencyData,
                 data,
-                transaction));
+                transaction)
+            );
+    }
+
+    public async Task RegenerateActionPointAsync(int userId, 
+        int newActionPoint,
+        DateTime lastUpdated
+        )
+    {
+        await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteAsync(
+                Sql.RegenerateActionPoint,
+                new 
+                {
+                    UserId = userId, 
+                    UsedActionPoint = newActionPoint ,
+                    LastActionPointUpdated = lastUpdated
+                },
+                transaction)
+        );
     }
 }

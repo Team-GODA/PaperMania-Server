@@ -57,35 +57,38 @@ public class DataRepository : RepositoryBase, IDataRepository
     
     public async Task<PlayerGameData?> ExistsPlayerNameAsync(string playerName)
     {
-        return await ExecuteAsync(async (connection, transaction) =>
-            await connection.QueryFirstOrDefaultAsync<PlayerGameData>(
+        return await ExecuteAsync( (connection, transaction) =>
+             connection.QueryFirstOrDefaultAsync<PlayerGameData>(
                 Sql.ExistsPlayerName,
                 new { PlayerName = playerName },
-                transaction));
+                transaction)
+             );
     }
 
     public async Task CreateDataAsync(int? userId, string playerName)
     {
-        await ExecuteAsync(async (connection, transaction) =>
-            await connection.ExecuteAsync(
+        await ExecuteAsync( (connection, transaction) =>
+             connection.ExecuteAsync(
                 Sql.AddPlayerData,
                 new { UserId = userId, PlayerName = playerName },
-                transaction));
+                transaction)
+             );
     }
 
     public async Task<PlayerGameData?> FindByUserIdAsync(int? userId)
     {
-        return await ExecuteAsync(async (connection, transaction) =>
-            await connection.QueryFirstOrDefaultAsync<PlayerGameData>(
+        return await QueryAsync(connection =>
+             connection.QueryFirstOrDefaultAsync<PlayerGameData>(
                 Sql.GetPlayerDataById,
-                new { UserId = userId },
-                transaction));
+                new { UserId = userId }
+                )
+             );
     }
 
     public async Task<PlayerGameData?> UpdatePlayerLevelAsync(int? userId, int newLevel, int newExp)
     {
-        return await ExecuteAsync(async (connection, transaction) =>
-            await connection.QueryFirstOrDefaultAsync<PlayerGameData>(
+        return await ExecuteAsync( (connection, transaction) =>
+             connection.QueryFirstOrDefaultAsync<PlayerGameData>(
                 Sql.UpdatePlayerLevel,
                 new
                 {
@@ -93,24 +96,27 @@ public class DataRepository : RepositoryBase, IDataRepository
                     Exp = newExp,
                     UserId = userId
                 },
-                transaction));
+                transaction)
+             );
     }
 
     public async Task<LevelDefinition?> FindLevelDataAsync(int currentLevel)
     {
-        return await ExecuteAsync(async (connection, transaction) =>
-            await connection.QueryFirstOrDefaultAsync<LevelDefinition>(
+        return await QueryAsync( connection =>
+             connection.QueryFirstOrDefaultAsync<LevelDefinition>(
                 Sql.GetLevelData,
-                new { CurrentLevel = currentLevel },
-                transaction));
+                new { CurrentLevel = currentLevel }
+                )
+             );
     }
 
     public async Task RenamePlayerNameAsync(int? userId, string newPlayerName)
     {
-        await ExecuteAsync(async (connection, transaction) =>
-            await connection.ExecuteAsync(
+        await ExecuteAsync( (connection, transaction) => 
+            connection.ExecuteAsync(
                 Sql.RenamePlayerName,
                 new { PlayerName = newPlayerName, UserId = userId },
-                transaction));
+                transaction)
+            );
     }
 }
