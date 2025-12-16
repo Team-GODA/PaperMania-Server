@@ -6,7 +6,7 @@ using Server.Application.UseCase.Data.Result;
 
 namespace Server.Application.UseCase.Data;
 
-public class AddPlayerUseCase : IAddPlayerDataUseCase
+public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
 {
     private readonly IDataRepository _dataRepository;
     private readonly IAccountRepository _accountRepository;
@@ -15,7 +15,7 @@ public class AddPlayerUseCase : IAddPlayerDataUseCase
     private readonly IStageRepository _stageRepository;
     private readonly ITransactionScope _transactionScope;
 
-    public AddPlayerUseCase(
+    public CreatePlayerDataUseCase(
         IDataRepository  dataRepository,
         IAccountRepository  accountRepository,
         ICurrencyRepository currencyRepository,

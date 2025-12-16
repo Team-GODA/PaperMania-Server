@@ -15,21 +15,21 @@ namespace Server.Api.Controller
     [SessionAuthorize]
     public class DataController : ControllerBase
     {
-        private readonly IAddPlayerDataUseCase _addPlayerDataUseCase;
+        private readonly ICreatePlayerDataUseCase _createPlayerDataUseCase;
         private readonly IGetPlayerLevelByUserIdUseCase _getPlayerLevelByUserIdUseCase;
         private readonly IAddPlayerExpService _addPlayerExpService;
         private readonly ISessionService _sessionService;
         private readonly ILogger<DataController> _logger;
 
         public DataController(
-            IAddPlayerDataUseCase addPlayerDataUseCase,
+            ICreatePlayerDataUseCase createPlayerDataUseCase,
             IGetPlayerLevelByUserIdUseCase getPlayerLevelByUserIdUseCase,
             IAddPlayerExpService addPlayerExpService,
             ISessionService sessionService,
             ILogger<DataController> logger
             )
         {
-            _addPlayerDataUseCase = addPlayerDataUseCase;
+            _createPlayerDataUseCase = createPlayerDataUseCase;
             _getPlayerLevelByUserIdUseCase = getPlayerLevelByUserIdUseCase;
             _addPlayerExpService = addPlayerExpService;
             _sessionService = sessionService;
@@ -48,7 +48,7 @@ namespace Server.Api.Controller
             _logger.LogInformation($"플레이어 데이터 등록 시도: PlayerName = {request.PlayerName}");
             var sessionId = HttpContext.Items["SessionId"] as string;
 
-            var result =  await _addPlayerDataUseCase.ExecuteAsync(new AddPlayerDataCommand(
+            var result =  await _createPlayerDataUseCase.ExecuteAsync(new AddPlayerDataCommand(
                 request.PlayerName, sessionId!)
             );
 
