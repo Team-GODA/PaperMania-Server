@@ -16,6 +16,12 @@ public static class CacheKey
         public static string ByPlayerId(string playerId)
             => $"Player:Account:PlayerId:{playerId}";
     }
+
+    public static class Profile
+    {
+        public static string ByUserId(int? userId)
+            => $"Player:Profile:{userId}";
+    }
     
     // Player 관련 클래스
     public static class Player
