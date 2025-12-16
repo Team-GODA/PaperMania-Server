@@ -32,7 +32,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
 
         public const string RegenerateActionPoint = @"
             UPDATE paper_mania_game_data.player_currency_data
-            SET action_point = action_point = @NewActionPoint,
+            SET action_point = @NewActionPoint,
                 last_action_point_updated = @LastUpdated
             WHERE user_id = @UserId
             ";
@@ -86,8 +86,8 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 new 
                 {
                     UserId = userId, 
-                    UsedActionPoint = newActionPoint ,
-                    LastActionPointUpdated = lastUpdated
+                    NewActionPoint = newActionPoint ,
+                    LastUpdated = lastUpdated.ToUniversalTime()
                 },
                 transaction)
         );
