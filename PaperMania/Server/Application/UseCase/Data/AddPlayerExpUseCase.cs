@@ -6,11 +6,11 @@ using Server.Application.UseCase.Data.Result;
 
 namespace Server.Application.UseCase.Data;
 
-public class AddPlayerExpService : IAddPlayerExpService
+public class AddPlayerExpUseCase : IAddPlayerExpService
 {
     private readonly IDataRepository _repository;
 
-    public AddPlayerExpService(
+    public AddPlayerExpUseCase(
         IDataRepository repository
     )
     {

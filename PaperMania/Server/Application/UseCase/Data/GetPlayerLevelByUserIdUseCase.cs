@@ -6,11 +6,11 @@ using Server.Application.UseCase.Data.Result;
 
 namespace Server.Application.UseCase.Data;
 
-public class GetPlayerLevelByUserIdService : IGetPlayerLevelByUserIdUseCase
+public class GetPlayerLevelByUserIdUseCase : IGetPlayerLevelByUserIdUseCase
 {
     private readonly IDataRepository _repository;
 
-    public GetPlayerLevelByUserIdService(
+    public GetPlayerLevelByUserIdUseCase(
         IDataRepository repository
         )
     {

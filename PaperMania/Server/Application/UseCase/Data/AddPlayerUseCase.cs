@@ -6,7 +6,7 @@ using Server.Application.UseCase.Data.Result;
 
 namespace Server.Application.UseCase.Data;
 
-public class AddPlayerService : IAddPlayerDataUseCase
+public class AddPlayerUseCase : IAddPlayerDataUseCase
 {
     private readonly IDataRepository _dataRepository;
     private readonly IAccountRepository _accountRepository;
@@ -15,7 +15,7 @@ public class AddPlayerService : IAddPlayerDataUseCase
     private readonly IStageRepository _stageRepository;
     private readonly ITransactionScope _transactionScope;
 
-    public AddPlayerService(
+    public AddPlayerUseCase(
         IDataRepository  dataRepository,
         IAccountRepository  accountRepository,
         ICurrencyRepository currencyRepository,
@@ -40,10 +40,6 @@ public class AddPlayerService : IAddPlayerDataUseCase
                 "PLAYER_NAME_EXIST");
 
         var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
-        if (userId == null)
-            throw new RequestException(
-                ErrorStatusCode.Unauthorized,
-                "SESSION_DATA_CORRUPTED");
 
         var isNewAccount = await _accountRepository.IsNewAccountAsync(userId);
         if (!isNewAccount)

@@ -6,11 +6,11 @@ using Server.Application.UseCase.Data.Result;
 
 namespace Server.Application.UseCase.Data;
 
-public class RenameService : IRenameUseCase
+public class RenameUseCase : IRenameUseCase
 {
     private readonly IDataRepository _repository;
     
-    public RenameService(IDataRepository repository)
+    public RenameUseCase(IDataRepository repository)
     {
         _repository = repository;
     }

@@ -5,7 +5,7 @@ using Server.Application.Exceptions;
 
 namespace Server.Application.UseCase.Currency;
 
-public class RegenerateActionPointService : IRegenerateActionPointUseCase
+public class RegenerateActionPointUseCase : IRegenerateActionPointUseCase
 {
     private readonly ICurrencyRepository _repository;
     private readonly ITransactionScope _transactionScope;
@@ -13,7 +13,7 @@ public class RegenerateActionPointService : IRegenerateActionPointUseCase
     private const int RegenerationIntervalMinutes = 4;
     private const int RegenerationAmount = 1;
     
-    public RegenerateActionPointService(
+    public RegenerateActionPointUseCase(
         ICurrencyRepository repository,
         ITransactionScope transactionScope)
     {

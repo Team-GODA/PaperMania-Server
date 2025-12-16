@@ -6,11 +6,11 @@
 
     namespace Server.Application.UseCase.Data;
 
-    public class GetPlayerNameByUserIdService : IGetPlayerNameByUserIdUseCase
+    public class GetPlayerNameByUserIdUseCase : IGetPlayerNameByUserIdUseCase
     {
         private readonly IDataRepository _repository;
 
-        public GetPlayerNameByUserIdService(
+        public GetPlayerNameByUserIdUseCase(
             IDataRepository repository
             )
         {

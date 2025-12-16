@@ -6,11 +6,11 @@ using Server.Application.UseCase.Auth.Result;
 
 namespace Server.Application.UseCase.Auth;
 
-public class ValidateService : IValidateUseCase
+public class ValidateUseCase : IValidateUseCase
 {
     private readonly ISessionService _sessionService;
 
-    public ValidateService(ISessionService sessionService)
+    public ValidateUseCase(ISessionService sessionService)
     {
         _sessionService = sessionService;
     }
@@ -25,10 +25,6 @@ public class ValidateService : IValidateUseCase
             );
             
         var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
-        if (userId == null)
-            throw new RequestException(
-                ErrorStatusCode.ServerError,
-                "SESSION_DATA_CORRUPTED");
 
         return new ValidateResult(
             UserId: userId,

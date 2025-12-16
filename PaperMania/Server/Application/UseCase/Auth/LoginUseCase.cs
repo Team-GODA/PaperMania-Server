@@ -9,13 +9,13 @@ using Server.Infrastructure.Cache;
 
 namespace Server.Application.UseCase.Auth;
 
-public class LoginService : ILoginUseCase
+public class LoginUseCase : ILoginUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly ISessionService _sessionService;
     private readonly ICacheService _cacheService;
 
-    public LoginService(
+    public LoginUseCase(
         IAccountRepository accountRepository,
         ISessionService sessionService,
         ICacheService cacheService)
@@ -42,7 +42,7 @@ public class LoginService : ILoginUseCase
 
             if (account != null)
                 await _cacheService.SetAsync(
-                    CacheKey.Account.ByPlayerId(account!.PlayerId),
+                    CacheKey.Account.ByPlayerId(account.PlayerId),
                     JsonSerializer.Serialize(account), 
                     TimeSpan.FromDays(30)
                     );

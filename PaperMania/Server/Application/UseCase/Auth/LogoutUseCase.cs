@@ -1,15 +1,13 @@
-﻿using Server.Api.Dto.Response;
-using Server.Application.Exceptions;
-using Server.Application.Port;
+﻿using Server.Application.Port;
 using Server.Application.UseCase.Auth.Command;
 
 namespace Server.Application.UseCase.Auth;
 
-public class LogoutService : ILogoutUseCase
+public class LogoutUseCase : ILogoutUseCase
 {
     private readonly ISessionService _sessionService;
 
-    public LogoutService(ISessionService sessionService)
+    public LogoutUseCase(ISessionService sessionService)
     {
         _sessionService = sessionService;
     }

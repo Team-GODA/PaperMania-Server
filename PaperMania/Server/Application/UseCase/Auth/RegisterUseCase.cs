@@ -7,12 +7,12 @@ using Server.Domain.Entity;
 
 namespace Server.Application.UseCase.Auth;
 
-public class RegisterService : IRegisterUseCase
+public class RegisterUseCase : IRegisterUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly ITransactionScope _transactionScope;
 
-    public RegisterService(
+    public RegisterUseCase(
         IAccountRepository repository,
         ITransactionScope transactionScope)
     {
