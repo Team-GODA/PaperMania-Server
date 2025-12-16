@@ -49,8 +49,8 @@ public class GetPlayerLevelByUserIdUseCase : IGetPlayerLevelByUserIdUseCase
                 new { UserId = request.UserId });
 
         return new GetPlayerLevelByUserIdResult(
-            Level: gameState .PlayerLevel,
-            Exp: gameState .PlayerExp
+            Level: gameState.Level,
+            Exp: gameState.Exp
         );
     }
 }
