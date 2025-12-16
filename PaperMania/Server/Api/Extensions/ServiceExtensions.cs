@@ -33,6 +33,12 @@ public static class ServiceExtensions
             return new DataRepository(connectionString);
         });
         
+        services.AddScoped<IPlayerRepository>(provider =>
+        {
+            var connectionString = GetConnectionString(provider);
+            return new PlayerRepository(connectionString);
+        });
+        
         services.AddScoped<ICurrencyRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
