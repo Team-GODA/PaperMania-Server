@@ -20,7 +20,7 @@ public class GetPlayerLevelByUserIdService : IGetPlayerLevelByUserIdUseCase
 
     public async Task<GetPlayerLevelByUserIdResult> ExecuteAsync(GetPlayerLevelByUserIdCommand request)
     {
-        var data = await _repository.FindPlayerDataByUserIdAsync(request.UserId);
+        var data = await _repository.FindByUserIdAsync(request.UserId);
         if (data == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,

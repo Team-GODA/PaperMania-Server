@@ -53,8 +53,8 @@ public class AddPlayerService : IAddPlayerDataUseCase
     
         await _transactionScope.ExecuteAsync(async () =>
         {
-            await _dataRepository.AddPlayerDataAsync(userId, request.PlayerName);
-            await _currencyRepository.AddPlayerCurrencyDataByUserIdAsync(userId);
+            await _dataRepository.CreateDataAsync(userId, request.PlayerName);
+            await _currencyRepository.CreateByUserIdAsync(userId);
             await _stageRepository.CreatePlayerStageDataAsync(userId);
             await _accountRepository.UpdateIsNewAccountAsync(userId, false);
         });

@@ -17,7 +17,7 @@ public class GetActionPointService : IGetActionPointUseCase
     
     public async Task<GetActionPointResult> ExecuteAsync(GetActionPointCommand request)
     {
-        var data = await _repository.FindPlayerCurrencyDataByUserIdAsync(request.UserId);
+        var data = await _repository.FindByUserIdAsync(request.UserId);
         
         return new GetActionPointResult(
             ActionPoint:data.ActionPoint

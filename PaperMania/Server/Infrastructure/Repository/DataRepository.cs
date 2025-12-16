@@ -64,7 +64,7 @@ public class DataRepository : RepositoryBase, IDataRepository
                 transaction));
     }
 
-    public async Task AddPlayerDataAsync(int? userId, string playerName)
+    public async Task CreateDataAsync(int? userId, string playerName)
     {
         await ExecuteAsync(async (connection, transaction) =>
             await connection.ExecuteAsync(
@@ -73,7 +73,7 @@ public class DataRepository : RepositoryBase, IDataRepository
                 transaction));
     }
 
-    public async Task<PlayerGameData?> FindPlayerDataByUserIdAsync(int? userId)
+    public async Task<PlayerGameData?> FindByUserIdAsync(int? userId)
     {
         return await ExecuteAsync(async (connection, transaction) =>
             await connection.QueryFirstOrDefaultAsync<PlayerGameData>(
