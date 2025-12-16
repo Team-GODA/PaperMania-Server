@@ -23,7 +23,7 @@
         
         public async Task<GetPlayerNameByUserIdResult> ExecuteAsync(GetPlayerNameByUserIdCommand request)
         {
-            var playerName = await _cache.FetchAsync<string>(
+            var playerName = await _cache.FetchAsync(
                 CacheKey.Profile.ByUserId(request.UserId),
                 async () =>
                 {
