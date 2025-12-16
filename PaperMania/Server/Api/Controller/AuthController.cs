@@ -12,11 +12,11 @@ namespace Server.Api.Controller
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthUseCase _authUseCase;
+        private readonly AuthUseCase _authUseCase;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
-            IAuthUseCase authUseCase,
+            AuthUseCase authUseCase,
             ILogger<AuthController> logger)
         {
             _authUseCase  = authUseCase;

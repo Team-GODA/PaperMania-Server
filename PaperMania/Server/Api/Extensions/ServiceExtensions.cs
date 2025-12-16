@@ -99,10 +99,7 @@ public static class ServiceExtensions
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<SessionValidationFilter>();
 
-        services.AddScoped<IRegisterUseCase, RegisterUseCase>();
-        services.AddScoped<ILoginUseCase, LoginUseCase>();
-        services.AddScoped<ILogoutUseCase, LogoutUseCase>();
-        services.AddScoped<IValidateUseCase, ValidateUseCase>();
+        services.AddScoped<AuthUseCase>();
 
         services.AddScoped<ICreatePlayerDataUseCase, CreatePlayerDataUseCase>();
         services.AddScoped<IGetPlayerNameByUserIdUseCase, GetPlayerNameByUserIdUseCase>();

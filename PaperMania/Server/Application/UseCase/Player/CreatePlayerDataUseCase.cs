@@ -52,7 +52,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
             await _dataRepository.CreateDataAsync(userId, request.PlayerName);
             await _currencyRepository.CreateByUserIdAsync(userId);
             await _stageRepository.CreatePlayerStageDataAsync(userId);
-            await _accountRepository.UpdateIsNewAccountAsync(userId, false);
+            await _accountRepository.UpdateAsync(userId, false);
         });
 
         return new AddPlayerDataResult(
