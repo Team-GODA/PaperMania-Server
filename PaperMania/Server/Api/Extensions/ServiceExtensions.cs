@@ -14,10 +14,10 @@ public static class ServiceExtensions
     public static IServiceCollection AddRepositories(
         this IServiceCollection services)
     {
-        services.AddScoped<IUnitOfWork>(provider =>
+        services.AddScoped<ITransactionScope>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new UnitOfWork(connectionString);
+            return new TransactionScope(connectionString);
         });
         
         services.AddScoped<IAccountRepository>(provider =>

@@ -13,7 +13,7 @@ public class AddPlayerService : IAddPlayerDataUseCase
     private readonly ICurrencyRepository _currencyRepository;
     private readonly ISessionService _sessionService;
     private readonly IStageRepository _stageRepository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionScope _transactionScope;
 
     public AddPlayerService(
         IDataRepository  dataRepository,
@@ -21,14 +21,14 @@ public class AddPlayerService : IAddPlayerDataUseCase
         ICurrencyRepository currencyRepository,
         ISessionService sessionService,
         IStageRepository stageRepository,
-        IUnitOfWork unitOfWork)
+        ITransactionScope transactionScope)
     {
         _dataRepository = dataRepository;
         _accountRepository = accountRepository;
         _currencyRepository = currencyRepository;
         _sessionService = sessionService;
         _stageRepository = stageRepository;
-        _unitOfWork = unitOfWork;
+        _transactionScope = transactionScope;
     }
     
     public async Task<AddPlayerDataResult> ExecuteAsync(AddPlayerDataCommand request)
@@ -51,7 +51,7 @@ public class AddPlayerService : IAddPlayerDataUseCase
                 ErrorStatusCode.Conflict,
                 "PLAYER_DATA_EXIST");
     
-        await _unitOfWork.ExecuteAsync(async () =>
+        await _transactionScope.ExecuteAsync(async () =>
         {
             await _dataRepository.AddPlayerDataAsync(userId, request.PlayerName);
             await _currencyRepository.AddPlayerCurrencyDataByUserIdAsync(userId);

@@ -6,23 +6,23 @@ namespace Server.Infrastructure.Repository;
 public class RepositoryBase
 { 
     private readonly string _connectionString;
-    private readonly IUnitOfWork? _unitOfWork;
+    private readonly ITransactionScope? _transactionScope;
 
     protected RepositoryBase(
         string connectionString,
-        IUnitOfWork? unitOfWork)
+        ITransactionScope? transactionScope)
     {
         _connectionString = connectionString;
-        _unitOfWork = unitOfWork;
+        _transactionScope = transactionScope;
     }
 
     protected async Task<T> ExecuteAsync<T>(
         Func<NpgsqlConnection, NpgsqlTransaction?, Task<T>> query)
     {
-        if (_unitOfWork != null && _unitOfWork.Transaction != null)
+        if (_transactionScope != null)
         {
-            var connection = (NpgsqlConnection)_unitOfWork.Connection;
-            var transaction = _unitOfWork.Transaction as NpgsqlTransaction;
+            var connection = (NpgsqlConnection)_transactionScope.Connection;
+            var transaction = _transactionScope.Transaction as NpgsqlTransaction;
             return await query(connection, transaction);
         }
 
@@ -34,10 +34,10 @@ public class RepositoryBase
     protected async Task ExecuteAsync(
         Func<NpgsqlConnection, NpgsqlTransaction?, Task> query)
     {
-        if (_unitOfWork != null && _unitOfWork.Transaction != null)
+        if (_transactionScope != null)
         {
-            var connection = (NpgsqlConnection)_unitOfWork.Connection;
-            var transaction = _unitOfWork.Transaction as NpgsqlTransaction;
+            var connection = (NpgsqlConnection)_transactionScope.Connection;
+            var transaction = _transactionScope.Transaction as NpgsqlTransaction;
             await query(connection, transaction);
             return;
         }
@@ -50,9 +50,9 @@ public class RepositoryBase
     protected async Task<T> QueryAsync<T>(
         Func<NpgsqlConnection, Task<T>> query)
     {
-        if (_unitOfWork?.Transaction != null)
+        if (_transactionScope != null)
         {
-            var connection = (NpgsqlConnection)_unitOfWork.Connection;
+            var connection = (NpgsqlConnection)_transactionScope.Connection;
             return await query(connection);
         }
 

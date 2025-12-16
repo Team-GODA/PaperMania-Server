@@ -46,8 +46,8 @@ public class AccountRepository : RepositoryBase, IAccountRepository
     
     public AccountRepository(
         string connectionString, 
-        IUnitOfWork? unitOfWork = null) 
-        : base(connectionString, unitOfWork)
+        ITransactionScope? transactionScope = null) 
+        : base(connectionString, transactionScope)
     {
     }
     
@@ -75,7 +75,7 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         );
     }
 
-    public async Task<PlayerAccountData> AddAccountAsync(PlayerAccountData? account)
+    public async Task<PlayerAccountData> CreateAccountAsync(PlayerAccountData? account)
     {
         ArgumentNullException.ThrowIfNull(account);
         

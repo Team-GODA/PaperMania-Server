@@ -50,8 +50,8 @@ public class DataRepository : RepositoryBase, IDataRepository
     
     public DataRepository(
         string connectionString, 
-        IUnitOfWork? unitOfWork = null) 
-        : base(connectionString, unitOfWork)
+        ITransactionScope? transactionScope = null) 
+        : base(connectionString, transactionScope)
     {
     }
     

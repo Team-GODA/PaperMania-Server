@@ -6,22 +6,22 @@ namespace Server.Application.UseCase.Currency;
 public class RegenerateActionPointService : IRegenerateActionPointUseCase
 {
     private readonly ICurrencyRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionScope _transactionScope;
     
     public RegenerateActionPointService(
         ICurrencyRepository repository,
-        IUnitOfWork unitOfWork
+        ITransactionScope transactionScope
         )
     {
         _repository = repository;
-        _unitOfWork = unitOfWork;
+        _transactionScope = transactionScope;
     }
     
     public async Task ExecuteAsync(RegenerateActionPointCommand request)
     {
         var data = await _repository.FindPlayerCurrencyDataByUserIdAsync(request.UserId);
         
-        await _unitOfWork.ExecuteAsync(async () =>
+        await _transactionScope.ExecuteAsync(async () =>
         {
             
         });

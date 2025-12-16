@@ -55,8 +55,8 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
     public CharacterRepository(
         string connectionString,
         CharacterDataCache cache,
-        IUnitOfWork? unitOfWork = null)
-        : base(connectionString, unitOfWork)
+        ITransactionScope? transactionScope = null)
+        : base(connectionString, transactionScope)
     {
         _cache = cache;
     }

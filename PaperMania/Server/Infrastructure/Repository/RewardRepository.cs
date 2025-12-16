@@ -30,8 +30,8 @@ public class RewardRepository : RepositoryBase, IRewardRepository
     public RewardRepository(
         string connectionString,
         StageRewardCache cache,
-        IUnitOfWork? unitOfWork = null) 
-        : base(connectionString, unitOfWork)
+        ITransactionScope? transactionScope = null) 
+        : base(connectionString, transactionScope)
     {
         _cache = cache;
     }

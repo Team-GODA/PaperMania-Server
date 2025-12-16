@@ -10,14 +10,14 @@ namespace Server.Application.UseCase.Auth;
 public class RegisterService : IRegisterUseCase
 {
     private readonly IAccountRepository _repository;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITransactionScope _transactionScope;
 
     public RegisterService(
         IAccountRepository repository,
-        IUnitOfWork unitOfWork)
+        ITransactionScope transactionScope)
     {
         _repository = repository;
-        _unitOfWork = unitOfWork;
+        _transactionScope = transactionScope;
     }
 
     public async Task<RegisterResult?> ExecuteAsync(RegisterCommand request)
@@ -35,7 +35,7 @@ public class RegisterService : IRegisterUseCase
             throw new RequestException(ErrorStatusCode.BadRequest, "INVALID_PASSWORD");
 
 
-        return await _unitOfWork.ExecuteAsync(async () =>
+        return await _transactionScope.ExecuteAsync(async () =>
         {
             var checkTasks = await Task.WhenAll(
                 _repository.FindByEmailAsync(request.Email),
@@ -60,7 +60,7 @@ public class RegisterService : IRegisterUseCase
                 Role = "user"
             };
 
-            var createdPlayer = await _repository.AddAccountAsync(newAccount);
+            var createdPlayer = await _repository.CreateAccountAsync(newAccount);
 
             if (createdPlayer == null)
                 throw new RequestException(ErrorStatusCode.ServerError, "CREATE_ACCOUNT_FAILED");

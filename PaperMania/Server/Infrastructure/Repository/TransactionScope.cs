@@ -4,15 +4,15 @@ using Server.Application.Port;
 
 namespace Server.Infrastructure.Repository;
 
-public class UnitOfWork : IUnitOfWork
+public class TransactionScope : ITransactionScope
 {
     private readonly string _connectionString;
-    private readonly ILogger<UnitOfWork>? _logger;
+    private readonly ILogger<TransactionScope>? _logger;
     private NpgsqlConnection? _connection;
     private NpgsqlTransaction? _transaction;
     private bool _disposed;
     
-    public UnitOfWork(string connectionString, ILogger<UnitOfWork>? logger = null)
+    public TransactionScope(string connectionString, ILogger<TransactionScope>? logger = null)
     {
         _connectionString = connectionString ?? 
                             throw new ArgumentNullException(nameof(connectionString));
@@ -298,7 +298,7 @@ public class UnitOfWork : IUnitOfWork
     private void ThrowIfDisposed()
     {
         if (_disposed)
-            throw new ObjectDisposedException(nameof(UnitOfWork));
+            throw new ObjectDisposedException(nameof(TransactionScope));
     }
     
     private void ThrowIfNoTransaction()

@@ -32,8 +32,8 @@ public class StageRepository : RepositoryBase, IStageRepository
     
     public StageRepository(
         string connectionString,
-        IUnitOfWork? unitOfWork = null) 
-        : base(connectionString, unitOfWork)
+        ITransactionScope? transactionScope = null) 
+        : base(connectionString, transactionScope)
     {
     }
 

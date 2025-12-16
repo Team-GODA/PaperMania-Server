@@ -3,7 +3,7 @@ using Npgsql;
 
 namespace Server.Application.Port;
 
-public interface IUnitOfWork : IDisposable, IAsyncDisposable
+public interface ITransactionScope : IDisposable, IAsyncDisposable
 {
     IDbConnection Connection { get; }
     IDbTransaction Transaction { get; }
