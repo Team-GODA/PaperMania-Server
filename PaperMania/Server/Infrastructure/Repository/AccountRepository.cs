@@ -31,17 +31,22 @@ public class AccountRepository : RepositoryBase, IAccountRepository
             RETURNING id AS Id, player_id AS PlayerId, email AS Email, 
                       password AS Password, is_new_account AS IsNewAccount,
                       role AS Role, created_at AS CreatedAt";
-
-        public const string IsNewAccount = @"
-            SELECT is_new_account
+        
+        public const string ExistsByPlayerId = @"
+            SELECT 1
             FROM paper_mania_account_data.player_account_data
-            WHERE id = @UserId
+            WHERE player_id = @PlayerId
             LIMIT 1";
 
-        public const string UpdateIsNewAccount = @"
+        public const string UpdateAccount = @"
             UPDATE paper_mania_account_data.player_account_data
-            SET is_new_account = @IsNew
-            WHERE id = @UserId";
+            SET
+                player_id = @PlayerId,
+                email = @Email,
+                password = @Password,
+                is_new_account = @IsNewAccount,
+                role = @Role
+            WHERE id = @Id";
     }
     
     public AccountRepository(
@@ -74,8 +79,21 @@ public class AccountRepository : RepositoryBase, IAccountRepository
             )
         );
     }
+    
+    public async Task<bool> ExistsByPlayerIdAsync(string playerId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(playerId);
 
-    public async Task<PlayerAccountData> CreateAccountAsync(PlayerAccountData? account)
+        var result = await QueryAsync(connection =>
+            connection.ExecuteScalarAsync<int?>(
+                Sql.ExistsByPlayerId,
+                new { PlayerId = playerId }
+            ));
+
+        return result.HasValue;
+    }
+
+    public async Task<PlayerAccountData> CreateAsync(PlayerAccountData account)
     {
         ArgumentNullException.ThrowIfNull(account);
         
@@ -87,37 +105,19 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         );
     }
     
-    public async Task<bool> IsNewAccountAsync(int? userId)
-    {
-        if (userId <= 0)
-            throw new ArgumentException("UserId must be positive", nameof(userId));
-        
-        var result = await ExecuteAsync((connection, transaction) =>
-            connection.ExecuteScalarAsync<bool?>(
-                Sql.IsNewAccount, 
-                new { UserId = userId },
-                transaction)
-        );
-        
-        if (result == null)
-            throw new InvalidOperationException($"ACCOUNT_NOT_FOUND: userId = {userId}");
-        
-        return result.Value;
-    }
     
-    public async Task UpdateIsNewAccountAsync(int? userId, bool isNew)
+    public async Task UpdateAsync(PlayerAccountData account)
     {
-        if (userId <= 0)
-            throw new ArgumentException("UserId must be positive", nameof(userId));
-        
-        var rowsAffected = await ExecuteAsync((connection, transaction) =>
-            connection.ExecuteAsync(
-                Sql.UpdateIsNewAccount,
-                new { IsNew = isNew, UserId = userId },
-                transaction)
-        );
-        
-        if (rowsAffected == 0)
-            throw new InvalidOperationException($"ACCOUNT_NOT_FOUND: userId = {userId}");
+        ArgumentNullException.ThrowIfNull(account);
+
+        var rows = await ExecuteAsync((conn, transaction) =>
+            conn.ExecuteAsync(
+                Sql.UpdateAccount,
+                account,
+                transaction
+            ));
+
+        if (rows == 0)
+            throw new InvalidOperationException($"ACCOUNT_NOT_FOUND: id={account.Id}");
     }
 }
