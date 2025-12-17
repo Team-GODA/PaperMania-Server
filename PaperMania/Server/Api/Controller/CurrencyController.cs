@@ -16,25 +16,22 @@ namespace Server.Api.Controller
     [SessionAuthorize]
     public class CurrencyController : ControllerBase
     {
-        private readonly IGetActionPointUseCase _getActionPointUseCase;
-        private readonly IRegenerateActionPointUseCase _regenerateActionPointUseCase;
-        private readonly IUpdateMaxActionPointUseCase _updateMaxActionPointUseCase;
-        private readonly IUseActionPointUseCase _useActionPointUseCase;
+        private readonly GetActionPointUseCase _getActionPointUseCase;
+        private readonly UpdateMaxActionPointUseCase _updateMaxActionPointUseCase;
+        private readonly UseActionPointUseCase _useActionPointUseCase;
         
         private readonly ISessionService _sessionService;
         private readonly ILogger<CurrencyController> _logger;
 
         public CurrencyController(
-            IGetActionPointUseCase getActionPointUseCase,
-            IRegenerateActionPointUseCase regenerateActionPointUseCase,
-            IUpdateMaxActionPointUseCase updateMaxActionPointUseCase,
-            IUseActionPointUseCase useActionPointUseCase,
+            GetActionPointUseCase getActionPointUseCase,
+            UpdateMaxActionPointUseCase updateMaxActionPointUseCase,
+            UseActionPointUseCase useActionPointUseCase,
             ISessionService sessionService, 
             ILogger<CurrencyController> logger
             )
         {
             _getActionPointUseCase = getActionPointUseCase;
-            _regenerateActionPointUseCase = regenerateActionPointUseCase;
             _updateMaxActionPointUseCase = updateMaxActionPointUseCase;
             _useActionPointUseCase = useActionPointUseCase;
             _sessionService = sessionService;
@@ -57,20 +54,6 @@ namespace Server.Api.Controller
             
             _logger.LogInformation($"플레이어 AP 조회 시도 : UserId : {userId}");
 
-            try
-            {
-                await _regenerateActionPointUseCase.ExecuteAsync(
-                    new RegenerateActionPointCommand(userId)
-                    );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "액션 포인트 재생 실패: UserId = {UserId}", userId);
-                throw new RequestException(
-                    ErrorStatusCode.ServerError,
-                    ex.Message);
-            }
-            
             var result = await _getActionPointUseCase.ExecuteAsync(new GetActionPointCommand(
                 userId)
             );

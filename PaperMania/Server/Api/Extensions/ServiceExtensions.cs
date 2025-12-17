@@ -2,7 +2,6 @@
 using Server.Application.Port;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Currency;
-using Server.Application.UseCase.Data;
 using Server.Application.UseCase.Player;
 using Server.Infrastructure.Cache;
 using Server.Infrastructure.Repository;
@@ -118,8 +117,10 @@ public static class ServiceExtensions
         services.AddScoped<GetPlayerLevelByUserIdUseCase>();
         services.AddScoped<AddPlayerExpUseCase>();
         
-        services.AddScoped<IGetActionPointUseCase, GetActionPointUseCase>();
-        services.AddScoped<IRegenerateActionPointUseCase, RegenerateActionPointUseCase>();
+        // currency use case
+        services.AddScoped<GetActionPointUseCase>();
+        services.AddScoped<UpdateMaxActionPointUseCase>();
+        services.AddScoped<UseActionPointUseCase>();
         
         return services;
     }

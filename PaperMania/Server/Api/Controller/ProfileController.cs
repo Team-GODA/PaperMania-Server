@@ -4,7 +4,6 @@ using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
-using Server.Application.UseCase.Data;
 using Server.Application.UseCase.Player;
 using Server.Application.UseCase.Player.Command;
 

@@ -6,7 +6,7 @@ using Server.Application.UseCase.Currency.Result;
 
 namespace Server.Application.UseCase.Currency;
 
-public class UseActionPointUseCase : IUseActionPointUseCase
+public class UseActionPointUseCase
 {
     private readonly ICurrencyRepository _repository;
     private readonly ITransactionScope _transactionScope;

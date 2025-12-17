@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
 using Server.Application.Port;
 
 namespace Server.Api.Filter;
@@ -42,6 +43,8 @@ public class SessionValidationFilter : IAsyncActionFilter
         }
 
         context.HttpContext.Items["SessionId"] = sessionId.ToString();
+        context.HttpContext.Items["UserId"] = userId;
+        
         await next();
     }
 }

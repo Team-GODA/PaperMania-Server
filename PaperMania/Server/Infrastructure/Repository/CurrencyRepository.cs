@@ -93,7 +93,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 new 
                 {
                     UserId = userId, 
-                    NewActionPoint = newActionPoint ,
+                    NewActionPoint = newActionPoint,
                     LastUpdated = lastUpdated.ToUniversalTime()
                 },
                 transaction)

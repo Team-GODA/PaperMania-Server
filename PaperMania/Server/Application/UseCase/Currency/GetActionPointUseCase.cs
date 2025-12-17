@@ -3,18 +3,22 @@ using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Application.UseCase.Currency.Command;
 using Server.Application.UseCase.Currency.Result;
+using Server.Domain.Service;
 
 namespace Server.Application.UseCase.Currency;
 
-public class GetActionPointUseCase : IGetActionPointUseCase
+public class GetActionPointUseCase
 {
     private readonly ICurrencyRepository _repository;
+    private readonly ActionPointService _apService;
 
     public GetActionPointUseCase(
-        ICurrencyRepository repository
+        ICurrencyRepository repository,
+        ActionPointService apService
         )
     {
         _repository = repository;
+        _apService = apService;
     }
     
     public async Task<GetActionPointResult> ExecuteAsync(GetActionPointCommand request)
@@ -25,8 +29,10 @@ public class GetActionPointUseCase : IGetActionPointUseCase
                 ErrorStatusCode.NotFound,
                 "CURRENCY_DATA_NOT_FOUND");
         
-        return new GetActionPointResult(
-            ActionPoint:data.ActionPoint
-            );
+        var regenerate = _apService.TryRegenerate(data, DateTime.UtcNow);
+        if (regenerate)
+            await _repository.UpdateDataAsync(data);
+        
+        return new GetActionPointResult(data.ActionPoint);
     }
 }

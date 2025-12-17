@@ -16,25 +16,22 @@ namespace Server.Api.Controller
     [SessionAuthorize]
     public class ApController : ControllerBase
     {
-        private readonly IGetActionPointUseCase _getActionPointUseCase;
-        private readonly IRegenerateActionPointUseCase _regenerateActionPointUseCase;
-        private readonly IUpdateMaxActionPointUseCase _updateMaxActionPointUseCase;
-        private readonly IUseActionPointUseCase _useActionPointUseCase;
+        private readonly GetActionPointUseCase _getActionPointUseCase;
+        private readonly UpdateMaxActionPointUseCase _updateMaxActionPointUseCase;
+        private readonly UseActionPointUseCase _useActionPointUseCase;
         
         private readonly ISessionService _sessionService;
         private readonly ILogger<CurrencyController> _logger;
 
         public ApController(
-            IGetActionPointUseCase getActionPointUseCase,
-            IRegenerateActionPointUseCase regenerateActionPointUseCase,
-            IUpdateMaxActionPointUseCase updateMaxActionPointUseCase,
-            IUseActionPointUseCase useActionPointUseCase,
+            GetActionPointUseCase getActionPointUseCase,
+            UpdateMaxActionPointUseCase updateMaxActionPointUseCase,
+            UseActionPointUseCase useActionPointUseCase,
             ISessionService sessionService, 
             ILogger<CurrencyController> logger
         )
         {
             _getActionPointUseCase = getActionPointUseCase;
-            _regenerateActionPointUseCase = regenerateActionPointUseCase;
             _updateMaxActionPointUseCase = updateMaxActionPointUseCase;
             _useActionPointUseCase = useActionPointUseCase;
             _sessionService = sessionService;
@@ -52,25 +49,10 @@ namespace Server.Api.Controller
         [ProducesResponseType(typeof(BaseResponse<GetPlayerActionPointResponse>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<BaseResponse<GetPlayerActionPointResponse>>> GetPlayerActionPointById()
         {
-            var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
+            var userId = GetUserId();
             
             _logger.LogInformation($"플레이어 AP 조회 시도 : UserId : {userId}");
 
-            try
-            {
-                await _regenerateActionPointUseCase.ExecuteAsync(
-                    new RegenerateActionPointCommand(userId)
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "액션 포인트 재생 실패: UserId = {UserId}", userId);
-                throw new RequestException(
-                    ErrorStatusCode.ServerError,
-                    ex.Message);
-            }
-            
             var result = await _getActionPointUseCase.ExecuteAsync(new GetActionPointCommand(
                 userId)
             );
@@ -94,8 +76,7 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<UpdatePlayerMaxActionPointResponse>>> UpdatePlayerMaxActionPoint(
             [FromBody] UpdatePlayerMaxActionPointRequest request)
         {
-            var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
+            var userId = GetUserId();
             
             _logger.LogInformation($"플레이어 최대 AP 갱신 시도");
             
@@ -122,8 +103,7 @@ namespace Server.Api.Controller
         public async Task<ActionResult<BaseResponse<UsePlayerActionPointResponse>>> UsePlayerActionPoint(
             [FromBody] UsePlayerActionPointRequest request)
         {
-            var sessionId = HttpContext.Items["SessionId"] as string;
-            var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
+            var userId = GetUserId();
             
             _logger.LogInformation($"플레이어 AP 사용 시도 : UserId : {userId}");
             
@@ -139,6 +119,19 @@ namespace Server.Api.Controller
         
             _logger.LogInformation($"플레이어 AP 사용 성공 : UserId : {userId}");
             return Ok(ApiResponse.Ok("플레이어 AP 사용 성공", response));
+        }
+
+        private int GetUserId()
+        {
+            if (!HttpContext.Items.TryGetValue("UserId", out var userIdObj)
+                || userIdObj is not int userId)
+            {
+                throw new RequestException(
+                    ErrorStatusCode.Unauthorized,
+                    "INVALID_SESSION");
+            }
+            
+            return userId;
         }
     }
 }
