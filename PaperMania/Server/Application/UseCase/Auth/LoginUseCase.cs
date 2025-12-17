@@ -1,6 +1,6 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
+using Server.Application.Port.In.Auth;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.Port.Out.Service;
 using Server.Application.UseCase.Auth.Command;
@@ -9,7 +9,7 @@ using Server.Domain.Service;
 
 namespace Server.Application.UseCase.Auth;
 
-public class LoginUseCase
+public class LoginUseCase : ILoginUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly ISessionService _sessionService;

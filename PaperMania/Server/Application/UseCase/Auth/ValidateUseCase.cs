@@ -1,11 +1,11 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
+using Server.Application.Port.In.Auth;
 using Server.Application.Port.Out.Service;
 
 namespace Server.Application.UseCase.Auth;
 
-public class ValidateUseCase
+public class ValidateUseCase : IValidateUseCase
 {
     private readonly ISessionService _sessionService;
 

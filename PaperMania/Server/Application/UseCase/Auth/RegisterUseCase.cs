@@ -1,6 +1,6 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
+using Server.Application.Port.In.Auth;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.UseCase.Auth.Command;
 using Server.Domain.Entity;
@@ -8,7 +8,7 @@ using Server.Domain.Service;
 
 namespace Server.Application.UseCase.Auth;
 
-public class RegisterUseCase
+public class RegisterUseCase : IRegisterUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly IPasswordHasher _passwordHasher;

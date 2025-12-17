@@ -1,9 +1,9 @@
-﻿using Server.Application.Port;
+﻿using Server.Application.Port.In.Auth;
 using Server.Application.Port.Out.Service;
 
 namespace Server.Application.UseCase.Auth;
 
-public class LogoutUseCase
+public class LogoutUseCase : ILogoutUseCase
 {
     private readonly ISessionService _sessionService;
 
