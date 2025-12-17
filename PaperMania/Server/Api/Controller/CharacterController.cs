@@ -4,6 +4,7 @@ using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Character;
 using Server.Api.Filter;
 using Server.Application.Port;
+using Server.Application.Port.Out.Service;
 using Server.Domain.Entity;
 
 namespace Server.Api.Controller

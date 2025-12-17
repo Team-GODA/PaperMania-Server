@@ -2,6 +2,7 @@
 using Server.Application.Configure;
 using Server.Application.Exceptions;
 using Server.Application.Port;
+using Server.Application.Port.Out.Service;
 using Server.Infrastructure.Cache;
 
 namespace Server.Infrastructure.Service;

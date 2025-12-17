@@ -1,5 +1,8 @@
 ﻿using Server.Api.Filter;
 using Server.Application.Port;
+using Server.Application.Port.Out.Infrastructure;
+using Server.Application.Port.Out.Persistence;
+using Server.Application.Port.Out.Service;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Player;
@@ -122,7 +125,7 @@ public static class ServiceExtensions
         // currency use case
         services.AddScoped<GetActionPointUseCase>();
         services.AddScoped<UpdateMaxActionPointUseCase>();
-        services.AddScoped<UseActionPointUseCase>();
+        services.AddScoped<SpendActionPointUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();

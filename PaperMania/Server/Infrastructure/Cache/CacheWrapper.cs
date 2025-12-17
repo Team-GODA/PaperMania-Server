@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Server.Application.Port;
+using Server.Application.Port.Out.Service;
 
 namespace Server.Infrastructure.Cache;
 

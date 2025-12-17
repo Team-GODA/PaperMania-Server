@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
+using Server.Application.Port.Out.Service;
 
 namespace Server.Api.Filter;
 

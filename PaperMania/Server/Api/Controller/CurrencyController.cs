@@ -5,6 +5,7 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
 using Server.Application.Port;
+using Server.Application.Port.Out.Service;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Currency.Command;
 
@@ -17,7 +18,7 @@ namespace Server.Api.Controller
     {
         private readonly GetActionPointUseCase _getActionPointUseCase;
         private readonly UpdateMaxActionPointUseCase _updateMaxActionPointUseCase;
-        private readonly UseActionPointUseCase _useActionPointUseCase;
+        private readonly SpendActionPointUseCase _spendActionPointUseCase;
         
         private readonly ISessionService _sessionService;
         private readonly ILogger<CurrencyController> _logger;
@@ -25,14 +26,14 @@ namespace Server.Api.Controller
         public CurrencyController(
             GetActionPointUseCase getActionPointUseCase,
             UpdateMaxActionPointUseCase updateMaxActionPointUseCase,
-            UseActionPointUseCase useActionPointUseCase,
+            SpendActionPointUseCase spendActionPointUseCase,
             ISessionService sessionService, 
             ILogger<CurrencyController> logger
             )
         {
             _getActionPointUseCase = getActionPointUseCase;
             _updateMaxActionPointUseCase = updateMaxActionPointUseCase;
-            _useActionPointUseCase = useActionPointUseCase;
+            _spendActionPointUseCase = spendActionPointUseCase;
             _sessionService = sessionService;
             _logger = logger;
         }
@@ -109,7 +110,7 @@ namespace Server.Api.Controller
             
             _logger.LogInformation($"플레이어 AP 사용 시도 : UserId : {userId}");
             
-            var result = await _useActionPointUseCase.ExecuteAsync(new UseActionPointCommand(
+            var result = await _spendActionPointUseCase.ExecuteAsync(new UseActionPointCommand(
                 userId, request.UsedActionPoint)
             
             );

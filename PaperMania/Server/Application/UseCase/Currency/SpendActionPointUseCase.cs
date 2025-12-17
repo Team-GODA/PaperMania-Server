@@ -1,17 +1,19 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
+using Server.Application.Port.Out.Infrastructure;
+using Server.Application.Port.Out.Persistence;
 using Server.Application.UseCase.Currency.Command;
 using Server.Application.UseCase.Currency.Result;
 
 namespace Server.Application.UseCase.Currency;
 
-public class UseActionPointUseCase
+public class SpendActionPointUseCase
 {
     private readonly ICurrencyRepository _repository;
     private readonly ITransactionScope _transactionScope;
 
-    public UseActionPointUseCase(
+    public SpendActionPointUseCase(
         ICurrencyRepository repository,
         ITransactionScope transactionScope
     )

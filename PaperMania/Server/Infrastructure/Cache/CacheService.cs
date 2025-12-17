@@ -1,4 +1,5 @@
 ﻿using Server.Application.Port;
+using Server.Application.Port.Out.Service;
 using StackExchange.Redis;
 
 namespace Server.Infrastructure.Cache;

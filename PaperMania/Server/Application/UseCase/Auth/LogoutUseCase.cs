@@ -1,4 +1,5 @@
 ﻿using Server.Application.Port;
+using Server.Application.Port.Out.Service;
 
 namespace Server.Application.UseCase.Auth;
 

@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Npgsql;
 using Server.Application.Port;
+using Server.Application.Port.Out.Infrastructure;
 
 namespace Server.Infrastructure.Repository;
 
