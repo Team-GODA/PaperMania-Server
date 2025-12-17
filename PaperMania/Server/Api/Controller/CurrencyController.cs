@@ -4,7 +4,6 @@ using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
-using Server.Application.Exceptions;
 using Server.Application.Port;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Currency.Command;
