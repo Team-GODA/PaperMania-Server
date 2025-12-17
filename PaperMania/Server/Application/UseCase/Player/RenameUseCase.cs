@@ -1,13 +1,13 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
+using Server.Application.Port.In.Player;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 
 namespace Server.Application.UseCase.Player;
 
-public class RenameUseCase
+public class RenameUseCase : IRenameUseCase
 {
     private readonly IDataRepository _repository;
     

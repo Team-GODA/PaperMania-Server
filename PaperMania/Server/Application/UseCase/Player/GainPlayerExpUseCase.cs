@@ -1,24 +1,24 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
+using Server.Application.Port.In.Player;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 
 namespace Server.Application.UseCase.Player;
 
-public class AddPlayerExpUseCase
+public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 {
     private readonly IDataRepository _repository;
 
-    public AddPlayerExpUseCase(
+    public GainPlayerExpUseCase(
         IDataRepository repository
     )
     {
         _repository = repository;
     }
     
-    public async Task<UpdatePlayerLevelByExpResult> ExecuteAsync(AddPlayerExpServiceCommand request)
+    public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpUseCaseCommand request)
     {
         var data = await _repository.FindByUserIdAsync(request.UserId);
         if (data == null)
@@ -39,7 +39,7 @@ public class AddPlayerExpUseCase
         }
 
         await _repository.UpdatePlayerLevelAsync(request.UserId, data.PlayerLevel, data.PlayerExp);
-        return new UpdatePlayerLevelByExpResult(
+        return new GainPlayerExpUseCaseResult(
             Level:data.PlayerLevel,
             Exp:data.PlayerExp
             );

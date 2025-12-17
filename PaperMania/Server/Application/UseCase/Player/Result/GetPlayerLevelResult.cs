@@ -1,6 +1,6 @@
 ﻿namespace Server.Application.UseCase.Player.Result;
 
-public record GetPlayerLevelByUserIdResult(
+public record GetPlayerLevelResult(
     int Level,
     int Exp
     );

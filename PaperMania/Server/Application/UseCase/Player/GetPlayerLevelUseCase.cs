@@ -1,6 +1,6 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
+using Server.Application.Port.In.Player;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
@@ -9,12 +9,12 @@ using Server.Infrastructure.Cache;
 
 namespace Server.Application.UseCase.Player;
 
-public class GetPlayerLevelByUserIdUseCase
+public class GetPlayerLevelUseCase : IGetPlayerLevelUseCase
 {
     private readonly IDataRepository _repository;
     private readonly CacheWrapper _cache;
 
-    public GetPlayerLevelByUserIdUseCase(
+    public GetPlayerLevelUseCase(
         IDataRepository repository,
         CacheWrapper cache
         )
@@ -24,7 +24,7 @@ public class GetPlayerLevelByUserIdUseCase
     }
 
 
-    public async Task<GetPlayerLevelByUserIdResult> ExecuteAsync(GetPlayerLevelByUserIdCommand request)
+    public async Task<GetPlayerLevelResult> ExecuteAsync(GetPlayerLevelCommand request)
     {
         var gameState = await _cache.FetchAsync(
             CacheKey.Player.GameData(request.UserId),
@@ -49,7 +49,7 @@ public class GetPlayerLevelByUserIdUseCase
                 "PLAYER_NOT_FOUND",
                 new { UserId = request.UserId });
 
-        return new GetPlayerLevelByUserIdResult(
+        return new GetPlayerLevelResult(
             Level: gameState.Level,
             Exp: gameState.Exp
         );

@@ -1,6 +1,6 @@
 ﻿namespace Server.Application.UseCase.Player.Result;
 
-public record UpdatePlayerLevelByExpResult(
+public record GainPlayerExpUseCaseResult(
     int Level,
     int Exp
     );

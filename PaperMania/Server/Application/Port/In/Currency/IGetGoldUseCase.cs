@@ -1,4 +1,4 @@
-﻿namespace Server.Application.Port.In;
+﻿namespace Server.Application.Port.In.Currency;
 
 public interface IGetGoldUseCase
 {

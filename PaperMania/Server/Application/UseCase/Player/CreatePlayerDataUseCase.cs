@@ -1,6 +1,6 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
+using Server.Application.Port.In.Player;
 using Server.Application.Port.Out.Infrastructure;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.Port.Out.Service;
@@ -10,7 +10,7 @@ using Server.Domain.Entity;
 
 namespace Server.Application.UseCase.Player;
 
-public class CreatePlayerDataUseCase
+public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
 {
     private readonly IPlayerRepository _playerRepository;
     private readonly IAccountRepository _accountRepository;

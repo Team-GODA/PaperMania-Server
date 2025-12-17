@@ -17,22 +17,22 @@ namespace Server.Api.Controller
     public class DataController : ControllerBase
     {
         private readonly CreatePlayerDataUseCase _createPlayerDataUseCase;
-        private readonly GetPlayerLevelByUserIdUseCase _getPlayerLevelByUserIdUseCase;
-        private readonly AddPlayerExpUseCase _addPlayerExpUseCase;
+        private readonly GetPlayerLevelUseCase _getPlayerLevelUseCase;
+        private readonly GainPlayerExpUseCase _gainPlayerExpUseCase;
         private readonly ISessionService _sessionService;
         private readonly ILogger<DataController> _logger;
 
         public DataController(
             CreatePlayerDataUseCase createPlayerDataUseCase,
-            GetPlayerLevelByUserIdUseCase getPlayerLevelByUserIdUseCase,
-            AddPlayerExpUseCase addPlayerExpUseCase,
+            GetPlayerLevelUseCase getPlayerLevelUseCase,
+            GainPlayerExpUseCase gainPlayerExpUseCase,
             ISessionService sessionService,
             ILogger<DataController> logger
             )
         {
             _createPlayerDataUseCase = createPlayerDataUseCase;
-            _getPlayerLevelByUserIdUseCase = getPlayerLevelByUserIdUseCase;
-            _addPlayerExpUseCase = addPlayerExpUseCase;
+            _getPlayerLevelUseCase = getPlayerLevelUseCase;
+            _gainPlayerExpUseCase = gainPlayerExpUseCase;
             _sessionService = sessionService;
             _logger = logger;
         }
@@ -75,7 +75,7 @@ namespace Server.Api.Controller
 
             _logger.LogInformation($"플레이어 레벨 조회 시도: UserId: {userId}");
 
-            var result = await _getPlayerLevelByUserIdUseCase.ExecuteAsync(new GetPlayerLevelByUserIdCommand(
+            var result = await _getPlayerLevelUseCase.ExecuteAsync(new GetPlayerLevelCommand(
                 userId)
             );
 
@@ -103,7 +103,7 @@ namespace Server.Api.Controller
 
             _logger.LogInformation($"플레이어 레벨 갱신 시도: UserId: {userId}");
 
-            var result = await _addPlayerExpUseCase.ExecuteAsync(new AddPlayerExpServiceCommand(
+            var result = await _gainPlayerExpUseCase.ExecuteAsync(new GainPlayerExpUseCaseCommand(
                 userId, 
                 request.NewExp)
             );

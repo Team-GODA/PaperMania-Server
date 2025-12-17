@@ -1,6 +1,6 @@
 ﻿namespace Server.Application.UseCase.Player.Command;
 
-public record AddPlayerExpServiceCommand(
+public record GainPlayerExpUseCaseCommand(
     int? UserId,
     int Exp
     );

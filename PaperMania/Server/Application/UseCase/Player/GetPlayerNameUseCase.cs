@@ -1,6 +1,6 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
+using Server.Application.Port.In.Player;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
@@ -8,12 +8,12 @@ using Server.Infrastructure.Cache;
 
 namespace Server.Application.UseCase.Player;
 
-    public class GetPlayerNameByUserIdUseCase
+    public class GetPlayerNameUseCase : IGetPlayerNameUseCase
     {
         private readonly IDataRepository _repository;
         private readonly CacheWrapper _cache;
 
-        public GetPlayerNameByUserIdUseCase(
+        public GetPlayerNameUseCase(
             IDataRepository repository,
             CacheWrapper cache
             )
@@ -22,7 +22,7 @@ namespace Server.Application.UseCase.Player;
             _cache = cache;
         }
         
-        public async Task<GetPlayerNameByUserIdResult> ExecuteAsync(GetPlayerNameByUserIdCommand request)
+        public async Task<GetPlayerNameResult> ExecuteAsync(GetPlayerNameCommand request)
         {
             var playerName = await _cache.FetchAsync(
                 CacheKey.Profile.ByUserId(request.UserId),
@@ -39,7 +39,7 @@ namespace Server.Application.UseCase.Player;
                     ErrorStatusCode.NotFound,
                     "PLAYER_NOT_FOUND");
 
-            return new GetPlayerNameByUserIdResult(
+            return new GetPlayerNameResult(
                 PlayerName: playerName
             );
         }

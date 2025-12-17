@@ -1,5 +1,5 @@
 ﻿namespace Server.Application.UseCase.Player.Command;
 
-public record GetPlayerNameByUserIdCommand(
+public record GetPlayerLevelCommand(
     int? UserId
     );

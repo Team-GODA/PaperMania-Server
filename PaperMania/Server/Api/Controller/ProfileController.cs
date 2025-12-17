@@ -14,11 +14,11 @@ namespace Server.Api.Controller;
 [SessionAuthorize]
 public class ProfileController : ControllerBase
 {
-    private readonly GetPlayerNameByUserIdUseCase _getPlayerNameUseCase;
+    private readonly GetPlayerNameUseCase _getPlayerNameUseCase;
     private readonly RenameUseCase _renameUseCase;
 
     public ProfileController(
-        GetPlayerNameByUserIdUseCase getPlayerNameUseCase,
+        GetPlayerNameUseCase getPlayerNameUseCase,
         RenameUseCase renameUseCase
     )
     {
@@ -37,7 +37,7 @@ public class ProfileController : ControllerBase
         var userId = (int)HttpContext.Items["UserId"]!;
 
         var result = await _getPlayerNameUseCase.ExecuteAsync(
-            new GetPlayerNameByUserIdCommand(userId)
+            new GetPlayerNameCommand(userId)
         );
 
         var response = new GetPlayerNameResponse

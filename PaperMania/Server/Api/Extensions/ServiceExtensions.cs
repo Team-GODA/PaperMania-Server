@@ -117,9 +117,9 @@ public static class ServiceExtensions
         
         // player use case
         services.AddScoped<CreatePlayerDataUseCase>();
-        services.AddScoped<GetPlayerNameByUserIdUseCase>();
-        services.AddScoped<GetPlayerLevelByUserIdUseCase>();
-        services.AddScoped<AddPlayerExpUseCase>();
+        services.AddScoped<GetPlayerNameUseCase>();
+        services.AddScoped<GetPlayerLevelUseCase>();
+        services.AddScoped<GainPlayerExpUseCase>();
         services.AddScoped<RenameUseCase>();
         
         // currency use case
