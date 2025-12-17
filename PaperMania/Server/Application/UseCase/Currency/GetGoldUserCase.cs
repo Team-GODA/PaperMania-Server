@@ -1,7 +1,5 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
-using Server.Application.Port.In;
 using Server.Application.Port.In.Currency;
 using Server.Application.Port.Out.Persistence;
 
