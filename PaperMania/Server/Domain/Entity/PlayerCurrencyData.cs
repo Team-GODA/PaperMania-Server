@@ -1,4 +1,7 @@
-﻿namespace Server.Domain.Entity;
+﻿using Server.Api.Dto.Response;
+using Server.Application.Exceptions;
+
+namespace Server.Domain.Entity;
 
 public class PlayerCurrencyData
 {
@@ -8,4 +11,29 @@ public class PlayerCurrencyData
     public int Gold { get; set; }
     public int PaperPiece { get; set; }
     public DateTime LastActionPointUpdated { get; set; }
+
+    public void SpendGold(int amount)
+    {
+        if (amount <= 0)
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_GOLD_AMOUNT");
+        
+        if (Gold < amount)
+            throw new RequestException(
+                ErrorStatusCode.Conflict,
+                "NOT_ENOUGH_GOLD");
+        
+        Gold -= amount;
+    }
+    
+    public void GainGold(int amount)
+    {
+        if (amount <= 0)
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_GOLD_AMOUNT");
+
+        Gold += amount;
+    }
 }

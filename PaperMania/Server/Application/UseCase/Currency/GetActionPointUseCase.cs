@@ -32,7 +32,7 @@ public class GetActionPointUseCase : IGetActionPointUseCase
         
         var regenerate = _apService.TryRegenerate(data, DateTime.UtcNow);
         if (regenerate)
-            await _repository.UpdateDataAsync(data);
+            await _repository.UpdateAsync(data);
         
         return new GetActionPointResult(data.ActionPoint);
     }

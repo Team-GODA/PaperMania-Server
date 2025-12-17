@@ -7,12 +7,12 @@ using Server.Application.UseCase.Currency.Command;
 
 namespace Server.Application.UseCase.Currency;
 
-public class GainGoldUseCase : IGainGoldUseCase
+public class SpendGoldUseCase : ISpendGoldUseCase
 {
     private readonly ICurrencyRepository _repository;
     private readonly ITransactionScope _transactionScope;
-
-    public GainGoldUseCase(
+    
+    public SpendGoldUseCase(
         ICurrencyRepository repository,
         ITransactionScope transactionScope)
     {
@@ -20,7 +20,7 @@ public class GainGoldUseCase : IGainGoldUseCase
         _transactionScope = transactionScope;
     }
     
-    public async Task<int> ExecuteAsync(GainGoldCommand request)
+    public async Task<int> ExecuteAsync(SpendGoldCommand request)
     {
         request.Validate();
 
@@ -31,8 +31,8 @@ public class GainGoldUseCase : IGainGoldUseCase
                            ErrorStatusCode.NotFound,
                            "PLAYER_NOT_FOUND");
 
+            data.SpendGold(request.Gold);
 
-            data.Gold += request.Gold;
             await _repository.UpdateAsync(data);
 
             return data.Gold;

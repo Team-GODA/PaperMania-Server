@@ -74,7 +74,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
             );
     }
 
-    public async Task UpdateDataAsync(PlayerCurrencyData data)
+    public async Task UpdateAsync(PlayerCurrencyData data)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(

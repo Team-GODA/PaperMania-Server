@@ -40,7 +40,7 @@ public class SpendActionPointUseCase : ISpendActionPointUseCase
             data.ActionPoint = Math.Max(data.ActionPoint - request.UsedActionPoint, 0);
             data.LastActionPointUpdated = DateTime.UtcNow;
             
-            await _repository.UpdateDataAsync(data);
+            await _repository.UpdateAsync(data);
 
             return new UseActionPointResult(
                 data.ActionPoint

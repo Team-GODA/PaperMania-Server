@@ -3,7 +3,7 @@ using Server.Application.Exceptions;
 
 namespace Server.Application.UseCase.Currency.Command;
 
-public record GainGoldCommand(
+public record SpendGoldCommand(
     int UserId,
     int Gold
 )

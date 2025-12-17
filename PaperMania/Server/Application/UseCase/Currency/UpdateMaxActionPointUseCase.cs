@@ -31,7 +31,7 @@ public class UpdateMaxActionPointUseCase : IUpdateMaxActionPointUseCase
                 throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_NOT_FOUND");
         
             data.MaxActionPoint = request.MaxActionPoint;
-            await _repository.UpdateDataAsync(data);
+            await _repository.UpdateAsync(data);
         
             return new UpdateMaxActionPointResult(data.MaxActionPoint);
         });
