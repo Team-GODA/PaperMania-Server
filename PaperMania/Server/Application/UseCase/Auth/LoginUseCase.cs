@@ -11,17 +11,17 @@ public class LoginUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly ISessionService _sessionService;
-    private readonly UserService _userService;
+    private readonly IPasswordHasher _passwordHasher;
 
     public LoginUseCase(
         IAccountRepository repository,
         ISessionService sessionService,
-        UserService userService
+        IPasswordHasher passwordHasher
     )
     {
         _repository = repository;
         _sessionService = sessionService;
-        _userService = userService;
+        _passwordHasher = passwordHasher;
     }
     
     public async Task<LoginResult> ExecuteAsync(LoginCommand request)
@@ -31,13 +31,13 @@ public class LoginUseCase
         var account = await _repository.FindByPlayerIdAsync(request.PlayerId);
         if (account == null || string.IsNullOrEmpty(account.Password))
         {
-            _userService.VerifyPassword(request.Password, "DUMMY_HASH");
+            _passwordHasher.Verify(request.Password, "DUMMY_HASH");
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
                 "INVALID_CREDENTIALS");
         }
 
-        if (!_userService.VerifyPassword(request.Password, account.Password))
+        if (!_passwordHasher.Verify(request.Password, account.Password))
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
                 "INVALID_PASSWORD");

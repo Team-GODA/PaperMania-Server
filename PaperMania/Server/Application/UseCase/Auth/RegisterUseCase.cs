@@ -10,18 +10,15 @@ namespace Server.Application.UseCase.Auth;
 public class RegisterUseCase
 {
     private readonly IAccountRepository _repository;
-    private readonly ISessionService _sessionService;
-    private readonly UserService _userService;
+    private readonly IPasswordHasher _passwordHasher;
 
     public RegisterUseCase(
         IAccountRepository repository,
-        ISessionService sessionService,
-        UserService userService
+        IPasswordHasher passwordHasher
     )
     {
         _repository = repository;
-        _sessionService = sessionService;
-        _userService = userService;
+        _passwordHasher = passwordHasher;
     }
     
     public async Task ExecuteAsync(RegisterCommand request)
@@ -35,7 +32,7 @@ public class RegisterUseCase
                 "PLAYER_ID_ALREADY_EXISTS"
             );
 
-        var hashedPassword = _userService.HashPassword(request.Password);
+        var hashedPassword = _passwordHasher.Hash(request.Password);
         
         var newAccount = new PlayerAccountData
         {

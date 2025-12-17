@@ -124,7 +124,7 @@ public static class ServiceExtensions
         services.AddScoped<UpdateMaxActionPointUseCase>();
         services.AddScoped<UseActionPointUseCase>();
         
-        services.AddScoped<UserService>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();
         
         services.AddScoped<CacheWrapper>();
