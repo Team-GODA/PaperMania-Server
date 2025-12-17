@@ -3,6 +3,7 @@ using Server.Application.Port;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Data;
+using Server.Application.UseCase.Player;
 using Server.Infrastructure.Cache;
 using Server.Infrastructure.Repository;
 using Server.Infrastructure.Service;
@@ -105,15 +106,17 @@ public static class ServiceExtensions
         services.AddScoped<ISessionService, SessionService>();
         services.AddScoped<SessionValidationFilter>();
 
+        // auth use case
         services.AddScoped<LoginUseCase>();
         services.AddScoped<RegisterUseCase>();
         services.AddScoped<LogoutUseCase>();
         services.AddScoped<ValidateUseCase>();
         
-        services.AddScoped<ICreatePlayerDataUseCase, CreatePlayerDataUseCase>();
-        services.AddScoped<IGetPlayerNameByUserIdUseCase, GetPlayerNameByUserIdUseCase>();
-        services.AddScoped<IGetPlayerLevelByUserIdUseCase, GetPlayerLevelByUserIdUseCase>();
-        services.AddScoped<IAddPlayerExpService, AddPlayerExpUseCase>();
+        // player use case
+        services.AddScoped<CreatePlayerDataUseCase>();
+        services.AddScoped<GetPlayerNameByUserIdUseCase>();
+        services.AddScoped<GetPlayerLevelByUserIdUseCase>();
+        services.AddScoped<AddPlayerExpUseCase>();
         
         services.AddScoped<IGetActionPointUseCase, GetActionPointUseCase>();
         services.AddScoped<IRegenerateActionPointUseCase, RegenerateActionPointUseCase>();

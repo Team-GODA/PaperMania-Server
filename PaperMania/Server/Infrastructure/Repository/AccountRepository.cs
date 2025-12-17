@@ -8,6 +8,14 @@ public class AccountRepository : RepositoryBase, IAccountRepository
 {
     private static class Sql
     {
+        public const string GetByUserId = @"
+            SELECT id AS Id, player_id AS PlayerId, email AS Email, 
+                   password AS Password, is_new_account AS IsNewAccount,
+                   role AS Role, created_at AS CreatedAt
+            FROM paper_mania_account_data.player_account_data
+            WHERE id = @UserId
+            LIMIT 1";
+        
         public const string GetByPlayerId = @"
             SELECT id AS Id, player_id AS PlayerId, email AS Email, 
                    password AS Password, is_new_account AS IsNewAccount,
@@ -54,6 +62,16 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)
     {
+    }
+    
+    public async Task<PlayerAccountData?> FindByUserIdAsync(int userId)
+    {
+        return await QueryAsync(connection =>
+            connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
+                Sql.GetByUserId, 
+                new { UserId = userId }
+            )
+        );
     }
     
     public async Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId)

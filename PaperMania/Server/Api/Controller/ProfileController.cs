@@ -5,7 +5,8 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
 using Server.Application.UseCase.Data;
-using Server.Application.UseCase.Data.Command;
+using Server.Application.UseCase.Player;
+using Server.Application.UseCase.Player.Command;
 
 namespace Server.Api.Controller;
 
@@ -14,12 +15,12 @@ namespace Server.Api.Controller;
 [SessionAuthorize]
 public class ProfileController : ControllerBase
 {
-    private readonly IGetPlayerNameByUserIdUseCase _getPlayerNameUseCase;
-    private readonly IRenameUseCase _renameUseCase;
+    private readonly GetPlayerNameByUserIdUseCase _getPlayerNameUseCase;
+    private readonly RenameUseCase _renameUseCase;
 
     public ProfileController(
-        IGetPlayerNameByUserIdUseCase getPlayerNameUseCase,
-        IRenameUseCase renameUseCase
+        GetPlayerNameByUserIdUseCase getPlayerNameUseCase,
+        RenameUseCase renameUseCase
     )
     {
         _getPlayerNameUseCase = getPlayerNameUseCase;

@@ -1,4 +1,4 @@
-﻿namespace Server.Application.UseCase.Data.Result;
+﻿namespace Server.Application.UseCase.Player.Result;
 
 public record GetPlayerNameByUserIdResult(
     string PlayerName

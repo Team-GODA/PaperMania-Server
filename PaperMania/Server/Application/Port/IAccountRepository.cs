@@ -4,6 +4,7 @@ namespace Server.Application.Port;
 
 public interface IAccountRepository
 {
+    Task<PlayerAccountData?> FindByUserIdAsync(int userId);
     Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId);
     Task<PlayerAccountData?> FindByEmailAsync(string email);
     Task<bool> ExistsByPlayerIdAsync(string playerId);

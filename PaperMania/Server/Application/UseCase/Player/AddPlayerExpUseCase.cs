@@ -1,12 +1,12 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
-using Server.Application.UseCase.Data.Command;
-using Server.Application.UseCase.Data.Result;
+using Server.Application.UseCase.Player.Command;
+using Server.Application.UseCase.Player.Result;
 
-namespace Server.Application.UseCase.Data;
+namespace Server.Application.UseCase.Player;
 
-public class AddPlayerExpUseCase : IAddPlayerExpService
+public class AddPlayerExpUseCase
 {
     private readonly IDataRepository _repository;
 

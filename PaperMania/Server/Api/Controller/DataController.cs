@@ -5,8 +5,8 @@ using Server.Api.Dto.Request;
 using Server.Application.Port;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
-using Server.Application.UseCase.Data;
-using Server.Application.UseCase.Data.Command;
+using Server.Application.UseCase.Player;
+using Server.Application.UseCase.Player.Command;
 
 namespace Server.Api.Controller
 {
@@ -15,23 +15,23 @@ namespace Server.Api.Controller
     [SessionAuthorize]
     public class DataController : ControllerBase
     {
-        private readonly ICreatePlayerDataUseCase _createPlayerDataUseCase;
-        private readonly IGetPlayerLevelByUserIdUseCase _getPlayerLevelByUserIdUseCase;
-        private readonly IAddPlayerExpService _addPlayerExpService;
+        private readonly CreatePlayerDataUseCase _createPlayerDataUseCase;
+        private readonly GetPlayerLevelByUserIdUseCase _getPlayerLevelByUserIdUseCase;
+        private readonly AddPlayerExpUseCase _addPlayerExpUseCase;
         private readonly ISessionService _sessionService;
         private readonly ILogger<DataController> _logger;
 
         public DataController(
-            ICreatePlayerDataUseCase createPlayerDataUseCase,
-            IGetPlayerLevelByUserIdUseCase getPlayerLevelByUserIdUseCase,
-            IAddPlayerExpService addPlayerExpService,
+            CreatePlayerDataUseCase createPlayerDataUseCase,
+            GetPlayerLevelByUserIdUseCase getPlayerLevelByUserIdUseCase,
+            AddPlayerExpUseCase addPlayerExpUseCase,
             ISessionService sessionService,
             ILogger<DataController> logger
             )
         {
             _createPlayerDataUseCase = createPlayerDataUseCase;
             _getPlayerLevelByUserIdUseCase = getPlayerLevelByUserIdUseCase;
-            _addPlayerExpService = addPlayerExpService;
+            _addPlayerExpUseCase = addPlayerExpUseCase;
             _sessionService = sessionService;
             _logger = logger;
         }
@@ -102,7 +102,7 @@ namespace Server.Api.Controller
 
             _logger.LogInformation($"플레이어 레벨 갱신 시도: UserId: {userId}");
 
-            var result = await _addPlayerExpService.ExecuteAsync(new AddPlayerExpServiceCommand(
+            var result = await _addPlayerExpUseCase.ExecuteAsync(new AddPlayerExpServiceCommand(
                 userId, 
                 request.NewExp)
             );

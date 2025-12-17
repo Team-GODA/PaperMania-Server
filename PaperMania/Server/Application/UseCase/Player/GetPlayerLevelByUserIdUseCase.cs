@@ -1,14 +1,14 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
-using Server.Application.UseCase.Data.Command;
-using Server.Application.UseCase.Data.Result;
+using Server.Application.UseCase.Player.Command;
+using Server.Application.UseCase.Player.Result;
 using Server.Domain.Entity;
 using Server.Infrastructure.Cache;
 
-namespace Server.Application.UseCase.Data;
+namespace Server.Application.UseCase.Player;
 
-public class GetPlayerLevelByUserIdUseCase : IGetPlayerLevelByUserIdUseCase
+public class GetPlayerLevelByUserIdUseCase
 {
     private readonly IDataRepository _repository;
     private readonly CacheWrapper _cache;

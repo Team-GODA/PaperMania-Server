@@ -1,4 +1,4 @@
-﻿namespace Server.Application.UseCase.Data.Command;
+﻿namespace Server.Application.UseCase.Player.Command;
 
 public record GetPlayerLevelByUserIdCommand(
     int? UserId
