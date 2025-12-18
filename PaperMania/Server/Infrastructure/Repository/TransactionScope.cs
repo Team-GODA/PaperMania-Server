@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using Npgsql;
-using Server.Application.Port;
 using Server.Application.Port.Out.Infrastructure;
 
 namespace Server.Infrastructure.Repository;
@@ -175,7 +174,7 @@ public class TransactionScope : ITransactionScope
         GC.SuppressFinalize(this);
     }
 
-    protected void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (_disposed) return;
 
@@ -206,7 +205,7 @@ public class TransactionScope : ITransactionScope
         _disposed = true;
     }
 
-    protected async ValueTask DisposeAsyncCore()
+    private async ValueTask DisposeAsyncCore()
     {
         if (_disposed) return;
 
