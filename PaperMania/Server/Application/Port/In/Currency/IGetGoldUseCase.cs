@@ -1,6 +1,8 @@
-﻿namespace Server.Application.Port.In.Currency;
+﻿using Server.Application.UseCase.Currency.Result;
+
+namespace Server.Application.Port.In.Currency;
 
 public interface IGetGoldUseCase
 {
-    Task<int> ExecuteAsync(int userId);
+    Task<GetGoldResult> ExecuteAsync(int userId);
 }

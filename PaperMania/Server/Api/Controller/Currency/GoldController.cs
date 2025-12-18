@@ -40,10 +40,10 @@ namespace Server.Api.Controller.Currency
         {
             _logger.LogInformation($"플레이어 골드 조회 시도 : UserId : {UserId}");
             
-            var gold = await _getGoldUseCase.ExecuteAsync(UserId);
+            var result = await _getGoldUseCase.ExecuteAsync(UserId);
             var response = new GetPlayerGoldResponse
             {
-                CurrentGold = gold
+                CurrentGold = result.Gold
             };
                 
             _logger.LogInformation($"플레이어 골드 조회 성공 : UserId {UserId}");
@@ -56,13 +56,13 @@ namespace Server.Api.Controller.Currency
         {
             _logger.LogInformation($"플레이어 골드 추가 시도 : UserId : {UserId}");
             
-            var gold = await _gainGoldUseCase.ExecuteAsync(new GainGoldCommand(
+            var result = await _gainGoldUseCase.ExecuteAsync(new GainGoldCommand(
                 UserId, request.Gold)
             );
 
             var response = new GainGoldResponse
             {
-                Gold = gold
+                Gold = result.Gold
             };
             
             return Ok(ApiResponse.Ok("플레이어 골드 추가 성공", response));
@@ -74,13 +74,13 @@ namespace Server.Api.Controller.Currency
         {
             _logger.LogInformation($"플레이어 골드 사용 시도 : UserID : {UserId}");
 
-            var gold = await _spendGoldUseCase.ExecuteAsync(new SpendGoldCommand(
+            var result = await _spendGoldUseCase.ExecuteAsync(new SpendGoldCommand(
                 UserId, request.Gold)
             );
 
             var response = new SpendGoldResponse
             {
-                Gold = gold
+                Gold = result.Gold
             };
 
             return Ok(ApiResponse.Ok("플레이어 골드 사용 성공", response));

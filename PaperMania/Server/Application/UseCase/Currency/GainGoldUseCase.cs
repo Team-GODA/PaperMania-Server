@@ -4,6 +4,7 @@ using Server.Application.Port.In.Currency;
 using Server.Application.Port.Out.Infrastructure;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.UseCase.Currency.Command;
+using Server.Application.UseCase.Currency.Result;
 
 namespace Server.Application.UseCase.Currency;
 
@@ -20,7 +21,7 @@ public class GainGoldUseCase : IGainGoldUseCase
         _transactionScope = transactionScope;
     }
     
-    public async Task<int> ExecuteAsync(GainGoldCommand request)
+    public async Task<GainGoldResult> ExecuteAsync(GainGoldCommand request)
     {
         request.Validate();
 
@@ -35,7 +36,7 @@ public class GainGoldUseCase : IGainGoldUseCase
             data.Gold += request.Gold;
             await _repository.UpdateAsync(data);
 
-            return data.Gold;
+            return new GainGoldResult(data.Gold);
         });
     }
 }
