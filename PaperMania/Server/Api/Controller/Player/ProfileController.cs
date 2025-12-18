@@ -1,4 +1,3 @@
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
@@ -9,10 +8,11 @@ using Server.Application.UseCase.Player.Command;
 
 namespace Server.Api.Controller.Player;
 
+[ApiLog("Profile")]
 [Route("api/v3/player/profile")]
 [ApiController]
 [SessionAuthorize]
-public class ProfileController : ControllerBase
+public class ProfileController : BaseController
 {
     private readonly GetPlayerNameUseCase _getPlayerNameUseCase;
     private readonly RenameUseCase _renameUseCase;
@@ -29,20 +29,16 @@ public class ProfileController : ControllerBase
     /// <summary>
     /// 현재 플레이어의 이름을 조회합니다.
     /// </summary>
-    /// <returns>플레이어 이름 정보</returns>
     [HttpGet("name")]
-    [ProducesResponseType(typeof(BaseResponse<GetPlayerNameResponse>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<BaseResponse<GetPlayerNameResponse>>> GetPlayerName()
     {
-        var userId = (int)HttpContext.Items["UserId"]!;
-
         var result = await _getPlayerNameUseCase.ExecuteAsync(
-            new GetPlayerNameCommand(userId)
+            new GetPlayerNameCommand(UserId)
         );
 
         var response = new GetPlayerNameResponse
         {
-            Id = userId,
+            Id = UserId,
             PlayerName = result.PlayerName
         };
 
@@ -52,23 +48,18 @@ public class ProfileController : ControllerBase
     /// <summary>
     /// 플레이어 이름을 변경합니다.
     /// </summary>
-    /// <param name="request">변경할 새 플레이어 이름 정보</param>
-    /// <returns>변경된 이름 반환</returns>
     [HttpPatch("name")]
-    [ProducesResponseType(typeof(BaseResponse<RenamePlayerNameResponse>), (int)HttpStatusCode.OK)]
     public async Task<ActionResult<BaseResponse<RenamePlayerNameResponse>>> RenamePlayerName(
         [FromBody] RenamePlayerNameRequest request
     )
     {
-        var userId = (int)HttpContext.Items["UserId"]!;
-
         var result = await _renameUseCase.ExecuteAsync(
-            new RenameCommand(userId, request.NewName)
+            new RenameCommand(UserId, request.NewName)
         );
 
         var response = new RenamePlayerNameResponse
         {
-            Id = userId,
+            Id = UserId,
             NewPlayerName = result.NewName
         };
 

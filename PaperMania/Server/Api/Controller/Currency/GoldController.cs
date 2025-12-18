@@ -8,6 +8,7 @@ using Server.Application.UseCase.Currency.Command;
 
 namespace Server.Api.Controller.Currency
 {
+    [ApiLog("Currency-Gold")]
     [Route("api/v3/player/currency/gold")]
     [ApiController]
     [SessionAuthorize]
@@ -16,19 +17,16 @@ namespace Server.Api.Controller.Currency
         private readonly IGetGoldUseCase _getGoldUseCase;
         private readonly IGainGoldUseCase _gainGoldUseCase;
         private readonly ISpendGoldUseCase _spendGoldUseCase;
-        private readonly ILogger<GoldController> _logger;
 
         public GoldController(
             IGetGoldUseCase getGoldUseCase,
             IGainGoldUseCase gainGoldUseCase,
-            ISpendGoldUseCase spendGoldUseCase,
-            ILogger<GoldController> logger
+            ISpendGoldUseCase spendGoldUseCase
         )
         {
             _getGoldUseCase = getGoldUseCase;
             _gainGoldUseCase = gainGoldUseCase;
             _spendGoldUseCase = spendGoldUseCase;
-            _logger = logger;
         }
         
         /// <summary>
@@ -36,26 +34,21 @@ namespace Server.Api.Controller.Currency
         /// </summary>
         /// <returns>현재 골드</returns>
         [HttpGet]
-        public async Task<ActionResult<BaseResponse<GetPlayerGoldResponse>>> GetPlayerGold()
+        public async Task<ActionResult<BaseResponse<BaseResponse<GetPlayerGoldResponse>>>> GetPlayerGold()
         {
-            _logger.LogInformation($"플레이어 골드 조회 시도 : UserId : {UserId}");
-            
             var result = await _getGoldUseCase.ExecuteAsync(UserId);
             var response = new GetPlayerGoldResponse
             {
                 CurrentGold = result.Gold
             };
                 
-            _logger.LogInformation($"플레이어 골드 조회 성공 : UserId {UserId}");
             return Ok(ApiResponse.Ok("플레이어 골드 조회 성공", response));
         }
 
         [HttpPatch("gain")]
-        public async Task<ActionResult<GetPlayerGoldResponse>> GainGold(
+        public async Task<ActionResult<BaseResponse<GetPlayerGoldResponse>>> GainGold(
             [FromBody] GainGoldRequest request)
         {
-            _logger.LogInformation($"플레이어 골드 추가 시도 : UserId : {UserId}");
-            
             var result = await _gainGoldUseCase.ExecuteAsync(new GainGoldCommand(
                 UserId, request.Gold)
             );
@@ -69,11 +62,9 @@ namespace Server.Api.Controller.Currency
         }
 
         [HttpPatch("spend")]
-        public async Task<ActionResult<SpendGoldResponse>> SpendGold(
+        public async Task<ActionResult<BaseResponse<SpendGoldResponse>>> SpendGold(
             [FromBody] SpendGoldRequest request)
         {
-            _logger.LogInformation($"플레이어 골드 사용 시도 : UserID : {UserId}");
-
             var result = await _spendGoldUseCase.ExecuteAsync(new SpendGoldCommand(
                 UserId, request.Gold)
             );

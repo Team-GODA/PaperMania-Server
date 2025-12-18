@@ -21,4 +21,20 @@ public abstract class BaseController : ControllerBase
             return userId;
         }
     }
+
+    protected string SessionId
+    {
+        get
+        {
+            if (!HttpContext.Items.TryGetValue("SessionId", out var sessionIdObj)
+                || sessionIdObj is not string sessionId)
+            {
+                throw new RequestException(
+                    ErrorStatusCode.Unauthorized,
+                    "INVALID_SESSION");
+            }
+            
+            return sessionId;
+        }
+    }
 }

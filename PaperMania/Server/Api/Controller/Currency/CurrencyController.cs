@@ -7,28 +7,24 @@ using Server.Application.UseCase.Currency.Command;
 
 namespace Server.Api.Controller.Currency
 {
+    [ApiLog("Currency")]
     [Route("api/v3/player/currency")]
     [ApiController]
     [SessionAuthorize]
     public class CurrencyController : BaseController
     {
         private readonly IGetCurrencyDataUseCase _getCurrencyDataUseCase;
-        private readonly ILogger<CurrencyController> _logger;
 
         public CurrencyController(
-            IGetCurrencyDataUseCase getCurrencyDataUseCase,
-            ILogger<CurrencyController> logger
+            IGetCurrencyDataUseCase getCurrencyDataUseCase
             )
         {
             _getCurrencyDataUseCase = getCurrencyDataUseCase;
-            _logger = logger;
         }
 
         [HttpGet]
-        public async Task<ActionResult<GetCurrencyDataResponse>> GetCurrencyData()
+        public async Task<ActionResult<BaseResponse<GetCurrencyDataResponse>>> GetCurrencyData()
         {
-            _logger.LogInformation("플레이어 전체 재화 조회 시도 : UserId : {UserId}", UserId);
-            
             var result = await _getCurrencyDataUseCase.ExecuteAsync(new GetCurrencyDataCommand(
                 UserId)
             );
@@ -40,7 +36,6 @@ namespace Server.Api.Controller.Currency
                 PaperPiece = result.PaperPiece
             };
             
-            _logger.LogInformation("플레이어 전체 재화 조회 성공 : UserId : {UserId}", UserId);
             return Ok(ApiResponse.Ok("플레이어 전체 재화 조회 성공", response));
         }
     }
