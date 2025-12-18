@@ -6,7 +6,7 @@ public class PasswordHasher : IPasswordHasher
 {
     public string Hash(string password)
     {
-        if (!string.IsNullOrWhiteSpace(password))
+        if (string.IsNullOrWhiteSpace(password))
             throw new ArgumentException("EMPTY_PASSWORD");
         
         return BCrypt.Net.BCrypt.HashPassword(password, 10);
