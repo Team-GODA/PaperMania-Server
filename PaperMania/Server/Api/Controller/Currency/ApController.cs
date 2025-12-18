@@ -4,7 +4,7 @@ using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
-using Server.Application.UseCase.Currency;
+using Server.Application.Port.In.Currency;
 using Server.Application.UseCase.Currency.Command;
 
 namespace Server.Api.Controller.Currency
@@ -14,16 +14,16 @@ namespace Server.Api.Controller.Currency
     [SessionAuthorize]
     public class ApController : BaseController
     {
-        private readonly GetActionPointUseCase _getActionPointUseCase;
-        private readonly UpdateMaxActionPointUseCase _updateMaxActionPointUseCase;
-        private readonly SpendActionPointUseCase _spendActionPointUseCase;
-        private readonly ILogger<CurrencyController> _logger;
+        private readonly IGetActionPointUseCase _getActionPointUseCase;
+        private readonly IUpdateMaxActionPointUseCase _updateMaxActionPointUseCase;
+        private readonly ISpendActionPointUseCase _spendActionPointUseCase;
+        private readonly ILogger<ApController> _logger;
 
         public ApController(
-            GetActionPointUseCase getActionPointUseCase,
-            UpdateMaxActionPointUseCase updateMaxActionPointUseCase,
-            SpendActionPointUseCase spendActionPointUseCase,
-            ILogger<CurrencyController> logger
+            IGetActionPointUseCase getActionPointUseCase,
+            IUpdateMaxActionPointUseCase updateMaxActionPointUseCase,
+            ISpendActionPointUseCase spendActionPointUseCase,
+            ILogger<ApController> logger
         )
         {
             _getActionPointUseCase = getActionPointUseCase;

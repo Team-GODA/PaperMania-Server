@@ -4,7 +4,6 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
 using Server.Application.Port.In.Currency;
-using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Currency.Command;
 
 namespace Server.Api.Controller.Currency
@@ -14,13 +13,13 @@ namespace Server.Api.Controller.Currency
     [SessionAuthorize]
     public class GoldController : BaseController
     {
-        private readonly GetGoldUseCase _getGoldUseCase;
+        private readonly IGetGoldUseCase _getGoldUseCase;
         private readonly IGainGoldUseCase _gainGoldUseCase;
         private readonly ISpendGoldUseCase _spendGoldUseCase;
         private readonly ILogger<GoldController> _logger;
 
         public GoldController(
-            GetGoldUseCase getGoldUseCase,
+            IGetGoldUseCase getGoldUseCase,
             IGainGoldUseCase gainGoldUseCase,
             ISpendGoldUseCase spendGoldUseCase,
             ILogger<GoldController> logger
