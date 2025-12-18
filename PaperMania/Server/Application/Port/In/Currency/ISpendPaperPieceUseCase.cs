@@ -3,7 +3,7 @@ using Server.Application.UseCase.Currency.Result;
 
 namespace Server.Application.Port.In.Currency;
 
-public interface ISpendActionPointUseCase
+public interface ISpendPaperPieceUseCase
 {
-    Task<SpendActionPointResult> ExecuteAsync(SpendActionPointCommand request);
+    Task<SpendPaperPieceResult> ExecuteAsync(SpendPaperPieceCommand request);
 }

@@ -94,7 +94,7 @@ namespace Server.Api.Controller.Currency
         {
             _logger.LogInformation($"플레이어 AP 사용 시도 : UserId : {UserId}");
             
-            var result = await _spendActionPointUseCase.ExecuteAsync(new UseActionPointCommand(
+            var result = await _spendActionPointUseCase.ExecuteAsync(new SpendActionPointCommand(
                 UserId, request.UsedActionPoint)
             
             );

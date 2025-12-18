@@ -24,7 +24,7 @@ public class PlayerCurrencyData
                 ErrorStatusCode.Conflict,
                 "NOT_ENOUGH_GOLD");
         
-        Gold -= amount;
+        Gold = Math.Max(Gold - amount, 0);
     }
     
     public void GainGold(int amount)
@@ -35,5 +35,30 @@ public class PlayerCurrencyData
                 "INVALID_GOLD_AMOUNT");
 
         Gold += amount;
+    }
+
+    public void SpendPaperPiece(int amount)
+    {
+        if (amount <= 0)
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_PAPER_PIECE_AMOUNT");
+        
+        if (PaperPiece < amount)
+            throw new RequestException(
+                ErrorStatusCode.Conflict,
+                "NOT_ENOUGH_PAPER_PIECE");
+        
+        PaperPiece = Math.Max(PaperPiece - amount, 0);
+    }
+
+    public void GainPaperPiece(int amount)
+    {
+        if (amount <= 0)
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_PAPER_PIECE_AMOUNT");
+        
+        PaperPiece += amount;
     }
 }

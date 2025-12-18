@@ -22,8 +22,10 @@ public class SpendActionPointUseCase : ISpendActionPointUseCase
         _transactionScope = transactionScope;
     }
     
-    public async Task<UseActionPointResult> ExecuteAsync(UseActionPointCommand request)
+    public async Task<SpendActionPointResult> ExecuteAsync(SpendActionPointCommand request)
     {
+        request.Validate();
+        
         return await _transactionScope.ExecuteAsync(async () =>
         {
             var data = await _repository.FindByUserIdAsync(request.UserId);
@@ -32,17 +34,17 @@ public class SpendActionPointUseCase : ISpendActionPointUseCase
                     ErrorStatusCode.NotFound,
                     "PLAYER_NOT_FOUND");
 
-            if (data.ActionPoint < request.UsedActionPoint)
+            if (data.ActionPoint < request.ActionPoint)
                 throw new RequestException(
                     ErrorStatusCode.BadRequest,
                     "INSUFFICIENT_ACTION_POINT");
             
-            data.ActionPoint = Math.Max(data.ActionPoint - request.UsedActionPoint, 0);
+            data.ActionPoint = Math.Max(data.ActionPoint - request.ActionPoint, 0);
             data.LastActionPointUpdated = DateTime.UtcNow;
             
             await _repository.UpdateAsync(data);
 
-            return new UseActionPointResult(
+            return new SpendActionPointResult(
                 data.ActionPoint
                 );
         });
