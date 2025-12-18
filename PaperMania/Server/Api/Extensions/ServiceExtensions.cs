@@ -71,6 +71,17 @@ public static class ServiceExtensions
         
         return services;
     }
+    
+    public static IServiceCollection AddApiFilters(
+        this IServiceCollection services)
+    {
+        services.AddControllers(options =>
+        {
+            options.Filters.Add<ApiLogActionFilter>();
+        });
+
+        return services;
+    }
 
     private static string GetConnectionString(IServiceProvider provider)
     {

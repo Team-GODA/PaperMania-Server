@@ -18,6 +18,7 @@ builder.Services
     .AddRepositories();
 
 builder.Services.AddControllers();
+builder.Services.AddApiFilters();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
