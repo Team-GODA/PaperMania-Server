@@ -3,10 +3,9 @@ using Server.Api.Attribute;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
 using Server.Application.Port.In.Currency;
-using Server.Application.Port.Out.Service;
 using Server.Application.UseCase.Currency.Command;
 
-namespace Server.Api.Controller
+namespace Server.Api.Controller.Currecny
 {
     [Route("api/v3/player/currency")]
     [ApiController]
@@ -28,7 +27,7 @@ namespace Server.Api.Controller
         [HttpGet]
         public async Task<ActionResult<GetCurrencyDataResponse>> GetCurrencyData()
         {
-            _logger.LogInformation($"플레이어 전체 재화 조회 시도 : UserId : {UserId}");
+            _logger.LogInformation("플레이어 전체 재화 조회 시도 : UserId : {UserId}", UserId);
             
             var result = await _getCurrencyDataUseCase.ExecuteAsync(new GetCurrencyDataCommand(
                 UserId)
@@ -41,7 +40,7 @@ namespace Server.Api.Controller
                 PaperPiece = result.PaperPiece
             };
             
-            _logger.LogInformation($"플레이어 전체 재화 조회 성공 : UserId : {UserId}");
+            _logger.LogInformation("플레이어 전체 재화 조회 성공 : UserId : {UserId}", UserId);
             return Ok(ApiResponse.Ok("플레이어 전체 재화 조회 성공", response));
         }
     }

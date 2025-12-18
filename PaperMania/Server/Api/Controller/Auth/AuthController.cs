@@ -4,11 +4,11 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;
 using Server.Application.UseCase.Auth;
-using Server.Application.UseCase.Auth.Command;  
+using Server.Application.UseCase.Auth.Command;
 
-namespace Server.Api.Controller
+namespace Server.Api.Controller.Auth
 {
-    [Route("api/v3/[controller]")]
+    [Route("api/v3/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {

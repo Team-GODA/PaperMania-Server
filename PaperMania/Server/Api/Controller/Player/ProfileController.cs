@@ -7,7 +7,7 @@ using Server.Api.Dto.Response.Data;
 using Server.Application.UseCase.Player;
 using Server.Application.UseCase.Player.Command;
 
-namespace Server.Api.Controller;
+namespace Server.Api.Controller.Player;
 
 [Route("api/v3/player/profile")]
 [ApiController]

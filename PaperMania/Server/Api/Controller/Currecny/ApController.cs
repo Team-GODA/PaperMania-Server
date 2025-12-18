@@ -5,12 +5,11 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
 using Server.Application.Exceptions;
-using Server.Application.Port;
 using Server.Application.Port.Out.Service;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Currency.Command;
 
-namespace Server.Api.Controller
+namespace Server.Api.Controller.Currecny
 {
     [Route("api/v3/player/currency/action-point")]
     [ApiController]

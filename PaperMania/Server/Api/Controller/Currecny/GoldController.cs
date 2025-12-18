@@ -9,7 +9,7 @@ using Server.Application.Port.In.Currency;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Currency.Command;
 
-namespace Server.Api.Controller
+namespace Server.Api.Controller.Currecny
 {
     [Route("api/v3/player/currency/gold")]
     [ApiController]
