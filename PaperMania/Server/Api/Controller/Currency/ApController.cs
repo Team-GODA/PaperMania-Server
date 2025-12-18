@@ -4,37 +4,31 @@ using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
-using Server.Application.Exceptions;
-using Server.Application.Port.Out.Service;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Currency.Command;
 
-namespace Server.Api.Controller.Currecny
+namespace Server.Api.Controller.Currency
 {
     [Route("api/v3/player/currency/action-point")]
     [ApiController]
     [SessionAuthorize]
-    public class ApController : ControllerBase
+    public class ApController : BaseController
     {
         private readonly GetActionPointUseCase _getActionPointUseCase;
         private readonly UpdateMaxActionPointUseCase _updateMaxActionPointUseCase;
         private readonly SpendActionPointUseCase _spendActionPointUseCase;
-        
-        private readonly ISessionService _sessionService;
         private readonly ILogger<CurrencyController> _logger;
 
         public ApController(
             GetActionPointUseCase getActionPointUseCase,
             UpdateMaxActionPointUseCase updateMaxActionPointUseCase,
             SpendActionPointUseCase spendActionPointUseCase,
-            ISessionService sessionService, 
             ILogger<CurrencyController> logger
         )
         {
             _getActionPointUseCase = getActionPointUseCase;
             _updateMaxActionPointUseCase = updateMaxActionPointUseCase;
             _spendActionPointUseCase = spendActionPointUseCase;
-            _sessionService = sessionService;
             _logger = logger;
         }
         
@@ -46,15 +40,12 @@ namespace Server.Api.Controller.Currecny
         /// </remarks>
         /// <returns>현재 행동력 정보</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(BaseResponse<GetPlayerActionPointResponse>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<BaseResponse<GetPlayerActionPointResponse>>> GetPlayerActionPointById()
         {
-            var userId = GetUserId();
-            
-            _logger.LogInformation($"플레이어 AP 조회 시도 : UserId : {userId}");
+            _logger.LogInformation($"플레이어 AP 조회 시도 : UserId : {UserId}");
 
             var result = await _getActionPointUseCase.ExecuteAsync(new GetActionPointCommand(
-                userId)
+                UserId)
             );
 
             var response = new GetPlayerActionPointResponse
@@ -62,8 +53,8 @@ namespace Server.Api.Controller.Currecny
                 CurrentActionPoint = result.ActionPoint
             };
                 
-            _logger.LogInformation($"플레이어 AP 조회 성공 : UserId : {userId}");
-            return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : UserId : {userId}", response));
+            _logger.LogInformation($"플레이어 AP 조회 성공 : UserId : {UserId}");
+            return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : UserId : {UserId}", response));
         }
         
         /// <summary>
@@ -76,12 +67,10 @@ namespace Server.Api.Controller.Currecny
         public async Task<ActionResult<BaseResponse<UpdatePlayerMaxActionPointResponse>>> UpdatePlayerMaxActionPoint(
             [FromBody] UpdatePlayerMaxActionPointRequest request)
         {
-            var userId = GetUserId();
-            
             _logger.LogInformation($"플레이어 최대 AP 갱신 시도");
             
             var result = await _updateMaxActionPointUseCase.ExecuteAsync(new UpdateMaxActionPointCommand(
-                userId, request.NewMaxActionPoint)
+                UserId, request.NewMaxActionPoint)
             
             );
             var response = new UpdatePlayerMaxActionPointResponse
@@ -89,7 +78,7 @@ namespace Server.Api.Controller.Currecny
                 NewMaxActionPoint = result.MaxActionPoint
             };
                 
-            _logger.LogInformation($"플레이어 최대 AP 갱신 성공 : UserId : {userId}");
+            _logger.LogInformation($"플레이어 최대 AP 갱신 성공 : UserId : {UserId}");
             return Ok(ApiResponse.Ok("플레이어 최대 AP 갱신 성공", response));
         }
         
@@ -103,12 +92,10 @@ namespace Server.Api.Controller.Currecny
         public async Task<ActionResult<BaseResponse<UsePlayerActionPointResponse>>> UsePlayerActionPoint(
             [FromBody] UsePlayerActionPointRequest request)
         {
-            var userId = GetUserId();
-            
-            _logger.LogInformation($"플레이어 AP 사용 시도 : UserId : {userId}");
+            _logger.LogInformation($"플레이어 AP 사용 시도 : UserId : {UserId}");
             
             var result = await _spendActionPointUseCase.ExecuteAsync(new UseActionPointCommand(
-                userId, request.UsedActionPoint)
+                UserId, request.UsedActionPoint)
             
             );
         
@@ -117,21 +104,8 @@ namespace Server.Api.Controller.Currecny
                 CurrentActionPoint = result.ActionPoint
             };
         
-            _logger.LogInformation($"플레이어 AP 사용 성공 : UserId : {userId}");
+            _logger.LogInformation($"플레이어 AP 사용 성공 : UserId : {UserId}");
             return Ok(ApiResponse.Ok("플레이어 AP 사용 성공", response));
-        }
-
-        private int GetUserId()
-        {
-            if (!HttpContext.Items.TryGetValue("UserId", out var userIdObj)
-                || userIdObj is not int userId)
-            {
-                throw new RequestException(
-                    ErrorStatusCode.Unauthorized,
-                    "INVALID_SESSION");
-            }
-            
-            return userId;
         }
     }
 }

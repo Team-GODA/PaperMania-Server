@@ -5,7 +5,7 @@ using Server.Api.Dto.Response.Currency;
 using Server.Application.Port.In.Currency;
 using Server.Application.UseCase.Currency.Command;
 
-namespace Server.Api.Controller.Currecny
+namespace Server.Api.Controller.Currency
 {
     [Route("api/v3/player/currency")]
     [ApiController]
