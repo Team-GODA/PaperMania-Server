@@ -26,6 +26,7 @@ namespace Server.Api.Controller.Currency
             )
         {
             _getPaperPieceUseCase = getPaperPieceUseCase;
+            _gainPaperPieceUseCase = gainPaperPieceUseCase;
             _spendPaperPieceUseCase = spendPaperPieceUseCase;
             _logger = logger;
         }
