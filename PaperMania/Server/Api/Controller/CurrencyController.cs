@@ -14,18 +14,14 @@ namespace Server.Api.Controller
     public class CurrencyController : BaseController
     {
         private readonly IGetCurrencyDataUseCase _getCurrencyDataUseCase;
-        
-        private readonly ISessionService _sessionService;
         private readonly ILogger<CurrencyController> _logger;
 
         public CurrencyController(
             IGetCurrencyDataUseCase getCurrencyDataUseCase,
-            ISessionService sessionService, 
             ILogger<CurrencyController> logger
             )
         {
             _getCurrencyDataUseCase = getCurrencyDataUseCase;
-            _sessionService = sessionService;
             _logger = logger;
         }
 
