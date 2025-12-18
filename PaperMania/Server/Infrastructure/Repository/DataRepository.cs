@@ -67,14 +67,14 @@ public class DataRepository : RepositoryBase, IDataRepository
              );
     }
 
-    public async Task CreateDataAsync(int? userId, string playerName)
+    public async Task CreateAsync(PlayerGameData player)
     {
         await ExecuteAsync( (connection, transaction) =>
-             connection.ExecuteAsync(
+            connection.ExecuteAsync(
                 Sql.AddPlayerData,
-                new { UserId = userId, PlayerName = playerName },
+                new { UserId = player.UserId, PlayerName = player.PlayerName },
                 transaction)
-             );
+        );
     }
 
     public async Task<PlayerGameData?> FindByUserIdAsync(int? userId)

@@ -18,11 +18,7 @@ public class RenameUseCase : IRenameUseCase
     
     public async Task<RenameResult> ExecuteAsync(RenameCommand request)
     {
-        if (string.IsNullOrEmpty(request.NewName))
-            throw new RequestException(
-                ErrorStatusCode.BadRequest,
-                "NEW_NAME_EMPTY",
-                new {UserId = request.UserId});
+        request.Validate();
 
         var exist = await _repository.ExistsPlayerNameAsync(request.NewName);
         if (exist != null)

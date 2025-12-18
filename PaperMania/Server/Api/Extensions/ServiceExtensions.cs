@@ -36,12 +36,6 @@ public static class ServiceExtensions
             return new DataRepository(connectionString);
         });
         
-        services.AddScoped<IPlayerRepository>(provider =>
-        {
-            var connectionString = GetConnectionString(provider);
-            return new PlayerRepository(connectionString);
-        });
-        
         services.AddScoped<ICurrencyRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
@@ -136,6 +130,12 @@ public static class ServiceExtensions
         services.AddScoped<GetActionPointUseCase>();
         services.AddScoped<UpdateMaxActionPointUseCase>();
         services.AddScoped<SpendActionPointUseCase>();
+        services.AddScoped<GainGoldUseCase>();
+        services.AddScoped<GetGoldUseCase>();
+        services.AddScoped<SpendGoldUseCase>();
+        services.AddScoped<GainPaperPieceUseCase>();
+        services.AddScoped<GetPaperPieceUseCase>();
+        services.AddScoped<SpendPaperPieceUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();

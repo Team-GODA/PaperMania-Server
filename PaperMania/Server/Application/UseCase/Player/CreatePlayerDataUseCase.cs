@@ -12,7 +12,7 @@ namespace Server.Application.UseCase.Player;
 
 public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
 {
-    private readonly IPlayerRepository _playerRepository;
+    private readonly IDataRepository _dataRepository;
     private readonly IAccountRepository _accountRepository;
     private readonly ICurrencyRepository _currencyRepository;
     private readonly ISessionService _sessionService;
@@ -20,14 +20,14 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
     private readonly ITransactionScope _transactionScope;
 
     public CreatePlayerDataUseCase(
-        IPlayerRepository  playerRepository,
+        IDataRepository  dataRepository,
         IAccountRepository  accountRepository,
         ICurrencyRepository currencyRepository,
         ISessionService sessionService,
         IStageRepository stageRepository,
         ITransactionScope transactionScope)
     {
-        _playerRepository = playerRepository;
+        _dataRepository = dataRepository;
         _accountRepository = accountRepository;
         _currencyRepository = currencyRepository;
         _sessionService = sessionService;
@@ -60,7 +60,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
                 PlayerExp = 0
             };
             
-            await _playerRepository.CreateAsync(player);
+            await _dataRepository.CreateAsync(player);
             await _currencyRepository.CreateByUserIdAsync(userId);
             await _stageRepository.CreatePlayerStageDataAsync(userId);
             
