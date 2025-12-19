@@ -124,7 +124,7 @@ public static class ServiceExtensions
         
         // player use case
         services.AddScoped<ICreatePlayerDataUseCase, CreatePlayerDataUseCase>();
-        services.AddScoped<GetPlayerNameUseCase ,GetPlayerNameUseCase>();
+        services.AddScoped<IGetPlayerNameUseCase ,GetPlayerNameUseCase>();
         services.AddScoped<IGetPlayerLevelUseCase, GetPlayerLevelUseCase>();
         services.AddScoped<IGainPlayerExpUseCase, GainPlayerExpUseCase>();
         services.AddScoped<IRenameUseCase, RenameUseCase>();
