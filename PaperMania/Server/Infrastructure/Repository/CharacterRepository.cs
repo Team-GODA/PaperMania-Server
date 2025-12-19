@@ -2,8 +2,8 @@
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port;
-using Server.Application.Port.Out.Infrastructure;
-using Server.Application.Port.Out.Persistence;
+using Server.Application.Port.Output.Infrastructure;
+using Server.Application.Port.Output.Persistence;
 using Server.Domain.Entity;
 using Server.Infrastructure.Service;
 

@@ -1,7 +1,7 @@
 ﻿using Server.Api.Filter;
-using Server.Application.Port.Out.Infrastructure;
-using Server.Application.Port.Out.Persistence;
-using Server.Application.Port.Out.Service;
+using Server.Application.Port.Output.Infrastructure;
+using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Player;

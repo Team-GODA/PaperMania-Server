@@ -1,8 +1,8 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port.In.Auth;
-using Server.Application.Port.Out.Persistence;
-using Server.Application.Port.Out.Service;
+using Server.Application.Port.Input.Auth;
+using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
 using Server.Domain.Service;

@@ -1,7 +1,7 @@
 ﻿using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
 
-namespace Server.Application.Port.In.Auth;
+namespace Server.Application.Port.Input.Auth;
 
 public interface ILoginUseCase
 {

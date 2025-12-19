@@ -3,7 +3,7 @@ using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Reward;
 using Server.Api.Filter;
-using Server.Application.Port.Out.Service;
+using Server.Application.Port.Output.Service;
 using Server.Domain.Entity;
 
 namespace Server.Api.Controller.Data

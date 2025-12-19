@@ -1,7 +1,7 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port.In.Player;
-using Server.Application.Port.Out.Persistence;
+using Server.Application.Port.Input.Player;
+using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 using Server.Infrastructure.Cache;
