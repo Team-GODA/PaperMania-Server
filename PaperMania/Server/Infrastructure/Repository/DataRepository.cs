@@ -1,99 +1,124 @@
 ﻿using Dapper;
 using Server.Application.Port;
+using Server.Application.Port.Out.Infrastructure;
+using Server.Application.Port.Out.Persistence;
 using Server.Domain.Entity;
 
 namespace Server.Infrastructure.Repository;
 
 public class DataRepository : RepositoryBase, IDataRepository
 {
-    public DataRepository(string connectionString) : base(connectionString)
+    private static class Sql
     {
-    }
-    
-    public async Task<PlayerGameData?> ExistsPlayerNameAsync(string playerName)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-        
-        var sql = @"
+        public const string ExistsPlayerName = @"
             SELECT user_id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
             FROM paper_mania_game_data.player_game_data
             WHERE player_name = @PlayerName
-            LIMIT 1";
+            LIMIT 1
+            ";
         
-        return await db.QueryFirstOrDefaultAsync<PlayerGameData>(sql, new { PlayerName = playerName });
-    }
-
-    public async Task AddPlayerDataAsync(int? userId, string playerName)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-
-        var sql = @"
+        public const string AddPlayerData = @"
         INSERT INTO paper_mania_game_data.player_game_data (user_id, player_name)
-        VALUES (@UserId, @PlayerName)";
+        VALUES (@UserId, @PlayerName)
+        ";
 
-        await db.ExecuteAsync(sql, new { UserId = userId, PlayerName = playerName });
-    }
-
-    public async Task<PlayerGameData?> GetPlayerDataByIdAsync(int? userId)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-        
-        var sql = @"
+        public const string GetPlayerDataById = @"
             SELECT user_id AS UserId, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
             FROM paper_mania_game_data.player_game_data
             WHERE user_id = @UserId
-            LIMIT 1";
-        
-        return await db.QueryFirstOrDefaultAsync<PlayerGameData>(sql, new { UserId = userId });
-    }
+            LIMIT 1
+            ";
 
-    public async Task<PlayerGameData?> UpdatePlayerLevelAsync(int? userId, int newLevel, int newExp)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-        
-        var sql = @"
+        public const string UpdatePlayerLevel = @"
             UPDATE paper_mania_game_data.player_game_data
             SET player_level = @Level, player_exp = @Exp
             WHERE user_id = @UserId
             RETURNING user_id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel;
             ";
-
-        return await db.QueryFirstOrDefaultAsync<PlayerGameData>(sql, new
-        {
-            Level = newLevel,
-            Exp = newExp,
-            UserId = userId
-        });
-    }
-
-    public async Task<LevelDefinition?> GetLevelDataAsync(int currentLevel)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-
-        var sql = @"
+        
+        public const string GetLevelData = @"
             SELECT level AS Level, max_exp AS MaxExp, max_action_point AS MaxActionPoint
             FROM paper_mania_game_data.level_definition
-            WHERE level = @CurrentLevel";
+            WHERE level = @CurrentLevel
+            LIMIT 1
+            ";
         
-        return await db.QueryFirstOrDefaultAsync<LevelDefinition>(sql, new { CurrentLevel = currentLevel });
-    }
-
-    public async Task RenamePlayerNameAsync(int? userId, string newPlayerName)
-    {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-        
-        var sql = @"
+        public const string RenamePlayerName = @"
             UPDATE paper_mania_game_data.player_game_data
             SET player_name = @PlayerName
             WHERE user_id = @UserId
             ";
-        
-        await db.ExecuteAsync(sql, new { PlayerName = newPlayerName, UserId = userId });
+    }
+    
+    public DataRepository(
+        string connectionString, 
+        ITransactionScope? transactionScope = null) 
+        : base(connectionString, transactionScope)
+    {
+    }
+    
+    public async Task<PlayerGameData?> ExistsPlayerNameAsync(string playerName)
+    {
+        return await ExecuteAsync( (connection, transaction) =>
+             connection.QueryFirstOrDefaultAsync<PlayerGameData>(
+                Sql.ExistsPlayerName,
+                new { PlayerName = playerName },
+                transaction)
+             );
+    }
+
+    public async Task CreateAsync(PlayerGameData player)
+    {
+        await ExecuteAsync( (connection, transaction) =>
+            connection.ExecuteAsync(
+                Sql.AddPlayerData,
+                new { UserId = player.UserId, PlayerName = player.PlayerName },
+                transaction)
+        );
+    }
+
+    public async Task<PlayerGameData?> FindByUserIdAsync(int? userId)
+    {
+        return await QueryAsync(connection =>
+             connection.QueryFirstOrDefaultAsync<PlayerGameData>(
+                Sql.GetPlayerDataById,
+                new { UserId = userId }
+                )
+             );
+    }
+
+    public async Task<PlayerGameData?> UpdatePlayerLevelAsync(int? userId, int newLevel, int newExp)
+    {
+        return await ExecuteAsync( (connection, transaction) =>
+             connection.QueryFirstOrDefaultAsync<PlayerGameData>(
+                Sql.UpdatePlayerLevel,
+                new
+                {
+                    Level = newLevel,
+                    Exp = newExp,
+                    UserId = userId
+                },
+                transaction)
+             );
+    }
+
+    public async Task<LevelDefinition?> FindLevelDataAsync(int currentLevel)
+    {
+        return await QueryAsync( connection =>
+             connection.QueryFirstOrDefaultAsync<LevelDefinition>(
+                Sql.GetLevelData,
+                new { CurrentLevel = currentLevel }
+                )
+             );
+    }
+
+    public async Task RenamePlayerNameAsync(int? userId, string newPlayerName)
+    {
+        await ExecuteAsync( (connection, transaction) => 
+            connection.ExecuteAsync(
+                Sql.RenamePlayerName,
+                new { PlayerName = newPlayerName, UserId = userId },
+                transaction)
+            );
     }
 }

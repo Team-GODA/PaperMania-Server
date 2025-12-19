@@ -1,5 +1,12 @@
 ﻿using Server.Api.Filter;
-using Server.Application.Port;
+using Server.Application.Port.Out.Infrastructure;
+using Server.Application.Port.Out.Persistence;
+using Server.Application.Port.Out.Service;
+using Server.Application.UseCase.Auth;
+using Server.Application.UseCase.Currency;
+using Server.Application.UseCase.Player;
+using Server.Domain.Service;
+using Server.Infrastructure.Cache;
 using Server.Infrastructure.Repository;
 using Server.Infrastructure.Service;
 using StackExchange.Redis;
@@ -11,6 +18,12 @@ public static class ServiceExtensions
     public static IServiceCollection AddRepositories(
         this IServiceCollection services)
     {
+        services.AddScoped<ITransactionScope>(provider =>
+        {
+            var connectionString = GetConnectionString(provider);
+            return new TransactionScope(connectionString);
+        });
+        
         services.AddScoped<IAccountRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
@@ -51,6 +64,17 @@ public static class ServiceExtensions
         
         return services;
     }
+    
+    public static IServiceCollection AddApiFilters(
+        this IServiceCollection services)
+    {
+        services.AddControllers(options =>
+        {
+            options.Filters.Add<ApiLogActionFilter>();
+        });
+
+        return services;
+    }
 
     private static string GetConnectionString(IServiceProvider provider)
     {
@@ -59,7 +83,7 @@ public static class ServiceExtensions
 
         if (string.IsNullOrEmpty(keyName))
             throw new InvalidOperationException(
-                $"DB 연결 Keyname을 찾을 수 없습니다. KeyName: {keyName}");
+                $"DB 연결 KeyName을 찾을 수 없습니다. KeyName: {keyName}");
             
         var connectionString = config[keyName];
 
@@ -87,12 +111,36 @@ public static class ServiceExtensions
         this IServiceCollection services)
     {
         services.AddScoped<ISessionService, SessionService>();
-        services.AddScoped<IAccountService, AccountService>();
-        services.AddScoped<IDataService, DataService>();
-        services.AddScoped<ICurrencyService, CurrencyService>();
-        services.AddScoped<ICharacterService, CharacterService>();
-        services.AddScoped<IRewardService, RewardService>();
         services.AddScoped<SessionValidationFilter>();
+
+        // auth use case
+        services.AddScoped<LoginUseCase>();
+        services.AddScoped<RegisterUseCase>();
+        services.AddScoped<LogoutUseCase>();
+        services.AddScoped<ValidateUseCase>();
+        
+        // player use case
+        services.AddScoped<CreatePlayerDataUseCase>();
+        services.AddScoped<GetPlayerNameUseCase>();
+        services.AddScoped<GetPlayerLevelUseCase>();
+        services.AddScoped<GainPlayerExpUseCase>();
+        services.AddScoped<RenameUseCase>();
+        
+        // currency use case
+        services.AddScoped<GetActionPointUseCase>();
+        services.AddScoped<UpdateMaxActionPointUseCase>();
+        services.AddScoped<SpendActionPointUseCase>();
+        services.AddScoped<GainGoldUseCase>();
+        services.AddScoped<GetGoldUseCase>();
+        services.AddScoped<SpendGoldUseCase>();
+        services.AddScoped<GainPaperPieceUseCase>();
+        services.AddScoped<GetPaperPieceUseCase>();
+        services.AddScoped<SpendPaperPieceUseCase>();
+        
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<ActionPointService>();
+        
+        services.AddScoped<CacheWrapper>();
         
         return services;
     }
