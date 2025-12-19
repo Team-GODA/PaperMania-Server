@@ -1,5 +1,4 @@
 ﻿using Server.Api.Filter;
-using Server.Application.Port;
 using Server.Application.Port.Out.Infrastructure;
 using Server.Application.Port.Out.Persistence;
 using Server.Application.Port.Out.Service;
@@ -35,12 +34,6 @@ public static class ServiceExtensions
         {
             var connectionString = GetConnectionString(provider);
             return new DataRepository(connectionString);
-        });
-        
-        services.AddScoped<IPlayerRepository>(provider =>
-        {
-            var connectionString = GetConnectionString(provider);
-            return new PlayerRepository(connectionString);
         });
         
         services.AddScoped<ICurrencyRepository>(provider =>
@@ -137,6 +130,12 @@ public static class ServiceExtensions
         services.AddScoped<GetActionPointUseCase>();
         services.AddScoped<UpdateMaxActionPointUseCase>();
         services.AddScoped<SpendActionPointUseCase>();
+        services.AddScoped<GainGoldUseCase>();
+        services.AddScoped<GetGoldUseCase>();
+        services.AddScoped<SpendGoldUseCase>();
+        services.AddScoped<GainPaperPieceUseCase>();
+        services.AddScoped<GetPaperPieceUseCase>();
+        services.AddScoped<SpendPaperPieceUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();
