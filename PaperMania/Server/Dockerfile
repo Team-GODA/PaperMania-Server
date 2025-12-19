@@ -1,6 +1,4 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-ARG APP_UID=1000
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -9,18 +7,16 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-COPY Server.csproj ./
-COPY Server.Domain/Server.Domain.csproj Server.Domain/
-COPY Server.Application/Server.Application.csproj Server.Application/
+COPY PaperMania/Server/Server.csproj Server/
 
-RUN dotnet restore "Server.csproj"
-COPY . ./
+RUN dotnet restore "Server/Server.csproj"
 
-RUN dotnet build "Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
+COPY PaperMania/Server/ Server/
+
+RUN dotnet build "Server/Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Server/Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
