@@ -1,6 +1,6 @@
 ﻿using Server.Application.UseCase.Currency.Result;
 
-namespace Server.Application.Port.In.Currency;
+namespace Server.Application.Port.Input.Currency;
 
 public interface IGetGoldUseCase
 {

@@ -1,8 +1,8 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port.In.Currency;
-using Server.Application.Port.Out.Infrastructure;
-using Server.Application.Port.Out.Persistence;
+using Server.Application.Port.Input.Currency;
+using Server.Application.Port.Output.Infrastructure;
+using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Currency.Command;
 using Server.Application.UseCase.Currency.Result;
 

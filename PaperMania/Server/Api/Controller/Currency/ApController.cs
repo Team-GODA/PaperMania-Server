@@ -3,7 +3,7 @@ using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
-using Server.Application.Port.In.Currency;
+using Server.Application.Port.Input.Currency;
 using Server.Application.UseCase.Currency.Command;
 
 namespace Server.Api.Controller.Currency

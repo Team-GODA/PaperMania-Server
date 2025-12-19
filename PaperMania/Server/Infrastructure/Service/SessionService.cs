@@ -1,7 +1,7 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Configure;
 using Server.Application.Exceptions;
-using Server.Application.Port.Out.Service;
+using Server.Application.Port.Output.Service;
 using Server.Infrastructure.Cache;
 
 namespace Server.Infrastructure.Service;
