@@ -1,4 +1,7 @@
 ﻿using Server.Api.Filter;
+using Server.Application.Port.Input.Auth;
+using Server.Application.Port.Input.Currency;
+using Server.Application.Port.Input.Player;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
@@ -114,28 +117,28 @@ public static class ServiceExtensions
         services.AddScoped<SessionValidationFilter>();
 
         // auth use case
-        services.AddScoped<LoginUseCase>();
-        services.AddScoped<RegisterUseCase>();
-        services.AddScoped<LogoutUseCase>();
-        services.AddScoped<ValidateUseCase>();
+        services.AddScoped<ILoginUseCase, LoginUseCase>();
+        services.AddScoped<IRegisterUseCase ,RegisterUseCase>();
+        services.AddScoped<ILogoutUseCase ,LogoutUseCase>();
+        services.AddScoped<IValidateUseCase ,ValidateUseCase>();
         
         // player use case
-        services.AddScoped<CreatePlayerDataUseCase>();
-        services.AddScoped<GetPlayerNameUseCase>();
-        services.AddScoped<GetPlayerLevelUseCase>();
-        services.AddScoped<GainPlayerExpUseCase>();
-        services.AddScoped<RenameUseCase>();
+        services.AddScoped<ICreatePlayerDataUseCase, CreatePlayerDataUseCase>();
+        services.AddScoped<GetPlayerNameUseCase ,GetPlayerNameUseCase>();
+        services.AddScoped<IGetPlayerLevelUseCase, GetPlayerLevelUseCase>();
+        services.AddScoped<IGainPlayerExpUseCase, GainPlayerExpUseCase>();
+        services.AddScoped<IRenameUseCase, RenameUseCase>();
         
         // currency use case
-        services.AddScoped<GetActionPointUseCase>();
-        services.AddScoped<UpdateMaxActionPointUseCase>();
-        services.AddScoped<SpendActionPointUseCase>();
-        services.AddScoped<GainGoldUseCase>();
-        services.AddScoped<GetGoldUseCase>();
-        services.AddScoped<SpendGoldUseCase>();
-        services.AddScoped<GainPaperPieceUseCase>();
-        services.AddScoped<GetPaperPieceUseCase>();
-        services.AddScoped<SpendPaperPieceUseCase>();
+        services.AddScoped<IGetActionPointUseCase, GetActionPointUseCase>();
+        services.AddScoped<IUpdateMaxActionPointUseCase, UpdateMaxActionPointUseCase>();
+        services.AddScoped<ISpendActionPointUseCase, SpendActionPointUseCase>();
+        services.AddScoped<IGainGoldUseCase, GainGoldUseCase>();
+        services.AddScoped<IGetGoldUseCase, GetGoldUseCase>();
+        services.AddScoped<ISpendGoldUseCase, SpendGoldUseCase>();
+        services.AddScoped<IGainPaperPieceUseCase, GainPaperPieceUseCase>();
+        services.AddScoped<IGetPaperPieceUseCase, GetPaperPieceUseCase>();
+        services.AddScoped<ISpendPaperPieceUseCase, SpendPaperPieceUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();
