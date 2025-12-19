@@ -1,5 +1,4 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-
 ARG APP_UID=1000
 USER $APP_UID
 WORKDIR /app
@@ -11,8 +10,10 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY Server.csproj ./
-RUN dotnet restore "Server.csproj"
+COPY Server.Domain/Server.Domain.csproj Server.Domain/
+COPY Server.Application/Server.Application.csproj Server.Application/
 
+RUN dotnet restore "Server.csproj"
 COPY . ./
 
 RUN dotnet build "Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
