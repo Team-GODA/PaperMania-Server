@@ -3,7 +3,7 @@ using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;
-using Server.Application.UseCase.Auth;
+using Server.Application.Port.Input.Auth;
 using Server.Application.UseCase.Auth.Command;
 
 namespace Server.Api.Controller.Auth
@@ -13,16 +13,16 @@ namespace Server.Api.Controller.Auth
     [ApiController]
     public class AuthController : BaseController
     {
-        private readonly LoginUseCase _loginUseCase;
-        private readonly RegisterUseCase _registerUseCase;
-        private readonly LogoutUseCase _logoutUseCase;
-        private readonly ValidateUseCase _validateUseCase;
+        private readonly ILoginUseCase _loginUseCase;
+        private readonly IRegisterUseCase _registerUseCase;
+        private readonly ILogoutUseCase _logoutUseCase;
+        private readonly IValidateUseCase _validateUseCase;
 
         public AuthController(
-            LoginUseCase loginUseCase,
-            RegisterUseCase registerUseCase,
-            LogoutUseCase logoutUseCase,
-            ValidateUseCase validateUseCase)
+            ILoginUseCase loginUseCase,
+            IRegisterUseCase registerUseCase,
+            ILogoutUseCase logoutUseCase,
+            IValidateUseCase validateUseCase)
         {
             _loginUseCase = loginUseCase;
             _registerUseCase = registerUseCase;
