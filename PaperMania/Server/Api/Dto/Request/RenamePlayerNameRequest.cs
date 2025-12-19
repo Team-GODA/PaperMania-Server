@@ -8,6 +8,6 @@
         /// <summary>
         /// 변경할 새 플레이어 이름
         /// </summary>
-        public string? NewName { get; set; }
+        public string NewName { get; set; }
     }
 }

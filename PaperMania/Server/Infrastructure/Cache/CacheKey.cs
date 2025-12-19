@@ -1,0 +1,56 @@
+﻿namespace Server.Infrastructure.Cache;
+
+public static class CacheKey
+{
+    public static class Account
+    {
+        /// <summary>
+        /// 계정 데이터 (UserId로 조회)
+        /// </summary>
+        public static string ByUserId(int userId)
+            => $"Player:Account:{userId}";
+        
+        /// <summary>
+        /// 계정 데이터 (PlayerId로 조회)
+        /// </summary>
+        public static string ByPlayerId(string playerId)
+            => $"Player:Account:PlayerId:{playerId}";
+    }
+
+    public static class Profile
+    {
+        public static string ByUserId(int? userId)
+            => $"Player:Profile:{userId}";
+    }
+    
+    // Player 관련 클래스
+    public static class Player
+    {
+        /// <summary>
+        /// 게임 데이터
+        /// </summary>
+        public static string GameData(int? userId)
+            => $"Player:Game:{userId}";
+        
+        /// <summary>
+        /// 재화 데이터
+        /// </summary>
+        public static string CurrencyData(int? userId)
+            => $"Player:Currency:{userId}";
+    }
+
+    public static class Session
+    {
+        /// <summary>
+        /// 세션 데이터 (Primary: SessionId로 UserId 찾기)
+        /// </summary>
+        public static string BySessionId(string? sessionId)
+            => $"Session:{sessionId}";
+        
+        /// <summary>
+        /// 세션 역방향 매핑 (Secondary: UserId로 SessionId 찾기)
+        /// </summary>
+        public static string ByUserId(int? userId)
+            => $"Session:UserId:{userId}";
+    }
+}

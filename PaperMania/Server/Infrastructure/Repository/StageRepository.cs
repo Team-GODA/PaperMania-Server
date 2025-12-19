@@ -1,29 +1,48 @@
 ﻿using Dapper;
 using Server.Application.Port;
+using Server.Application.Port.Out.Infrastructure;
+using Server.Application.Port.Out.Persistence;
 using Server.Domain.Entity;
 
 namespace Server.Infrastructure.Repository;
 
 public class StageRepository : RepositoryBase, IStageRepository
 {
+    private static class Sql
+    {
+        public const string CreateStageData = @"
+                INSERT INTO paper_mania_game_data.player_stage_data (user_id, stage_num, stage_sub_num, is_cleared)
+                VALUES (@UserId, @StageNum, @StageSubNum, false);
+        ";
+        
+        public const string CheckIsCleared = @"
+            SELECT is_cleared AS IsCleared
+            FROM paper_mania_game_data.player_stage_data
+            WHERE user_id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
+            LIMIT 1
+            ";
+        
+        public const string UpdateIsCleared = @"
+            UPDATE paper_mania_game_data.player_stage_data
+            SET is_cleared = @IsCleared
+            WHERE user_id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
+            ";
+    }
+    
     private const int MaxStageNum = 5;
     private const int MaxSubStageNum = 5;
     
-    public StageRepository(string connectionString) : base(connectionString)
+    public StageRepository(
+        string connectionString,
+        ITransactionScope? transactionScope = null) 
+        : base(connectionString, transactionScope)
     {
     }
 
     public async Task CreatePlayerStageDataAsync(int? userId)    
     {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
+        var data = new List<object>(MaxStageNum * MaxSubStageNum);
         
-        var sql = @"
-                INSERT INTO paper_mania_game_data.player_stage_data (user_id, stage_num, stage_sub_num, is_cleared)
-                VALUES (@UserId, @StageNum, @StageSubNum, false);
-        ";
-        
-        var data = new List<dynamic>();
         for (int stageNum = 1; stageNum <= MaxStageNum; stageNum++)
         {
             for (int subNum = 1; subNum <= MaxSubStageNum; subNum++)
@@ -36,47 +55,41 @@ public class StageRepository : RepositoryBase, IStageRepository
                 });
             }
         }
-        
-        await db.ExecuteAsync(sql, data);
+
+        await ExecuteAsync(async (connection, transaction) =>
+            await connection.ExecuteAsync(Sql.CreateStageData, data, transaction));
     }
 
     public async Task<bool> IsClearedStageAsync(PlayerStageData data)
     {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-        
-        var sql = @"
-            SELECT is_cleared AS IsCleared
-            FROM paper_mania_game_data.player_stage_data
-            WHERE user_id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
-            LIMIT 1";
-        
-        var result = await db.QueryFirstOrDefaultAsync<bool?>(sql, new
+        return await ExecuteAsync(async (connection, transaction) =>
         {
-            UserId = data.UserId,
-            StageNum = data.StageNum,
-            StageSubNum = data.StageSubNum
-        });
+            var result = await connection.QueryFirstOrDefaultAsync<bool?>(
+                Sql.CheckIsCleared,
+                new
+                {
+                    UserId = data.UserId,
+                    StageNum = data.StageNum,
+                    StageSubNum = data.StageSubNum
+                },
+                transaction);
 
-        return result ?? false;
+            return result ?? false;
+        });
     }
 
     public async Task UpdateIsClearedAsync(PlayerStageData data)
     {
-        await using var db = CreateConnection();
-        await db.OpenAsync();
-
-        var sql = @"
-            UPDATE paper_mania_game_data.player_stage_data
-            SET is_cleared = @IsCleared
-            WHERE user_id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum";
-        
-        await db.ExecuteAsync(sql, new
-        {
-            UserId = data.UserId,
-            IsCleared = data.IsCleared,
-            StageNum = data.StageNum,
-            StageSubNum = data.StageSubNum
-        });
+        await ExecuteAsync(async (connection, transaction) =>
+            await connection.ExecuteAsync(
+                Sql.UpdateIsCleared, 
+                new
+                {
+                    UserId = data.UserId,
+                    IsCleared = data.IsCleared,
+                    StageNum = data.StageNum,
+                    StageSubNum = data.StageSubNum
+                },
+                transaction));
     }
 }
