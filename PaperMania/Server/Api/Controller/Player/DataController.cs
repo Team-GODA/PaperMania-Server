@@ -1,11 +1,9 @@
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
-using Server.Application.Port.Output.Service;
-using Server.Application.UseCase.Player;
+using Server.Application.Port.Input.Player;
 using Server.Application.UseCase.Player.Command;
 
 namespace Server.Api.Controller.Player
@@ -16,22 +14,19 @@ namespace Server.Api.Controller.Player
     [SessionAuthorize]
     public class DataController : BaseController
     {
-        private readonly CreatePlayerDataUseCase _createPlayerDataUseCase;
-        private readonly GetPlayerLevelUseCase _getPlayerLevelUseCase;
-        private readonly GainPlayerExpUseCase _gainPlayerExpUseCase;
-        private readonly ISessionService _sessionService;
+        private readonly ICreatePlayerDataUseCase _createPlayerDataUseCase;
+        private readonly IGetPlayerLevelUseCase _getPlayerLevelUseCase;
+        private readonly IGainPlayerExpUseCase _gainPlayerExpUseCase;
 
         public DataController(
-            CreatePlayerDataUseCase createPlayerDataUseCase,
-            GetPlayerLevelUseCase getPlayerLevelUseCase,
-            GainPlayerExpUseCase gainPlayerExpUseCase,
-            ISessionService sessionService
+            ICreatePlayerDataUseCase createPlayerDataUseCase,
+            IGetPlayerLevelUseCase getPlayerLevelUseCase,
+            IGainPlayerExpUseCase gainPlayerExpUseCase
             )
         {
             _createPlayerDataUseCase = createPlayerDataUseCase;
             _getPlayerLevelUseCase = getPlayerLevelUseCase;
             _gainPlayerExpUseCase = gainPlayerExpUseCase;
-            _sessionService = sessionService;
         }
 
         /// <summary>
