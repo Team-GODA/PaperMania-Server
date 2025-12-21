@@ -17,7 +17,7 @@ public class StageRewardCache
     
     public async Task Initialize()
     {
-        var stageRewardsDict = await CsvLoader.LoadCsvAsync<(int,int), StageReward>(
+        var stageRewardsDict = await CsvHelper.LoadCsvAsync<(int,int), StageReward>(
             Url,
             r => (r.StageNum, r.StageSubNum));
         _rewards.Clear();

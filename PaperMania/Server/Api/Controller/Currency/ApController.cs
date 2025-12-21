@@ -35,7 +35,7 @@ namespace Server.Api.Controller.Currency
         [HttpGet]
         public async Task<ActionResult<BaseResponse<GetPlayerActionPointResponse>>> GetPlayerActionPointById()
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _getActionPointUseCase.ExecuteAsync(new GetActionPointCommand(
                 userId)
@@ -56,7 +56,7 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<UpdatePlayerMaxActionPointResponse>>> UpdatePlayerMaxActionPoint(
             [FromBody] UpdatePlayerMaxActionPointRequest request)
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _updateMaxActionPointUseCase.ExecuteAsync(new UpdateMaxActionPointCommand(
                 userId, request.NewMaxActionPoint)
@@ -77,7 +77,7 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<UsePlayerActionPointResponse>>> UsePlayerActionPoint(
             [FromBody] UsePlayerActionPointRequest request)
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _spendActionPointUseCase.ExecuteAsync(new SpendActionPointCommand(
                 userId, request.UsedActionPoint)

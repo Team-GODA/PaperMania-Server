@@ -31,7 +31,7 @@ namespace Server.Api.Controller.Currency
         [HttpGet]
         public async Task<ActionResult<BaseResponse<GetPaperPieceResponse>>> GetPaperPiece()
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _getPaperPieceUseCase.ExecuteAsync(new GetPaperPieceCommand(
                 userId)
@@ -49,7 +49,7 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<GainPaperPieceResponse>>> GainPaperPiece(
             [FromBody] GainPaperPieceRequest request)
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _gainPaperPieceUseCase.ExecuteAsync(new GainPaperPieceCommand(
                 userId, request.PaperPiece)
@@ -67,7 +67,7 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<SpendPaperPieceResponse>>> SpendPaperPiece(
             [FromBody] SpendPaperPieceRequest request)
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _spendPaperPieceUseCase.ExecuteAsync(new SpendPaperPieceCommand(
                 userId, request.PaperPiece)

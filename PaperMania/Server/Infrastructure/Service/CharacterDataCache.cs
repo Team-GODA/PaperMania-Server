@@ -12,7 +12,7 @@ public class CharacterDataCache
 
     public async Task Initialize()
     {
-        var characterDataDict = await CsvLoader.LoadCsvAsync<string, CharacterData>(
+        var characterDataDict = await CsvHelper.LoadCsvAsync<string, CharacterData>(
             Url,
             keySelector: c => c.CharacterId
         );

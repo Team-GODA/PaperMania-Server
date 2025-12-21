@@ -35,7 +35,7 @@ namespace Server.Api.Controller.Player
         [HttpPost]
         public async Task<ActionResult<BaseResponse<AddPlayerDataResponse>>> AddPlayerData([FromBody] AddPlayerDataRequest request)
         {
-            var sessionId = TryGetSessionId();
+            var sessionId = GetSessionId();
             
             var result =  await _createPlayerDataUseCase.ExecuteAsync(new AddPlayerDataCommand(
                 request.PlayerName, sessionId)
@@ -55,7 +55,7 @@ namespace Server.Api.Controller.Player
         [HttpGet("level")]
         public async Task<ActionResult<BaseResponse<GetPlayerLevelResponse>>> GetPlayerLevel()
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _getPlayerLevelUseCase.ExecuteAsync(new GetPlayerLevelCommand(
                 userId)
@@ -76,7 +76,7 @@ namespace Server.Api.Controller.Player
         [HttpPatch("level")]
         public async Task<ActionResult<BaseResponse<UpdatePlayerLevelByExpResponse>>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request)
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _gainPlayerExpUseCase.ExecuteAsync(new GainPlayerExpUseCaseCommand(
                 userId, 

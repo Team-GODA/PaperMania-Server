@@ -25,7 +25,7 @@ namespace Server.Api.Controller.Currency
         [HttpGet]
         public async Task<ActionResult<BaseResponse<GetCurrencyDataResponse>>> GetCurrencyData()
         {
-            var userId = TryGetUserId();
+            var userId = GetUserId();
             
             var result = await _getCurrencyDataUseCase.ExecuteAsync(new GetCurrencyDataCommand(
                 userId)

@@ -32,7 +32,7 @@ public class ProfileController : BaseController
     [HttpGet("name")]
     public async Task<ActionResult<BaseResponse<GetPlayerNameResponse>>> GetPlayerName()
     {
-        var userId = TryGetUserId();
+        var userId = GetUserId();
         
         var result = await _getPlayerNameUseCase.ExecuteAsync(
             new GetPlayerNameCommand(userId)
@@ -55,7 +55,7 @@ public class ProfileController : BaseController
         [FromBody] RenamePlayerNameRequest request
     )
     {
-        var userId = TryGetUserId();
+        var userId = GetUserId();
         
         var result = await _renameUseCase.ExecuteAsync(
             new RenameCommand(userId, request.NewName)

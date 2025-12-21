@@ -2,7 +2,7 @@
 
 namespace Server.Infrastructure.Service;
 
-public static class CsvLoader
+public static class CsvHelper
 {
     public static async Task<Dictionary<Tkey, T>> LoadCsvAsync<Tkey, T>(
         string url,

@@ -6,7 +6,7 @@ namespace Server.Api.Controller;
 
 public abstract class BaseController : ControllerBase
 {
-    protected int TryGetUserId()
+    protected int GetUserId()
     {
         if (!HttpContext.Items.TryGetValue("UserId", out var userIdObj)
             || userIdObj is not int userId)
@@ -19,7 +19,7 @@ public abstract class BaseController : ControllerBase
         return userId;
     }
 
-    protected string TryGetSessionId()
+    protected string GetSessionId()
     {
         if (!HttpContext.Items.TryGetValue("SessionId", out var sessionIdObj)
             || sessionIdObj is not string sessionId)
