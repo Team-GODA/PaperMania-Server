@@ -36,7 +36,9 @@ namespace Server.Api.Controller.Currency
         [HttpGet]
         public async Task<ActionResult<BaseResponse<BaseResponse<GetPlayerGoldResponse>>>> GetPlayerGold()
         {
-            var result = await _getGoldUseCase.ExecuteAsync(UserId);
+            var userId = TryGetUserId();
+            
+            var result = await _getGoldUseCase.ExecuteAsync(userId);
             var response = new GetPlayerGoldResponse
             {
                 CurrentGold = result.Gold
@@ -49,8 +51,10 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<GetPlayerGoldResponse>>> GainGold(
             [FromBody] GainGoldRequest request)
         {
+            var userId = TryGetUserId();
+            
             var result = await _gainGoldUseCase.ExecuteAsync(new GainGoldCommand(
-                UserId, request.Gold)
+                userId, request.Gold)
             );
 
             var response = new GainGoldResponse
@@ -65,8 +69,10 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<SpendGoldResponse>>> SpendGold(
             [FromBody] SpendGoldRequest request)
         {
+            var userId = TryGetUserId();
+            
             var result = await _spendGoldUseCase.ExecuteAsync(new SpendGoldCommand(
-                UserId, request.Gold)
+                userId, request.Gold)
             );
 
             var response = new SpendGoldResponse

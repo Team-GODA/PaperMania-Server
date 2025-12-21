@@ -37,7 +37,9 @@ namespace Server.Api.Controller.Auth
         [SessionAuthorize]
         public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUser()
         {
-           await _validateUseCase.ExecuteAsync(SessionId);
+            var sessionId = TryGetSessionId();
+            
+           await _validateUseCase.ExecuteAsync(sessionId);
            return Ok(ApiResponse.Ok<EmptyResponse>("유저 인증 성공"));
         }
         
@@ -87,7 +89,9 @@ namespace Server.Api.Controller.Auth
         [HttpPost("logout")]
         public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout()
         {
-            await _logoutUseCase.ExecuteAsync(SessionId);
+            var sessionId = TryGetSessionId();
+            
+            await _logoutUseCase.ExecuteAsync(sessionId);
             return Ok(ApiResponse.Ok<EmptyResponse>("로그아웃 성공"));
         }
     }

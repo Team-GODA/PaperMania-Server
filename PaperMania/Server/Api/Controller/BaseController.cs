@@ -6,35 +6,29 @@ namespace Server.Api.Controller;
 
 public abstract class BaseController : ControllerBase
 {
-    protected int UserId
+    protected int TryGetUserId()
     {
-        get
+        if (!HttpContext.Items.TryGetValue("UserId", out var userIdObj)
+            || userIdObj is not int userId)
         {
-            if (!HttpContext.Items.TryGetValue("UserId", out var userIdObj)
-                || userIdObj is not int userId)
-            {
-                throw new RequestException(
-                    ErrorStatusCode.Unauthorized,
-                    "INVALID_SESSION");
-            }
-
-            return userId;
+            throw new RequestException(
+                ErrorStatusCode.Unauthorized,
+                "INVALID_SESSION");
         }
+
+        return userId;
     }
 
-    protected string SessionId
+    protected string TryGetSessionId()
     {
-        get
+        if (!HttpContext.Items.TryGetValue("SessionId", out var sessionIdObj)
+            || sessionIdObj is not string sessionId)
         {
-            if (!HttpContext.Items.TryGetValue("SessionId", out var sessionIdObj)
-                || sessionIdObj is not string sessionId)
-            {
-                throw new RequestException(
-                    ErrorStatusCode.Unauthorized,
-                    "INVALID_SESSION");
-            }
-            
-            return sessionId;
+            throw new RequestException(
+                ErrorStatusCode.Unauthorized,
+                "INVALID_SESSION");
         }
+            
+        return sessionId;
     }
 }
