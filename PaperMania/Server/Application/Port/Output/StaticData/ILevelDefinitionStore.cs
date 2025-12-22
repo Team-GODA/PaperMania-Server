@@ -2,7 +2,7 @@
 
 namespace Server.Application.Port.Output.StaticData;
 
-public interface IStageRewardStore
+public interface ILevelDefinitionStore
 {
-    StageReward? GetStageReward(int stageNum, int stageSubNum);
+    LevelDefinition? GetLevelDefinition(int level);
 }

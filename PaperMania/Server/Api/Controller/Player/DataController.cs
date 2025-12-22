@@ -78,7 +78,7 @@ namespace Server.Api.Controller.Player
         {
             var userId = GetUserId();
             
-            var result = await _gainPlayerExpUseCase.ExecuteAsync(new GainPlayerExpCommand(
+            var result = await _gainPlayerExpUseCase.ExecuteWithTransactionAsync(new GainPlayerExpCommand(
                 userId, 
                 request.NewExp)
             );

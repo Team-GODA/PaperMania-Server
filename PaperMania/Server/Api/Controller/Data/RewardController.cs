@@ -10,18 +10,18 @@ namespace Server.Api.Controller.Data
     [ApiLog("Reward")]
     [Route("api/v3/reward/stage")]
     [ApiController]
-    public class RewardController : ControllerBase
+    public class RewardController : BaseController
     {
         private readonly IGetStageRewardUseCase _getStageRewardUseCase;
-        private readonly ICheckStageClearedUseCase _checkStageClearedUseCase;
+        private readonly IClaimStageRewardUseCase _claimStageRewardUseCase;
 
         public RewardController(
             IGetStageRewardUseCase getStageRewardUseCase,
-            ICheckStageClearedUseCase checkStageClearedUseCase
+            IClaimStageRewardUseCase claimStageRewardUseCase
             )
         {
             _getStageRewardUseCase = getStageRewardUseCase;
-            _checkStageClearedUseCase = checkStageClearedUseCase;
+            _claimStageRewardUseCase = claimStageRewardUseCase;
         }
         
         /// <summary>
@@ -30,7 +30,8 @@ namespace Server.Api.Controller.Data
         [HttpGet("{stageNum:int}/{stageSubNum:int}")]
         public ActionResult<BaseResponse<GetStageRewardResponse>> GetStageReward(
             [FromRoute] int stageNum,
-            [FromRoute] int stageSubNum)
+            [FromRoute] int stageSubNum
+            )
         {
             var reward = _getStageRewardUseCase.Execute(new GetStageRewardCommand(
                 stageNum, stageSubNum)
@@ -47,32 +48,31 @@ namespace Server.Api.Controller.Data
         /// <summary>
         /// 플레이어가 특정 스테이지 보상을 수령합니다.
         /// </summary>
-        // [SessionAuthorize]
-        // [HttpPatch("stage")]
-        // public async Task<ActionResult<BaseResponse<ClaimStageRewardResponse>>> ClaimStageReward(
-        //     [FromBody] ClaimStageRewardRequest request)
-        // {
-        //     var sessionId = HttpContext.Items["SessionId"] as string;
-        //     var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
-        //     
-        //
-        //     var stageData = new PlayerStageData
-        //     {
-        //         UserId = userId,
-        //         StageNum = request.StageNum,
-        //         StageSubNum = request.SubStageNum
-        //     };
-        //
-        //     var stageReward = _rewardService.GetStageReward(request.StageNum, request.SubStageNum);
-        //     await _rewardService.ClaimStageRewardByUserIdAsync(userId, stageReward!, stageData);
-        //
-        //     var response = new ClaimStageRewardResponse
-        //     {
-        //         Id = userId,
-        //         StageReward = stageReward
-        //     };
-        //
-        //     return Ok(ApiResponse.Ok("스테이지 보상 수령 성공", response));
-        // }
+        [SessionAuthorize]
+        [HttpPost("{stageNum:int}/{stageSubNum:int}")]
+        public async Task<ActionResult<BaseResponse<ClaimStageRewardResponse>>> ClaimStageReward(
+            [FromRoute] int stageNum,
+            [FromRoute] int stageSubNum
+            )
+        {
+            var userId = GetUserId();
+            
+            var result = await _claimStageRewardUseCase.ExecuteAsync(new ClaimStageRewardCommand(
+                userId,
+                stageNum,
+                stageSubNum)
+            );
+
+            var response = new ClaimStageRewardResponse
+            {
+                Gold = result.Gold,
+                PaperPiece = result.PaperPiece,
+                Level = result.Level,
+                Exp = result.Exp,
+                IsCleared = result.IsCleared
+            };
+        
+            return Ok(ApiResponse.Ok("스테이지 보상 수령 성공", response));
+        }
     }
 }

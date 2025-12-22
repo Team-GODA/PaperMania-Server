@@ -89,6 +89,10 @@ public static class ServiceExtensions
         services.AddSingleton<IStageRewardStore, StageRewardStore>();
         services.AddHostedService(sp => 
             (StageRewardStore)sp.GetRequiredService<IStageRewardStore>());
+        
+        services.AddSingleton<ILevelDefinitionStore, LevelDefinitionStore>();
+        services.AddHostedService(sp => 
+            (LevelDefinitionStore)sp.GetRequiredService<ILevelDefinitionStore>());
     
         return services;
     }
@@ -155,6 +159,7 @@ public static class ServiceExtensions
         // reward use case
         services.AddScoped<IGetStageRewardUseCase, GetStageRewardUseCase>();
         services.AddScoped<ICheckStageClearedUseCase, CheckStageClearedUseCase>();
+        services.AddScoped<IClaimStageRewardUseCase, ClaimStageRewardUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();

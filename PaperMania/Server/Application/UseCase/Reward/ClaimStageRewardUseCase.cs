@@ -20,6 +20,7 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
     private readonly ICurrencyDao _currencyDao;
     private readonly IDataDao _dataDao;
     private readonly IStageRewardStore _stageRewardStore;
+    private readonly ICheckStageClearedUseCase _checkStageClearedUseCase;
     private readonly IGainGoldUseCase _gainGoldUseCase;
     private readonly IGainPaperPieceUseCase _gainPaperPieceUseCase;
     private readonly IGainPlayerExpUseCase _gainPlayerExpUseCase;
@@ -30,6 +31,7 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
         ICurrencyDao currencyDao,
         IDataDao dataDao,
         IStageRewardStore stageRewardStore,
+        ICheckStageClearedUseCase checkStageClearedUseCase,
         IGainGoldUseCase gainGoldUseCase,
         IGainPaperPieceUseCase gainPaperPieceUseCase,
         IGainPlayerExpUseCase gainPlayerExpUseCase,
@@ -39,6 +41,7 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
         _currencyDao = currencyDao;
         _dataDao = dataDao;
         _stageRewardStore = stageRewardStore;
+        _checkStageClearedUseCase = checkStageClearedUseCase;
         _gainGoldUseCase = gainGoldUseCase;
         _gainPaperPieceUseCase = gainPaperPieceUseCase;
         _gainPlayerExpUseCase = gainPlayerExpUseCase;
@@ -57,15 +60,15 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
 
         return await _transactionScope.ExecuteAsync(async () =>
         {
-            var cleared = await _stageDao.FindByUserIdAsync(
+            var checkCommand = new CheckStageClearedCommand(
                 request.UserId,
                 request.StageNum,
                 request.StageSubNum
             );
-
-            var isReChallenge = cleared != null;
+            var isCleared = await _checkStageClearedUseCase.ExecuteAsync(checkCommand);
+            Console.WriteLine($"{isCleared}", isCleared);
             
-            if (!isReChallenge)
+            if (!isCleared)
             {
                 var stageData = new PlayerStageData
                 {
@@ -76,8 +79,10 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                 await _stageDao.CreateAsync(stageData);
             }
 
+            Console.WriteLine($"{isCleared}", isCleared);
+            
             var goldToGain = stageReward.Gold;
-            var paperPieceToGain = !isReChallenge ? stageReward.PaperPiece : 0;
+            var paperPieceToGain = !isCleared ? stageReward.PaperPiece : 0;
             var expToGain = stageReward.ClearExp;
 
             if (goldToGain > 0)
@@ -118,7 +123,7 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                 PaperPiece: currencyData.PaperPiece,
                 Level: playerData.Level,
                 Exp: playerData.Exp,
-                IsReChallenge: isReChallenge
+                IsReChallenge: isCleared
             );
         });
     }

@@ -5,5 +5,5 @@ public record ClaimStageRewardResult(
     int PaperPiece,
     int Level,
     int Exp,
-    bool IsReChallenge
+    bool IsCleared
     );

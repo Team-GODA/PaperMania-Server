@@ -14,7 +14,7 @@ public class DataDao : DaoBase, IDataDao
         public const string ExistsPlayerName = @"
             SELECT user_id, player_name AS Name, player_exp AS Exp, player_level AS Level
             FROM paper_mania_game_data.player_game_data
-            WHERE player_name = @Name
+            WHERE player_name = @PlayerName
             LIMIT 1
             ";
         
@@ -63,7 +63,7 @@ public class DataDao : DaoBase, IDataDao
         return await ExecuteAsync( (connection, transaction) =>
              connection.QueryFirstOrDefaultAsync<PlayerGameData>(
                 Sql.ExistsPlayerName,
-                new { PlayerName = playerName },
+                new { Name = playerName },
                 transaction)
              );
     }
@@ -73,7 +73,7 @@ public class DataDao : DaoBase, IDataDao
         await ExecuteAsync( (connection, transaction) =>
             connection.ExecuteAsync(
                 Sql.AddPlayerData,
-                new { UserId = player.UserId, PlayerName = player.Name },
+                new { UserId = player.UserId, Name = player.Name },
                 transaction)
         );
     }
@@ -108,7 +108,7 @@ public class DataDao : DaoBase, IDataDao
         return await QueryAsync( connection =>
              connection.QueryFirstOrDefaultAsync<LevelDefinition>(
                 Sql.GetLevelData,
-                new { CurrentLevel = currentLevel }
+                new { Level = currentLevel }
                 )
              );
     }
@@ -118,7 +118,7 @@ public class DataDao : DaoBase, IDataDao
         await ExecuteAsync( (connection, transaction) => 
             connection.ExecuteAsync(
                 Sql.RenamePlayerName,
-                new { PlayerName = newPlayerName, UserId = userId },
+                new { Name = newPlayerName, UserId = userId },
                 transaction)
             );
     }

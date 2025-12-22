@@ -1,7 +1,9 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
+using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 
@@ -9,28 +11,35 @@ namespace Server.Application.UseCase.Player;
 
 public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 {
-    private readonly IDataDao _dao;
+    private readonly IDataDao _dataDao;
+    private readonly ILevelDefinitionStore _store;
+    private readonly ITransactionScope _transactionScope;
 
     public GainPlayerExpUseCase(
-        IDataDao dao
-    )
+        IDataDao dataDao,
+        ILevelDefinitionStore store,
+        ITransactionScope transactionScope)
     {
-        _dao = dao;
+        _dataDao = dataDao;
+        _store = store;
+        _transactionScope = transactionScope;
     }
     
     public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpCommand request)
     {
-        var data = await _dao.FindByUserIdAsync(request.UserId);
-        if (data == null)
-            throw new RequestException(
-                ErrorStatusCode.NotFound,
-                "PLAYER_DATA_NOT_FOUND");
+        request.Validate();
+
+        var data = await _dataDao.FindByUserIdAsync(request.UserId)
+                   ?? throw new RequestException(
+                       ErrorStatusCode.NotFound,
+                       "PLAYER_DATA_NOT_FOUND"
+                   );
 
         data.Exp += request.Exp;
 
         while (true)
         {
-            var levelData = await _dao.FindLevelDataAsync(data.Level);
+            var levelData = _store.GetLevelDefinition(data.Level);
             if (levelData == null || data.Exp < levelData.MaxExp)
                 break;
             
@@ -38,10 +47,18 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
             data.Level++;
         }
 
-        await _dao.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp);
+        await _dataDao.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp);
+        
         return new GainPlayerExpUseCaseResult(
-            Level:data.Level,
-            Exp:data.Exp
+            Level: data.Level,
+            Exp: data.Exp
+        );
+    }
+
+    public async Task<GainPlayerExpUseCaseResult> ExecuteWithTransactionAsync(GainPlayerExpCommand request)
+    {
+        return await _transactionScope.ExecuteAsync(async () => 
+            await ExecuteAsync(request)
             );
     }
 }

@@ -53,7 +53,7 @@ namespace Server.Api.Controller.Currency
         {
             var userId = GetUserId();
             
-            var result = await _gainGoldUseCase.ExecuteAsync(new GainGoldCommand(
+            var result = await _gainGoldUseCase.ExecuteWithTransactionAsync(new GainGoldCommand(
                 userId, request.Gold)
             );
 

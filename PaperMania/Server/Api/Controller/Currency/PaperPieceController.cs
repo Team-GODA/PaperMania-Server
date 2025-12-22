@@ -51,7 +51,7 @@ namespace Server.Api.Controller.Currency
         {
             var userId = GetUserId();
             
-            var result = await _gainPaperPieceUseCase.ExecuteAsync(new GainPaperPieceCommand(
+            var result = await _gainPaperPieceUseCase.ExecuteWithTransactionAsync(new GainPaperPieceCommand(
                 userId, request.PaperPiece)
             );
             
