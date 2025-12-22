@@ -34,7 +34,7 @@ public class CharacterStore : ICharacterStore, IHostedService
         return _characters;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+     public async Task StartAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -48,7 +48,7 @@ public class CharacterStore : ICharacterStore, IHostedService
             if (string.IsNullOrEmpty(url))
                 throw new InvalidOperationException(
                     $"CSV URL not found. Secret name: {secretName}");
-
+            
             _characters = await CsvHelper.LoadAsync(
                 _httpClient,
                 url,

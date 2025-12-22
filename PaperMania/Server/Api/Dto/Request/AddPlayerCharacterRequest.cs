@@ -1,5 +1,6 @@
 ﻿using Server.Domain.Entity;
 using Server.Infrastructure.StaticData;
+using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Api.Dto.Request
 {
@@ -8,7 +9,6 @@ namespace Server.Api.Dto.Request
     /// </summary>
     public class AddPlayerCharacterRequest
     {
-        public int Id { get; set; }
-        public CharacterData Data { get; set; } = null!;
+        public int CharacterId { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Server.Api.Filter;
 using Server.Application.Port.Input.Auth;
+using Server.Application.Port.Input.Character;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Input.Player;
 using Server.Application.Port.Input.Reward;
@@ -8,6 +9,7 @@ using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
 using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Auth;
+using Server.Application.UseCase.Character;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Player;
 using Server.Application.UseCase.Reward;
@@ -49,12 +51,11 @@ public static class ServiceExtensions
             return new CurrencyDao(connectionString);
         });
         
-        // services.AddScoped<ICharacterDao>(provider =>
-        // {
-        //     var connectionString = GetConnectionString(provider);
-        //     var cache = provider.GetRequiredService<CharacterDataCache>();
-        //     return new CharacterDao(connectionString, cache);
-        // });
+        services.AddScoped<ICharacterDao>(provider =>
+        {
+            var connectionString = GetConnectionString(provider);
+            return new CharacterDao(connectionString);
+        });
         
         services.AddScoped<IStageDao>(provider =>
         {
@@ -93,6 +94,14 @@ public static class ServiceExtensions
         services.AddSingleton<ILevelDefinitionStore, LevelDefinitionStore>();
         services.AddHostedService(sp => 
             (LevelDefinitionStore)sp.GetRequiredService<ILevelDefinitionStore>());
+        
+        services.AddSingleton<ISkillDataStore, SkillDataStore>();
+        services.AddHostedService(sp => 
+            (SkillDataStore)sp.GetRequiredService<ISkillDataStore>());
+        
+        services.AddSingleton<ICharacterStore, CharacterStore>();
+        services.AddHostedService(sp => 
+            (CharacterStore)sp.GetRequiredService<ICharacterStore>());
     
         return services;
     }
@@ -160,6 +169,9 @@ public static class ServiceExtensions
         services.AddScoped<IGetStageRewardUseCase, GetStageRewardUseCase>();
         services.AddScoped<ICheckStageClearedUseCase, CheckStageClearedUseCase>();
         services.AddScoped<IClaimStageRewardUseCase, ClaimStageRewardUseCase>();
+
+        services.AddScoped<IGetCharacterUseCase, GetCharacterUseCase>();
+        services.AddScoped<ICreatePlayerCharacterDataUseCase, CreatePlayerCharacterDataUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();

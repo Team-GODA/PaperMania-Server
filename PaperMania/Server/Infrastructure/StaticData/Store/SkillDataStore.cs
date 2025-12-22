@@ -77,9 +77,8 @@ public class SkillDataStore : ISkillDataStore, IHostedService
         // 1: SkillName
         // 2: SkillType
         // 3: CoolTime
-        // 4: Value
-        // 5: ScalingType
-        // 6: TargetType
+        // 4: ScalingType
+        // 5: TargetType
 
         return new SkillData
         {
@@ -89,9 +88,8 @@ public class SkillDataStore : ISkillDataStore, IHostedService
             SkillType = CsvHelper.ParseEnum<SkillType>(cols[2], "SkillType"),
             CoolTime = float.Parse(cols[3]),
 
-            Value = float.Parse(cols[4]),
-            ScalingType = CsvHelper.ParseEnum<SkillScalingType>(cols[5], "ScalingType"),
-            TargetType = CsvHelper.ParseEnum<SkillTargetType>(cols[6], "TargetType")
+            ScalingType = CsvHelper.ParseEnum<SkillScalingType>(cols[4], "ScalingType"),
+            TargetType = CsvHelper.ParseEnum<SkillTargetType>(cols[5], "TargetType")
         };
     }
 
@@ -101,10 +99,6 @@ public class SkillDataStore : ISkillDataStore, IHostedService
         {
             if (skill.SkillId <= 0)
                 throw new InvalidOperationException("SkillId must be greater than 0");
-
-            if (skill.Value < 0)
-                throw new InvalidOperationException(
-                    $"Invalid Value for SkillId={skill.SkillId}");
 
             if (skill.CoolTime < 0)
                 throw new InvalidOperationException(

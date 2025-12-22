@@ -8,7 +8,6 @@ public class SkillData
     public SkillType SkillType { get; set; }
     public float CoolTime { get; set; }
 
-    public float Value { get; set; }
     public SkillScalingType ScalingType { get; set; }
     public SkillTargetType TargetType { get; set; }
 }
