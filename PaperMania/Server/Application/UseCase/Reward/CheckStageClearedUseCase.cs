@@ -1,8 +1,8 @@
-﻿using Server.Application.Port.Input.Stage;
+﻿using Server.Application.Port.Input.Reward;
 using Server.Application.Port.Output.Persistence;
-using Server.Application.UseCase.Stage.Command;
+using Server.Application.UseCase.Reward.Command;
 
-namespace Server.Application.UseCase.Stage;
+namespace Server.Application.UseCase.Reward;
 
 public class CheckStageClearedUseCase : ICheckStageClearedUseCase
 {

@@ -1,6 +1,6 @@
-﻿using Server.Application.UseCase.Stage.Command;
+﻿using Server.Application.UseCase.Reward.Command;
 
-namespace Server.Application.Port.Input.Stage;
+namespace Server.Application.Port.Input.Reward;
 
 public interface ICheckStageClearedUseCase
 {

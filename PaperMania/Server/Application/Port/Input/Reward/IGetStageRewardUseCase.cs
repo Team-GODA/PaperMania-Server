@@ -1,7 +1,7 @@
-﻿using Server.Application.UseCase.Stage.Command;
+﻿using Server.Application.UseCase.Reward.Command;
 using Server.Infrastructure.StaticData;
 
-namespace Server.Application.Port.Input.Stage;
+namespace Server.Application.Port.Input.Reward;
 
 public interface IGetStageRewardUseCase
 {

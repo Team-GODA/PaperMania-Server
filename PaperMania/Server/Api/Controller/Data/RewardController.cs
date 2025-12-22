@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Reward;
-using Server.Application.Port.Input.Stage;
-using Server.Application.UseCase.Stage.Command;
+using Server.Application.Port.Input.Reward;
+using Server.Application.UseCase.Reward.Command;
 
 namespace Server.Api.Controller.Data
 {
