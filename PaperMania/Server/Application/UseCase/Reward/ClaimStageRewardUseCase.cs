@@ -119,11 +119,11 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                              );
 
             return new ClaimStageRewardResult(
-                Gold: currencyData.Gold,
-                PaperPiece: currencyData.PaperPiece,
-                Level: playerData.Level,
-                Exp: playerData.Exp,
-                IsReChallenge: isCleared
+                currencyData.Gold,
+                currencyData.PaperPiece,
+                playerData.Level,
+                playerData.Exp,
+                isCleared
             );
         });
     }
