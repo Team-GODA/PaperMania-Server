@@ -1,7 +1,7 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 
-namespace Server.Domain.Entity;
+namespace Server.Infrastructure.Persistence.Model;
 
 public class PlayerCurrencyData
 {

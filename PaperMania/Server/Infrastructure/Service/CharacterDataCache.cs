@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Server.Application.Configure;
 using Server.Domain.Entity;
+using Server.Infrastructure.StaticData;
 
 namespace Server.Infrastructure.Service;
 

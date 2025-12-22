@@ -3,6 +3,8 @@ using Server.Application.Port;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Domain.Entity;
+using Server.Infrastructure.Persistence.Model;
+using Server.Infrastructure.StaticData;
 
 namespace Server.Infrastructure.Repository;
 

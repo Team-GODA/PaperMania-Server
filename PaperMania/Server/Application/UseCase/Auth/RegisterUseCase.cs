@@ -5,6 +5,7 @@ using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Auth.Command;
 using Server.Domain.Entity;
 using Server.Domain.Service;
+using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.UseCase.Auth;
 

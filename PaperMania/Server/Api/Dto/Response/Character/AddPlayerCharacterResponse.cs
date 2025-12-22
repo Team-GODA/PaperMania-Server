@@ -1,4 +1,5 @@
 ﻿using Server.Domain.Entity;
+using Server.Infrastructure.StaticData;
 
 namespace Server.Api.Dto.Response.Character;
 

@@ -1,4 +1,7 @@
-﻿namespace Server.Domain.Entity;
+﻿using Server.Domain.Entity;
+using Server.Infrastructure.StaticData;
+
+namespace Server.Infrastructure.Persistence.Model;
 
 public class PlayerCharacterData
 {

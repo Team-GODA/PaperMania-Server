@@ -7,6 +7,7 @@ using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 using Server.Domain.Entity;
+using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.UseCase.Player;
 

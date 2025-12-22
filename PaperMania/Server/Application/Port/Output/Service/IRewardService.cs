@@ -1,4 +1,6 @@
 ﻿using Server.Domain.Entity;
+using Server.Infrastructure.Persistence.Model;
+using Server.Infrastructure.StaticData;
 
 namespace Server.Application.Port.Output.Service;
 

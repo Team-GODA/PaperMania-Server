@@ -1,4 +1,5 @@
 ﻿using Server.Domain.Entity;
+using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.Port.Output.Persistence;
 

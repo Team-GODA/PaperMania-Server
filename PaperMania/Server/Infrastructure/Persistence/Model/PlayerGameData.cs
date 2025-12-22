@@ -1,4 +1,4 @@
-﻿namespace Server.Domain.Entity;
+﻿namespace Server.Infrastructure.Persistence.Model;
 
 public class PlayerGameData
 {

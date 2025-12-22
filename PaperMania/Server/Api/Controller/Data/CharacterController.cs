@@ -5,6 +5,7 @@ using Server.Api.Dto.Response.Character;
 using Server.Api.Filter;
 using Server.Application.Port.Output.Service;
 using Server.Domain.Entity;
+using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Api.Controller.Data
 {

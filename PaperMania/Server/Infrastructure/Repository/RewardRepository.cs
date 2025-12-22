@@ -6,6 +6,7 @@ using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Domain.Entity;
 using Server.Infrastructure.Service;
+using Server.Infrastructure.StaticData;
 
 namespace Server.Infrastructure.Repository;
 
