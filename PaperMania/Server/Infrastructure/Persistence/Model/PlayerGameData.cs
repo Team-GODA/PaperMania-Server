@@ -3,7 +3,7 @@
 public class PlayerGameData
 {
     public int UserId { get; set; }
-    public string PlayerName { get; set; } = null!;
-    public int PlayerExp { get; set; }
-    public int PlayerLevel { get; set; } = 1;
+    public string Name { get; set; } = null!;
+    public int Exp { get; set; }
+    public int Level { get; set; } = 1;
 }

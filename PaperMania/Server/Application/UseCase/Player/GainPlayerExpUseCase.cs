@@ -18,7 +18,7 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
         _dao = dao;
     }
     
-    public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpUseCaseCommand request)
+    public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpCommand request)
     {
         var data = await _dao.FindByUserIdAsync(request.UserId);
         if (data == null)
@@ -26,22 +26,22 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
                 ErrorStatusCode.NotFound,
                 "PLAYER_DATA_NOT_FOUND");
 
-        data.PlayerExp += request.Exp;
+        data.Exp += request.Exp;
 
         while (true)
         {
-            var levelData = await _dao.FindLevelDataAsync(data.PlayerLevel);
-            if (levelData == null || data.PlayerExp < levelData.MaxExp)
+            var levelData = await _dao.FindLevelDataAsync(data.Level);
+            if (levelData == null || data.Exp < levelData.MaxExp)
                 break;
             
-            data.PlayerExp -= levelData.MaxExp;
-            data.PlayerLevel++;
+            data.Exp -= levelData.MaxExp;
+            data.Level++;
         }
 
-        await _dao.UpdatePlayerLevelAsync(request.UserId, data.PlayerLevel, data.PlayerExp);
+        await _dao.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp);
         return new GainPlayerExpUseCaseResult(
-            Level:data.PlayerLevel,
-            Exp:data.PlayerExp
+            Level:data.Level,
+            Exp:data.Exp
             );
     }
 }

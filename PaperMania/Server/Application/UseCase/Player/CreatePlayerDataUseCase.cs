@@ -52,9 +52,9 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
             var player = new PlayerGameData
             {
                 UserId = userId,
-                PlayerName = request.PlayerName,
-                PlayerLevel = 1,
-                PlayerExp = 0
+                Name = request.PlayerName,
+                Level = 1,
+                Exp = 0
             };
             
             await _dataDao.CreateAsync(player);

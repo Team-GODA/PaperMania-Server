@@ -4,6 +4,7 @@ using Server.Application.Port.Input.Reward;
 using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Reward.Command;
 using Server.Infrastructure.StaticData;
+using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Application.UseCase.Reward;
 
@@ -20,12 +21,12 @@ public class GetStageRewardUseCase : IGetStageRewardUseCase
     {
         request.Validate();
 
-        var stageData = _store.GetStageReward(request.StageNum, request.StageSubNum)
-                        ?? throw new RequestException(
-                            ErrorStatusCode.NotFound,
-                            "STAGE_NOT_FOUND"
-                            );
+        var stageReward = _store.GetStageReward(request.StageNum, request.StageSubNum)
+                          ?? throw new RequestException(
+                              ErrorStatusCode.NotFound,
+                              "STAGE_NOT_FOUND"
+                          );
             
-        return stageData;
+        return stageReward;
     }
 }

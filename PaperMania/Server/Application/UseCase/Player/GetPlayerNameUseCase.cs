@@ -29,7 +29,7 @@ namespace Server.Application.UseCase.Player;
                 async () =>
                 {
                     var data = await _dao.FindByUserIdAsync(request.UserId);
-                    return data?.PlayerName;
+                    return data?.Name;
                 },
                 TimeSpan.FromDays(30)
             );

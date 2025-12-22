@@ -1,4 +1,5 @@
 ﻿using Server.Application.Port.Output.StaticData;
+using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Infrastructure.StaticData.Store;
 

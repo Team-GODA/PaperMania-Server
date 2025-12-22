@@ -3,6 +3,7 @@ using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Infrastructure.Persistence.Model;
 using Server.Infrastructure.StaticData;
+using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
@@ -11,19 +12,19 @@ public class DataDao : DaoBase, IDataDao
     private static class Sql
     {
         public const string ExistsPlayerName = @"
-            SELECT user_id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
+            SELECT user_id, player_name AS Name, player_exp AS Exp, player_level AS Level
             FROM paper_mania_game_data.player_game_data
-            WHERE player_name = @PlayerName
+            WHERE player_name = @Name
             LIMIT 1
             ";
         
         public const string AddPlayerData = @"
         INSERT INTO paper_mania_game_data.player_game_data (user_id, player_name)
-        VALUES (@UserId, @PlayerName)
+        VALUES (@UserId, @Name)
         ";
 
         public const string GetPlayerDataById = @"
-            SELECT user_id AS UserId, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel
+            SELECT user_id AS UserId, player_name AS Name, player_exp AS Exp, player_level AS Level
             FROM paper_mania_game_data.player_game_data
             WHERE user_id = @UserId
             LIMIT 1
@@ -33,7 +34,7 @@ public class DataDao : DaoBase, IDataDao
             UPDATE paper_mania_game_data.player_game_data
             SET player_level = @Level, player_exp = @Exp
             WHERE user_id = @UserId
-            RETURNING user_id, player_name AS PlayerName, player_exp AS PlayerExp, player_level AS PlayerLevel;
+            RETURNING user_id, player_name AS Name, player_exp AS Exp, player_level AS Level;
             ";
         
         public const string GetLevelData = @"
@@ -45,7 +46,7 @@ public class DataDao : DaoBase, IDataDao
         
         public const string RenamePlayerName = @"
             UPDATE paper_mania_game_data.player_game_data
-            SET player_name = @PlayerName
+            SET player_name = @Name
             WHERE user_id = @UserId
             ";
     }
@@ -72,7 +73,7 @@ public class DataDao : DaoBase, IDataDao
         await ExecuteAsync( (connection, transaction) =>
             connection.ExecuteAsync(
                 Sql.AddPlayerData,
-                new { UserId = player.UserId, PlayerName = player.PlayerName },
+                new { UserId = player.UserId, PlayerName = player.Name },
                 transaction)
         );
     }

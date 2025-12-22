@@ -1,4 +1,4 @@
-﻿namespace Server.Infrastructure.StaticData;
+﻿namespace Server.Infrastructure.StaticData.Model;
 
 public class LevelDefinition
 {

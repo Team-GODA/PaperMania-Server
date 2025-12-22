@@ -5,6 +5,7 @@ using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Infrastructure.Service;
 using Server.Infrastructure.StaticData;
+using Server.Infrastructure.StaticData.Model;
 using Server.Infrastructure.StaticData.Store;
 
 namespace Server.Infrastructure.Persistence.Dao;
