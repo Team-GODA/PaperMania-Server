@@ -34,9 +34,32 @@ public class CharacterDao : DaoBase, ICharacterDao
 
         public const string createData = @"
             INSERT INTO paper_mania_game_data.player_character_data (
-                user_id, character_id, character_level, character_exp, normal_skill_level, ultimate_skill_level, support_skill_level)
-                VALUES (@UserId, @CharacterId, @CharacterLevel, @CharacterExp, @NormalSkillLevel, @UltimateSkillLevel, @SupportSkillLevel)
-                ";
+                user_id, 
+                character_id, 
+                character_level, 
+                character_exp, 
+                normal_skill_level, 
+                ultimate_skill_level, 
+                support_skill_level
+            )
+            VALUES (    
+                @UserId, 
+                @CharacterId, 
+                @CharacterLevel, 
+                @CharacterExp, 
+                @NormalSkillLevel, 
+                @UltimateSkillLevel, 
+                @SupportSkillLevel
+            )
+            RETURNING 
+                user_id AS UserId,
+                character_id AS CharacterId,
+                character_level AS CharacterLevel,
+                character_exp AS CharacterExp,
+                normal_skill_level AS NormalSkillLevel,
+                ultimate_skill_level AS UltimateSkillLevel,
+                support_skill_level AS SupportSkillLevel
+    ";
     }
 
     public CharacterDao(
