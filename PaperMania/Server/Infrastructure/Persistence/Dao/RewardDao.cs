@@ -5,6 +5,7 @@ using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Infrastructure.Service;
 using Server.Infrastructure.StaticData;
+using Server.Infrastructure.StaticData.Store;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
@@ -26,20 +27,20 @@ public class RewardDao : DaoBase, IRewardDao
             ";
     }
     
-    private readonly StageRewardCache _cache;
+    private readonly StageRewardStore _store;
     
     public RewardDao(
         string connectionString,
-        StageRewardCache cache,
+        StageRewardStore store,
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)
     {
-        _cache = cache;
+        _store = store;
     }
 
     public StageReward? GetStageReward(int stageNum, int stageSubNum)
     {
-        return _cache.GetStageReward(stageNum, stageSubNum);
+        return _store.GetStageReward(stageNum, stageSubNum);
     }
 
     public async Task ClaimStageRewardByUserIdAsync(int userId, StageReward reward)
