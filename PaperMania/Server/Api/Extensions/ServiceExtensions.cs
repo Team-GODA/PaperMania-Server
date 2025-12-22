@@ -170,7 +170,7 @@ public static class ServiceExtensions
         services.AddScoped<ICheckStageClearedUseCase, CheckStageClearedUseCase>();
         services.AddScoped<IClaimStageRewardUseCase, ClaimStageRewardUseCase>();
 
-        services.AddScoped<IGetCharacterUseCase, GetCharacterUseCase>();
+        services.AddScoped<IGetPlayerCharacterUseCase, GetPlayerCharacterUseCase>();
         services.AddScoped<ICreatePlayerCharacterDataUseCase, CreatePlayerCharacterDataUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();

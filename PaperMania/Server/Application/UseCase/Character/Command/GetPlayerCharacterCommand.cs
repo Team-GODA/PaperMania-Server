@@ -3,7 +3,7 @@ using Server.Application.Exceptions;
 
 namespace Server.Application.UseCase.Character.Command;
 
-public record GetCharacterCommand(
+public record GetPlayerCharacterCommand(
     int UserId,
     int CharacterId
 )

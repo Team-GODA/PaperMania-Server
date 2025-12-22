@@ -7,16 +7,16 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.UseCase.Character;
 
-public class GetCharacterUseCase : IGetCharacterUseCase
+public class GetPlayerCharacterUseCase : IGetPlayerCharacterUseCase
 {
     private readonly ICharacterDao _dao;
 
-    public GetCharacterUseCase(ICharacterDao dao)
+    public GetPlayerCharacterUseCase(ICharacterDao dao)
     {
         _dao = dao;
     }
     
-    public async Task<PlayerCharacterData> ExecuteAsync(GetCharacterCommand request)
+    public async Task<PlayerCharacterData> ExecuteAsync(GetPlayerCharacterCommand request)
     {
         request.Validate();
         

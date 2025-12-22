@@ -1,6 +1,8 @@
-﻿namespace Server.Api.Dto.Request.Character;
+﻿using Server.Infrastructure.Persistence.Model;
+
+namespace Server.Api.Dto.Request.Character;
 
 public class GetCharacterDataRequest
 {
-    public int CharacterId { get; set; }
+    public PlayerCharacterData Character { get; set; }
 }

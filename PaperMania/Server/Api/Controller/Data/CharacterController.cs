@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
-using Server.Api.Dto.Request;
 using Server.Api.Dto.Request.Character;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Character;
@@ -14,15 +13,15 @@ namespace Server.Api.Controller.Data;
 [SessionAuthorize]
 public class CharacterController : BaseController
 {
-    private readonly IGetCharacterUseCase _getCharacterUseCase;
+    private readonly IGetPlayerCharacterUseCase _getPlayerCharacterUseCase;
     private readonly ICreatePlayerCharacterDataUseCase _createPlayerCharacterDataUseCase;
 
     public CharacterController(
-        IGetCharacterUseCase getCharacterUseCase,
+        IGetPlayerCharacterUseCase getPlayerCharacterUseCase,
         ICreatePlayerCharacterDataUseCase createPlayerCharacterDataUseCase
     )
     {
-        _getCharacterUseCase = getCharacterUseCase;
+        _getPlayerCharacterUseCase = getPlayerCharacterUseCase;
         _createPlayerCharacterDataUseCase = createPlayerCharacterDataUseCase;
     }
         
@@ -30,19 +29,19 @@ public class CharacterController : BaseController
     /// 특정 캐릭터 정보를 조회합니다.
     /// </summary>
     [HttpGet("{characterId:int}")]
-    public async Task<ActionResult<BaseResponse<GetCharacterDataRequest>>> GetAllPlayerCharacters(
+    public async Task<ActionResult<BaseResponse<GetCharacterDataRequest>>> GetCharacterData(
         [FromRoute] int characterId)
     {
         var userId = GetUserId();
 
-        var result = await _getCharacterUseCase.ExecuteAsync(new GetCharacterCommand(
+        var result = await _getPlayerCharacterUseCase.ExecuteAsync(new GetPlayerCharacterCommand(
             userId,
             characterId)
         );
             
         var response = new GetCharacterDataRequest
         {
-            CharacterId = result.CharacterId,
+            Character = result
         };
 
         return Ok(ApiResponse.Ok("플레이어 보유 캐릭터 데이터 조회 성공", response));
@@ -52,7 +51,7 @@ public class CharacterController : BaseController
     /// 유저의 보유 캐릭터를 추가합니다.
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<BaseResponse<AddPlayerCharacterResponse>>> AddPlayerCharacter(
+    public async Task<ActionResult<BaseResponse<AddPlayerCharacterResponse>>> AddPlayerCharacterData(
         [FromBody] AddPlayerCharacterRequest request)
     {
         var userId = GetUserId();

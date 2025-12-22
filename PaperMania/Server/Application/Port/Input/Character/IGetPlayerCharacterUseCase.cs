@@ -3,7 +3,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.Port.Input.Character;
 
-public interface IGetCharacterUseCase
+public interface IGetPlayerCharacterUseCase
 {
-    Task<PlayerCharacterData> ExecuteAsync(GetCharacterCommand request);
+    Task<PlayerCharacterData> ExecuteAsync(GetPlayerCharacterCommand request);
 }
