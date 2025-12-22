@@ -8,9 +8,9 @@
 // public class CharacterService : ICharacterService
 // {
 //     private readonly CharacterDataCache _cache;
-//     private readonly ICharacterRepository _repository;
+//     private readonly ICharacterDao _repository;
 //
-//     public CharacterService(CharacterDataCache cache, ICharacterRepository repository)
+//     public CharacterService(CharacterDataCache cache, ICharacterDao repository)
 //     {
 //         _cache = cache;
 //         _repository = repository;

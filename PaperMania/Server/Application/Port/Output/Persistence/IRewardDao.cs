@@ -3,7 +3,7 @@ using Server.Infrastructure.StaticData;
 
 namespace Server.Application.Port.Output.Persistence;
 
-public interface IRewardRepository
+public interface IRewardDao
 {
     StageReward? GetStageReward(int stageNum, int stageSubNum);
     Task ClaimStageRewardByUserIdAsync(int userId, StageReward reward);

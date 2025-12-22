@@ -1,13 +1,11 @@
 ﻿using Dapper;
-using Server.Application.Port;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
-using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 
-namespace Server.Infrastructure.Repository;
+namespace Server.Infrastructure.Dao;
 
-public class StageRepository : RepositoryBase, IStageRepository
+public class StageDao : DaoBase, IStageDao
 {
     private static class Sql
     {
@@ -33,7 +31,7 @@ public class StageRepository : RepositoryBase, IStageRepository
     private const int MaxStageNum = 5;
     private const int MaxSubStageNum = 5;
     
-    public StageRepository(
+    public StageDao(
         string connectionString,
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)

@@ -1,13 +1,11 @@
 ﻿using Dapper;
-using Server.Application.Port;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
-using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 
-namespace Server.Infrastructure.Repository;
+namespace Server.Infrastructure.Dao;
 
-public class CurrencyRepository : RepositoryBase, ICurrencyRepository
+public class CurrencyDao : DaoBase, ICurrencyDao
 {
     private static class Sql
     {
@@ -48,7 +46,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
             ";
     }
     
-    public CurrencyRepository(
+    public CurrencyDao(
         string connectionString,
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)

@@ -3,7 +3,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.Port.Output.Persistence;
 
-public interface IStageRepository
+public interface IStageDao
 {
     Task CreatePlayerStageDataAsync(int? userId);
     Task<bool> IsClearedStageAsync(PlayerStageData data);

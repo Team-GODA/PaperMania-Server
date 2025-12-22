@@ -3,7 +3,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.Port.Output.Persistence;
 
-public interface ICharacterRepository
+public interface ICharacterDao
 {
     Task<IEnumerable<PlayerCharacterData>> GetPlayerCharactersDataByUserIdAsync(int userId);
     Task AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data);

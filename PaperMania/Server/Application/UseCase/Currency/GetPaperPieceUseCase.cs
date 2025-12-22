@@ -9,18 +9,18 @@ namespace Server.Application.UseCase.Currency;
 
 public class GetPaperPieceUseCase : IGetPaperPieceUseCase
 {
-    private readonly ICurrencyRepository _repository;
+    private readonly ICurrencyDao _dao;
     
-    public GetPaperPieceUseCase(ICurrencyRepository repository)
+    public GetPaperPieceUseCase(ICurrencyDao dao)
     {
-        _repository = repository;
+        _dao = dao;
     }
     
     public async Task<GetPaperPieceResult> ExecuteAsync(GetPaperPieceCommand request)
     {
         request.Validate();
         
-        var data = await _repository.FindByUserIdAsync(request.UserId)
+        var data = await _dao.FindByUserIdAsync(request.UserId)
                    ?? throw new RequestException(
                        ErrorStatusCode.NotFound,
                        "CURRENCY_DATA_NOT_FOUND");

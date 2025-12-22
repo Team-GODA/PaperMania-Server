@@ -10,7 +10,7 @@ using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Player;
 using Server.Domain.Service;
 using Server.Infrastructure.Cache;
-using Server.Infrastructure.Repository;
+using Server.Infrastructure.Dao;
 using Server.Infrastructure.Service;
 using StackExchange.Redis;
 
@@ -27,42 +27,42 @@ public static class ServiceExtensions
             return new TransactionScope(connectionString);
         });
         
-        services.AddScoped<IAccountRepository>(provider =>
+        services.AddScoped<IAccountDao>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new AccountRepository(connectionString);
+            return new AccountDao(connectionString);
         });
         
-        services.AddScoped<IDataRepository>(provider =>
+        services.AddScoped<IDataDao>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new DataRepository(connectionString);
+            return new DataDao(connectionString);
         });
         
-        services.AddScoped<ICurrencyRepository>(provider =>
+        services.AddScoped<ICurrencyDao>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new CurrencyRepository(connectionString);
+            return new CurrencyDao(connectionString);
         });
         
-        services.AddScoped<ICharacterRepository>(provider =>
+        services.AddScoped<ICharacterDao>(provider =>
         {
             var connectionString = GetConnectionString(provider);
             var cache = provider.GetRequiredService<CharacterDataCache>();
-            return new CharacterRepository(connectionString, cache);
+            return new CharacterDao(connectionString, cache);
         });
         
-        services.AddScoped<IStageRepository>(provider =>
+        services.AddScoped<IStageDao>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new StageRepository(connectionString);
+            return new StageDao(connectionString);
         });
         
-        services.AddScoped<IRewardRepository>(provider =>
+        services.AddScoped<IRewardDao>(provider =>
         {
             var connectionString = GetConnectionString(provider);
             var cache = provider.GetRequiredService<StageRewardCache>();
-            return new RewardRepository(connectionString, cache);
+            return new RewardDao(connectionString, cache);
         });
         
         return services;

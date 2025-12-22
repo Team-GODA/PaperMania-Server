@@ -7,10 +7,10 @@
 //
 // public class RewardService : IRewardService
 // {
-//     private readonly IRewardRepository _rewardRepository;
-//     private readonly IStageRepository _stageRepository;
+//     private readonly IRewardDao _rewardRepository;
+//     private readonly IStageDao _stageRepository;
 //     
-//     public RewardService(IRewardRepository rewardRepository, IStageRepository stageRepository)
+//     public RewardService(IRewardDao rewardRepository, IStageDao stageRepository)
 //     {
 //         _rewardRepository = rewardRepository;
 //         _stageRepository = stageRepository;

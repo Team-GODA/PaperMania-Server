@@ -11,15 +11,15 @@ namespace Server.Application.UseCase.Auth;
 
 public class RegisterUseCase : IRegisterUseCase
 {
-    private readonly IAccountRepository _repository;
+    private readonly IAccountDao _dao;
     private readonly IPasswordHasher _passwordHasher;
 
     public RegisterUseCase(
-        IAccountRepository repository,
+        IAccountDao dao,
         IPasswordHasher passwordHasher
     )
     {
-        _repository = repository;
+        _dao = dao;
         _passwordHasher = passwordHasher;
     }
     
@@ -27,7 +27,7 @@ public class RegisterUseCase : IRegisterUseCase
     {
         request.Validate();
 
-        var exists = await _repository.ExistsByPlayerIdAsync(request.PlayerId);
+        var exists = await _dao.ExistsByPlayerIdAsync(request.PlayerId);
         if (exists)
             throw new RequestException(
                 ErrorStatusCode.Conflict,
@@ -45,6 +45,6 @@ public class RegisterUseCase : IRegisterUseCase
             Role = "user"
         };
         
-        await _repository.CreateAsync(newAccount);
+        await _dao.CreateAsync(newAccount);
     }
 }

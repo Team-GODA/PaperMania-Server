@@ -1,16 +1,14 @@
 ﻿using Dapper;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
-using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 using Server.Infrastructure.Service;
 
-namespace Server.Infrastructure.Repository;
+namespace Server.Infrastructure.Dao;
 
-public class CharacterRepository : RepositoryBase, ICharacterRepository
+public class CharacterDao : DaoBase, ICharacterDao
 {
     private static class Sql
     {
@@ -55,7 +53,7 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
     
     private readonly CharacterDataCache _cache;
 
-    public CharacterRepository(
+    public CharacterDao(
         string connectionString,
         CharacterDataCache cache,
         ITransactionScope? transactionScope = null)

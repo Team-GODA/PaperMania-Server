@@ -13,26 +13,26 @@ namespace Server.Application.UseCase.Player;
 
 public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
 {
-    private readonly IDataRepository _dataRepository;
-    private readonly IAccountRepository _accountRepository;
-    private readonly ICurrencyRepository _currencyRepository;
+    private readonly IDataDao _dataDao;
+    private readonly IAccountDao _accountDao;
+    private readonly ICurrencyDao _currencyDao;
     private readonly ISessionService _sessionService;
-    private readonly IStageRepository _stageRepository;
+    private readonly IStageDao _stageDao;
     private readonly ITransactionScope _transactionScope;
 
     public CreatePlayerDataUseCase(
-        IDataRepository  dataRepository,
-        IAccountRepository  accountRepository,
-        ICurrencyRepository currencyRepository,
+        IDataDao  dataDao,
+        IAccountDao  accountDao,
+        ICurrencyDao currencyDao,
         ISessionService sessionService,
-        IStageRepository stageRepository,
+        IStageDao stageDao,
         ITransactionScope transactionScope)
     {
-        _dataRepository = dataRepository;
-        _accountRepository = accountRepository;
-        _currencyRepository = currencyRepository;
+        _dataDao = dataDao;
+        _accountDao = accountDao;
+        _currencyDao = currencyDao;
         _sessionService = sessionService;
-        _stageRepository = stageRepository;
+        _stageDao = stageDao;
         _transactionScope = transactionScope;
     }
     
@@ -40,7 +40,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
     {
         var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
 
-        var account = await _accountRepository.FindByUserIdAsync(userId);
+        var account = await _accountDao.FindByUserIdAsync(userId);
         if (account == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,
@@ -61,12 +61,12 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
                 PlayerExp = 0
             };
             
-            await _dataRepository.CreateAsync(player);
-            await _currencyRepository.CreateByUserIdAsync(userId);
-            await _stageRepository.CreatePlayerStageDataAsync(userId);
+            await _dataDao.CreateAsync(player);
+            await _currencyDao.CreateByUserIdAsync(userId);
+            await _stageDao.CreatePlayerStageDataAsync(userId);
             
             account.IsNewAccount = false;
-            await _accountRepository.UpdateAsync(account);
+            await _accountDao.UpdateAsync(account);
         });
 
         return new AddPlayerDataResult(

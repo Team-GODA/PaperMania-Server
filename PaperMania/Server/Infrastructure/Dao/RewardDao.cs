@@ -1,16 +1,14 @@
 ﻿using Dapper;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
-using Server.Domain.Entity;
 using Server.Infrastructure.Service;
 using Server.Infrastructure.StaticData;
 
-namespace Server.Infrastructure.Repository;
+namespace Server.Infrastructure.Dao;
 
-public class RewardRepository : RepositoryBase, IRewardRepository
+public class RewardDao : DaoBase, IRewardDao
 {
     private static class Sql
     {
@@ -30,7 +28,7 @@ public class RewardRepository : RepositoryBase, IRewardRepository
     
     private readonly StageRewardCache _cache;
     
-    public RewardRepository(
+    public RewardDao(
         string connectionString,
         StageRewardCache cache,
         ITransactionScope? transactionScope = null) 

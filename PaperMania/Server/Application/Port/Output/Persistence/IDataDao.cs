@@ -4,7 +4,7 @@ using Server.Infrastructure.StaticData;
 
 namespace Server.Application.Port.Output.Persistence;
 
-public interface IDataRepository
+public interface IDataDao
 {
     Task<PlayerGameData?> ExistsPlayerNameAsync(string playerName);
     Task CreateAsync(PlayerGameData player);

@@ -8,18 +8,18 @@ namespace Server.Application.UseCase.Currency;
 
 public class GetGoldUseCase : IGetGoldUseCase
 {
-    private readonly ICurrencyRepository _repository;
+    private readonly ICurrencyDao _dao;
     
     public GetGoldUseCase(
-        ICurrencyRepository repository
+        ICurrencyDao dao
         )
     {
-        _repository = repository;
+        _dao = dao;
     }
 
     public async Task<GetGoldResult> ExecuteAsync(int userId)
     {
-        var data = await _repository.FindByUserIdAsync(userId);
+        var data = await _dao.FindByUserIdAsync(userId);
         if (data == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,

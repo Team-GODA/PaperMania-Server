@@ -9,18 +9,18 @@ namespace Server.Application.UseCase.Player;
 
 public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 {
-    private readonly IDataRepository _repository;
+    private readonly IDataDao _dao;
 
     public GainPlayerExpUseCase(
-        IDataRepository repository
+        IDataDao dao
     )
     {
-        _repository = repository;
+        _dao = dao;
     }
     
     public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpUseCaseCommand request)
     {
-        var data = await _repository.FindByUserIdAsync(request.UserId);
+        var data = await _dao.FindByUserIdAsync(request.UserId);
         if (data == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,
@@ -30,7 +30,7 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 
         while (true)
         {
-            var levelData = await _repository.FindLevelDataAsync(data.PlayerLevel);
+            var levelData = await _dao.FindLevelDataAsync(data.PlayerLevel);
             if (levelData == null || data.PlayerExp < levelData.MaxExp)
                 break;
             
@@ -38,7 +38,7 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
             data.PlayerLevel++;
         }
 
-        await _repository.UpdatePlayerLevelAsync(request.UserId, data.PlayerLevel, data.PlayerExp);
+        await _dao.UpdatePlayerLevelAsync(request.UserId, data.PlayerLevel, data.PlayerExp);
         return new GainPlayerExpUseCaseResult(
             Level:data.PlayerLevel,
             Exp:data.PlayerExp

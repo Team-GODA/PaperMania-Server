@@ -10,15 +10,15 @@ namespace Server.Application.UseCase.Currency;
 
 public class UpdateMaxActionPointUseCase : IUpdateMaxActionPointUseCase
 {
-    private readonly ICurrencyRepository _repository;
+    private readonly ICurrencyDao _dao;
     private readonly ITransactionScope _transactionScope;
 
     public UpdateMaxActionPointUseCase(
-        ICurrencyRepository repository,
+        ICurrencyDao dao,
         ITransactionScope transactionScope
     )
     {
-        _repository = repository;
+        _dao = dao;
         _transactionScope = transactionScope;
     }
     
@@ -26,12 +26,12 @@ public class UpdateMaxActionPointUseCase : IUpdateMaxActionPointUseCase
     {
         return await _transactionScope.ExecuteAsync(async () =>
         {
-            var data = await _repository.FindByUserIdAsync(request.UserId);
+            var data = await _dao.FindByUserIdAsync(request.UserId);
             if (data == null)
                 throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_NOT_FOUND");
         
             data.MaxActionPoint = request.MaxActionPoint;
-            await _repository.UpdateAsync(data);
+            await _dao.UpdateAsync(data);
         
             return new UpdateMaxActionPointResult(data.MaxActionPoint);
         });

@@ -10,21 +10,21 @@ namespace Server.Application.UseCase.Currency;
 
 public class GetActionPointUseCase : IGetActionPointUseCase
 {
-    private readonly ICurrencyRepository _repository;
+    private readonly ICurrencyDao _dao;
     private readonly ActionPointService _apService;
 
     public GetActionPointUseCase(
-        ICurrencyRepository repository,
+        ICurrencyDao dao,
         ActionPointService apService
         )
     {
-        _repository = repository;
+        _dao = dao;
         _apService = apService;
     }
     
     public async Task<GetActionPointResult> ExecuteAsync(GetActionPointCommand request)
     {
-        var data = await _repository.FindByUserIdAsync(request.UserId);
+        var data = await _dao.FindByUserIdAsync(request.UserId);
         if (data == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,
@@ -32,7 +32,7 @@ public class GetActionPointUseCase : IGetActionPointUseCase
         
         var regenerate = _apService.TryRegenerate(data, DateTime.UtcNow);
         if (regenerate)
-            await _repository.UpdateAsync(data);
+            await _dao.UpdateAsync(data);
         
         return new GetActionPointResult(data.ActionPoint);
     }

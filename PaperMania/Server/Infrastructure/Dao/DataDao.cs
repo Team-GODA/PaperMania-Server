@@ -1,14 +1,12 @@
 ﻿using Dapper;
-using Server.Application.Port;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
-using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 using Server.Infrastructure.StaticData;
 
-namespace Server.Infrastructure.Repository;
+namespace Server.Infrastructure.Dao;
 
-public class DataRepository : RepositoryBase, IDataRepository
+public class DataDao : DaoBase, IDataDao
 {
     private static class Sql
     {
@@ -52,7 +50,7 @@ public class DataRepository : RepositoryBase, IDataRepository
             ";
     }
     
-    public DataRepository(
+    public DataDao(
         string connectionString, 
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)

@@ -3,7 +3,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.Port.Output.Persistence;
 
-public interface IAccountRepository
+public interface IAccountDao
 {
     Task<PlayerAccountData?> FindByUserIdAsync(int userId);
     Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId);

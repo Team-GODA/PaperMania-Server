@@ -10,15 +10,15 @@ namespace Server.Application.UseCase.Player;
 
     public class GetPlayerNameUseCase : IGetPlayerNameUseCase
     {
-        private readonly IDataRepository _repository;
+        private readonly IDataDao _dao;
         private readonly CacheWrapper _cache;
 
         public GetPlayerNameUseCase(
-            IDataRepository repository,
+            IDataDao dao,
             CacheWrapper cache
             )
         {
-            _repository = repository;
+            _dao = dao;
             _cache = cache;
         }
         
@@ -28,7 +28,7 @@ namespace Server.Application.UseCase.Player;
                 CacheKey.Profile.ByUserId(request.UserId),
                 async () =>
                 {
-                    var data = await _repository.FindByUserIdAsync(request.UserId);
+                    var data = await _dao.FindByUserIdAsync(request.UserId);
                     return data?.PlayerName;
                 },
                 TimeSpan.FromDays(30)

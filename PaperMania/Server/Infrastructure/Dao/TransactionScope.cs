@@ -2,7 +2,7 @@
 using Npgsql;
 using Server.Application.Port.Output.Infrastructure;
 
-namespace Server.Infrastructure.Repository;
+namespace Server.Infrastructure.Dao;
 
 public class TransactionScope : ITransactionScope
 {
