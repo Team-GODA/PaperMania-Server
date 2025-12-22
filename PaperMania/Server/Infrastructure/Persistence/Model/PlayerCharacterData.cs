@@ -1,5 +1,4 @@
-﻿using Server.Domain.Entity;
-using Server.Infrastructure.StaticData;
+﻿using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Infrastructure.Persistence.Model;
 
