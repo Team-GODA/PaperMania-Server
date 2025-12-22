@@ -9,27 +9,21 @@ public class StageDao : DaoBase, IStageDao
 {
     private static class Sql
     {
-        public const string CreateStageData = @"
-                INSERT INTO paper_mania_game_data.player_stage_data (user_id, stage_num, stage_sub_num, is_cleared)
-                VALUES (@UserId, @StageNum, @StageSubNum, false);
+        public const string GetStageData = @"
+            SELECT user_id AS UserId, 
+                   stage_num AS StageNum, 
+                   stage_sub_num AS StageSubNum
+            FROM paper_mania_game_data.player_stage_data
+            WHERE user_id = @UserId 
+              AND stage_num = @StageNum 
+              AND stage_sub_num = @StageSubNum;
         ";
         
-        public const string CheckIsCleared = @"
-            SELECT is_cleared AS IsCleared
-            FROM paper_mania_game_data.player_stage_data
-            WHERE user_id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
-            LIMIT 1
-            ";
-        
-        public const string UpdateIsCleared = @"
-            UPDATE paper_mania_game_data.player_stage_data
-            SET is_cleared = @IsCleared
-            WHERE user_id = @UserId AND stage_num = @StageNum AND stage_sub_num = @StageSubNum
-            ";
+        public const string CreateStageData = @"
+                INSERT INTO paper_mania_game_data.player_stage_data (user_id, stage_num, stage_sub_num)
+                VALUES (@UserId, @StageNum, @StageSubNum);
+        ";
     }
-    
-    private const int MaxStageNum = 5;
-    private const int MaxSubStageNum = 5;
     
     public StageDao(
         string connectionString,
@@ -38,57 +32,23 @@ public class StageDao : DaoBase, IStageDao
     {
     }
 
-    public async Task CreatePlayerStageDataAsync(int? userId)    
+    public async Task<PlayerStageData?> FindByUserIdAsync(int userId, int stageNum, int stageSubNum)
     {
-        var data = new List<object>(MaxStageNum * MaxSubStageNum);
-        
-        for (int stageNum = 1; stageNum <= MaxStageNum; stageNum++)
-        {
-            for (int subNum = 1; subNum <= MaxSubStageNum; subNum++)
-            {
-                data.Add(new PlayerStageData
-                {
-                    UserId = userId,
-                    StageNum = stageNum,
-                    StageSubNum = subNum
-                });
-            }
-        }
-
-        await ExecuteAsync(async (connection, transaction) =>
-            await connection.ExecuteAsync(Sql.CreateStageData, data, transaction));
+        return await QueryAsync(connection =>
+            connection.QueryFirstOrDefaultAsync<PlayerStageData>(
+                Sql.GetStageData,
+                new { UserId = userId, StageNum = stageNum, StageSubNum = stageSubNum }
+            )
+        );
     }
 
-    public async Task<bool> IsClearedStageAsync(PlayerStageData data)
+    public async Task CreateAsync(PlayerStageData data)    
     {
-        return await ExecuteAsync(async (connection, transaction) =>
-        {
-            var result = await connection.QueryFirstOrDefaultAsync<bool?>(
-                Sql.CheckIsCleared,
-                new
-                {
-                    UserId = data.UserId,
-                    StageNum = data.StageNum,
-                    StageSubNum = data.StageSubNum
-                },
-                transaction);
-
-            return result ?? false;
-        });
-    }
-
-    public async Task UpdateIsClearedAsync(PlayerStageData data)
-    {
-        await ExecuteAsync(async (connection, transaction) =>
-            await connection.ExecuteAsync(
-                Sql.UpdateIsCleared, 
-                new
-                {
-                    UserId = data.UserId,
-                    IsCleared = data.IsCleared,
-                    StageNum = data.StageNum,
-                    StageSubNum = data.StageSubNum
-                },
-                transaction));
+        await ExecuteAsync( (connection, transaction) =>
+            connection.ExecuteAsync(
+                Sql.CreateStageData,
+                new { UserId = data.UserId, StageNum = data.StageNum, StageSubNum = data.StageSubNum },
+                transaction)
+        );
     }
 }

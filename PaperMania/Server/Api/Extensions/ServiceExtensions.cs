@@ -2,6 +2,7 @@
 using Server.Application.Port.Input.Auth;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Input.Player;
+using Server.Application.Port.Input.Stage;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
@@ -9,6 +10,7 @@ using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Player;
+using Server.Application.UseCase.Stage;
 using Server.Domain.Service;
 using Server.Infrastructure.Cache;
 using Server.Infrastructure.Persistence.Dao;
@@ -149,6 +151,10 @@ public static class ServiceExtensions
         services.AddScoped<IGainPaperPieceUseCase, GainPaperPieceUseCase>();
         services.AddScoped<IGetPaperPieceUseCase, GetPaperPieceUseCase>();
         services.AddScoped<ISpendPaperPieceUseCase, SpendPaperPieceUseCase>();
+        
+        // reward use case
+        services.AddScoped<IGetStageRewardUseCase, GetStageRewardUseCase>();
+        services.AddScoped<ICheckStageClearedUseCase, CheckStageClearedUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();
