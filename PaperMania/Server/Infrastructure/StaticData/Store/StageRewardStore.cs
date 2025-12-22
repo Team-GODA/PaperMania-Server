@@ -4,19 +4,19 @@ namespace Server.Infrastructure.StaticData.Store;
 
 public class StageRewardStore : IStageRewardStore, IHostedService
 {
-    private const string Url =
-        "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjqte_1Pq7_fnmlqnJ_aoZ3xLDyZPuTP83L1buqjstcuk9nkZpVXUw0wYt2wqfI631jrdC4lTweZ2V/pub?output=csv";
-    
     private readonly HttpClient _httpClient;
     private readonly ILogger<StageRewardStore> _logger;
+    private readonly IConfiguration _configuration;
     private Dictionary<(int stageNum, int stageSubNum), StageReward> _rewards = new();
 
     public StageRewardStore(
         IHttpClientFactory httpClientFactory,
-        ILogger<StageRewardStore> logger)
+        ILogger<StageRewardStore> logger,
+        IConfiguration configuration)
     {
         _httpClient = httpClientFactory.CreateClient();
         _logger = logger;
+        _configuration = configuration;
     }
 
     public StageReward? GetStageReward(int stageNum, int stageSubNum)
@@ -30,9 +30,18 @@ public class StageRewardStore : IStageRewardStore, IHostedService
         {
             _logger.LogInformation("Loading stage rewards from CSV...");
             
+            var secretName = _configuration["StaticData:StageRewardCsvUrlSecretName"];
+            if (string.IsNullOrEmpty(secretName))
+                throw new InvalidOperationException("StageRewardCsvUrlSecretName is not configured");
+            
+            var url = _configuration[secretName];
+            if (string.IsNullOrEmpty(url))
+                throw new InvalidOperationException($"CSV URL not found in Key Vault. Secret name: {secretName}");
+            
+            
             _rewards = await CsvHelper.LoadAsync<(int, int), StageReward>(
                 _httpClient,
-                Url,
+                url,
                 cols => new StageReward
                 {
                     StageNum = int.Parse(cols[0]),
