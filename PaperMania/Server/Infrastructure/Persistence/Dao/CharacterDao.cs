@@ -6,7 +6,7 @@ using Server.Application.Port.Output.Persistence;
 using Server.Infrastructure.Persistence.Model;
 using Server.Infrastructure.Service;
 
-namespace Server.Infrastructure.Dao;
+namespace Server.Infrastructure.Persistence.Dao;
 
 public class CharacterDao : DaoBase, ICharacterDao
 {

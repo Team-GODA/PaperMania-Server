@@ -6,7 +6,7 @@ using Server.Application.Port.Output.Persistence;
 using Server.Infrastructure.Service;
 using Server.Infrastructure.StaticData;
 
-namespace Server.Infrastructure.Dao;
+namespace Server.Infrastructure.Persistence.Dao;
 
 public class RewardDao : DaoBase, IRewardDao
 {

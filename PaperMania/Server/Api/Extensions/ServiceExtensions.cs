@@ -10,7 +10,7 @@ using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Player;
 using Server.Domain.Service;
 using Server.Infrastructure.Cache;
-using Server.Infrastructure.Dao;
+using Server.Infrastructure.Persistence.Dao;
 using Server.Infrastructure.Service;
 using StackExchange.Redis;
 

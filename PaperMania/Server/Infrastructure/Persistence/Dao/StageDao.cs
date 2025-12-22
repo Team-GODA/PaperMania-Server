@@ -3,7 +3,7 @@ using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Infrastructure.Persistence.Model;
 
-namespace Server.Infrastructure.Dao;
+namespace Server.Infrastructure.Persistence.Dao;
 
 public class StageDao : DaoBase, IStageDao
 {

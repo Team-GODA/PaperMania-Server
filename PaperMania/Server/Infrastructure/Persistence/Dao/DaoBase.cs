@@ -1,7 +1,7 @@
 ﻿using Npgsql;
 using Server.Application.Port.Output.Infrastructure;
 
-namespace Server.Infrastructure.Dao;
+namespace Server.Infrastructure.Persistence.Dao;
 
 public class DaoBase
 { 
