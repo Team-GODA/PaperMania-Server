@@ -1,4 +1,4 @@
-﻿namespace Server.Api.Dto.Request
+﻿namespace Server.Api.Dto.Request.Data
 {
     /// <summary>
     /// 플레이어 경험치 추가 요청 DTO

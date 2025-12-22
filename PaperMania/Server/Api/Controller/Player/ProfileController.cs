@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
+using Server.Api.Dto.Request.Data;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
 using Server.Application.Port.Input.Player;

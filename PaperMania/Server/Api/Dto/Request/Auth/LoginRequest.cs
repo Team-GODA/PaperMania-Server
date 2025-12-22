@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿namespace Server.Api.Dto.Request.Auth;
+
+/// <summary>
 /// 로그인 요청 데이터
 /// </summary>
 public class LoginRequest

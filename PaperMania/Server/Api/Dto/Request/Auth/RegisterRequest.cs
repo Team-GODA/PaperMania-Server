@@ -1,4 +1,4 @@
-﻿namespace Server.Api.Dto.Request
+﻿namespace Server.Api.Dto.Request.Auth
 {
     /// <summary>
     /// 회원가입 요청 DTO

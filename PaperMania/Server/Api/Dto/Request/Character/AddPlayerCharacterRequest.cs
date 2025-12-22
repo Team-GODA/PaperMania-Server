@@ -1,8 +1,4 @@
-﻿using Server.Domain.Entity;
-using Server.Infrastructure.StaticData;
-using Server.Infrastructure.StaticData.Model;
-
-namespace Server.Api.Dto.Request
+﻿namespace Server.Api.Dto.Request.Character
 {
     /// <summary>
     /// 플레이어가 보유한 캐릭터 추가 요청 DTO

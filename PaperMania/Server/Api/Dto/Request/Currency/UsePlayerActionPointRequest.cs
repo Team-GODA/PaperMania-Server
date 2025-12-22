@@ -1,4 +1,4 @@
-﻿namespace Server.Api.Dto.Request
+﻿namespace Server.Api.Dto.Request.Currency
 {
     /// <summary>
     /// 플레이어 행동력 사용 요청 DTO

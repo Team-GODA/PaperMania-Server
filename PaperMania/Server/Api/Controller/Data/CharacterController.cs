@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
+using Server.Api.Dto.Request.Character;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Character;
 using Server.Application.Port.Input.Character;

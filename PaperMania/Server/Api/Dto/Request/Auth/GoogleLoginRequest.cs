@@ -1,4 +1,4 @@
-﻿namespace Server.Api.Dto.Request
+﻿namespace Server.Api.Dto.Request.Auth
 {
     /// <summary>
     /// 구글 로그인 요청 DTO

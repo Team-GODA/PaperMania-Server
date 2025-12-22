@@ -1,4 +1,4 @@
-﻿namespace Server.Api.Dto.Request
+﻿namespace Server.Api.Dto.Request.Reward
 {
     /// <summary>
     /// 스테이지 보상 수령 요청 DTO

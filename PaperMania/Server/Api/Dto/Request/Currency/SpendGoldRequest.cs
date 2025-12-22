@@ -1,4 +1,4 @@
-﻿namespace Server.Api.Dto.Request;
+﻿namespace Server.Api.Dto.Request.Currency;
 
 public class SpendGoldRequest
 {
