@@ -19,7 +19,8 @@ public class CharacterDao : DaoBase, ICharacterDao
             FROM paper_mania_game_data.player_character_data PC
             LEFT JOIN paper_mania_game_data.player_character_piece_data PP
                 ON PC.user_id = PP.user_id AND PC.character_id = PP.character_id
-            WHERE PC.user_id = @UserId";
+            WHERE PC.user_id = @UserId
+            ";    
 
         public const string GetByUserId = @"
             SELECT user_id AS UserId,
@@ -51,15 +52,20 @@ public class CharacterDao : DaoBase, ICharacterDao
                 @UltimateSkillLevel, 
                 @SupportSkillLevel
             )
-            RETURNING 
-                user_id AS UserId,
-                character_id AS CharacterId,
-                character_level AS CharacterLevel,
-                character_exp AS CharacterExp,
-                normal_skill_level AS NormalSkillLevel,
-                ultimate_skill_level AS UltimateSkillLevel,
-                support_skill_level AS SupportSkillLevel
-    ";
+            ";
+        
+        public const string CreatePieceData = @"
+            INSERT INTO paper_mania_game_data.player_character_piece_data (
+                user_id,
+                character_id,
+                character_piece
+            )
+            VALUES (
+                @UserId,
+                @CharacterId,
+                @PieceAmount
+            )
+            ";
     }
 
     public CharacterDao(
@@ -69,14 +75,13 @@ public class CharacterDao : DaoBase, ICharacterDao
     {
     }
 
-    public async Task<IEnumerable<PlayerCharacterData?>> FindAll(int userId)
+    public async Task<IEnumerable<PlayerCharacterData>> FindAll(int userId)
     {
-        return await QueryAsync(async conn =>
-            (await conn.QueryAsync<PlayerCharacterData>(
+        return await QueryAsync(conn =>
+            conn.QueryAsync<PlayerCharacterData>(
                 Sql.GetAllByUserId,
                 new { UserId = userId }
-                )
-            ).ToList()
+            )
         );
     }
 
@@ -94,16 +99,26 @@ public class CharacterDao : DaoBase, ICharacterDao
         );
     }
 
-    public async Task<PlayerCharacterData?> UpdateAsync(PlayerCharacterData data)
+    public async Task<PlayerCharacterData> UpdateAsync(PlayerCharacterData data)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<PlayerCharacterData?> CreateAsync(PlayerCharacterData data)
+    public async Task CreateAsync(PlayerCharacterData data)
     {
-        return await ExecuteAsync((connection, transaction) =>
-            connection.QuerySingleAsync<PlayerCharacterData>(
-                Sql.createData, 
+        await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteAsync(
+                Sql.createData,
+                data,
+                transaction)
+        );
+    }
+
+    public async Task CreatePieceData(PlayerCharacterPieceData data)
+    {
+        await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteAsync(
+                Sql.CreatePieceData, 
                 data,
                 transaction)
         );

@@ -5,5 +5,5 @@ namespace Server.Application.Port.Input.Character;
 
 public interface ICreatePlayerCharacterDataUseCase
 {
-    Task<CreatePlayerCharacterDataResult> ExecuteAsync(CreatePlayerCharacterCommand request);
+    Task ExecuteAsync(CreatePlayerCharacterCommand request);
 }

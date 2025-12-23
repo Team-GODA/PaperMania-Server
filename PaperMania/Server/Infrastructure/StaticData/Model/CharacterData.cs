@@ -18,7 +18,6 @@ public class CharacterData
 
 public enum CharacterRole
 {
-    None = 0,
     Main = 1,
     Support = 2
 }

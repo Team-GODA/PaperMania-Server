@@ -131,8 +131,7 @@ public class CharacterStore : ICharacterStore, IHostedService
     private void ValidateSkill(int skillId, SkillType expectedType, int characterId)
     {
         if (skillId == 0)
-            throw new InvalidOperationException(
-                $"Missing {expectedType} skill for CharacterId={characterId}");
+            return;
 
         var skill = _skillStore.Get(skillId);
         if (skill == null)
