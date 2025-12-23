@@ -21,8 +21,6 @@ public static class MiddlewareExtensions
         this IApplicationBuilder app)
     {
         app.UseMiddleware<ExceptionHandlingMiddleware>();
-        app.UseMiddleware<SessionRefreshMiddleware>();
-        
         return app;
     }
 }

@@ -7,16 +7,19 @@ var builder = WebApplication.CreateBuilder(args);
 var keyVaultName = builder.Configuration["Azure:KeyVaultName"] 
                    ?? "papermaniadbconnection";
 var keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
+
 builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
 
-var redisConnectionString = builder.Environment.IsDevelopment()
-    ? builder.Configuration["Redis:Development"]
-    : builder.Configuration["Redis:Production"];
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
+
+builder.Services.AddHttpClient();
 
 builder.Services
     .AddCache(redisConnectionString!)
+    .AddStaticDataStores()
     .AddApplicationServices()
-    .AddRepositories();
+    .AddRepositories()
+    .AddApiFilters();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -41,19 +44,4 @@ if (!app.Environment.IsProduction())
 app.UseAuthorization();
 app.MapControllers();
 
-await InitializeCachesAsync(app.Services);
-
 app.Run();
-
-static async Task InitializeCachesAsync(IServiceProvider services)
-{
-    using var scope = services.CreateScope();
-    
-    var stageRewardCache = scope.ServiceProvider.GetRequiredService<StageRewardCache>();
-    var characterDataCache = scope.ServiceProvider.GetRequiredService<CharacterDataCache>();
-    
-    await Task.WhenAll(
-        stageRewardCache.Initialize(),
-        characterDataCache.Initialize()
-    );
-}
