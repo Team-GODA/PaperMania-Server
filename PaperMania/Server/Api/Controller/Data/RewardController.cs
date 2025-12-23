@@ -69,6 +69,7 @@ namespace Server.Api.Controller.Data
                 PaperPiece = result.PaperPiece,
                 Level = result.Level,
                 Exp = result.Exp,
+                MaxActionPoint = result.MaxActionPoint,
                 IsCleared = result.IsCleared
             };
         

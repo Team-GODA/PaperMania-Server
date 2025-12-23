@@ -12,15 +12,18 @@ namespace Server.Application.UseCase.Player;
 public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 {
     private readonly IDataDao _dataDao;
+    private readonly ICurrencyDao _currencyDao;
     private readonly ILevelDefinitionStore _store;
     private readonly ITransactionScope _transactionScope;
 
     public GainPlayerExpUseCase(
         IDataDao dataDao,
+        ICurrencyDao currencyDao,
         ILevelDefinitionStore store,
         ITransactionScope transactionScope)
     {
         _dataDao = dataDao;
+        _currencyDao = currencyDao;
         _store = store;
         _transactionScope = transactionScope;
     }
@@ -37,6 +40,13 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 
         data.Exp += request.Exp;
 
+        var currencyData = await _currencyDao.FindByUserIdAsync(request.UserId)
+                            ?? throw new RequestException(
+                                ErrorStatusCode.NotFound,
+                                "PLAYER_CURRENCY_DATA_NOT_FOUND"
+                                );
+
+        var maxExp = 0;
         while (true)
         {
             var levelData = _store.GetLevelDefinition(data.Level);
@@ -45,13 +55,21 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
             
             data.Exp -= levelData.MaxExp;
             data.Level++;
+            
+            currencyData.SetMaxActionPoint(levelData.MaxActionPoint);
+            currencyData.SetActionPoint(levelData.MaxActionPoint);
+            
+            maxExp = levelData.MaxExp;
         }
 
         await _dataDao.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp);
+        await _currencyDao.UpdateAsync(currencyData);
         
         return new GainPlayerExpUseCaseResult(
-            Level: data.Level,
-            Exp: data.Exp
+            data.Level,
+            data.Exp,
+            maxExp,
+            MaxActionPoint: currencyData.MaxActionPoint
         );
     }
 

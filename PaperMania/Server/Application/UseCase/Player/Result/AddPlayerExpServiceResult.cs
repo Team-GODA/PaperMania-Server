@@ -2,5 +2,7 @@
 
 public record GainPlayerExpUseCaseResult(
     int Level,
-    int Exp
+    int Exp,
+    int MaxExp,
+    int MaxActionPoint
     );
