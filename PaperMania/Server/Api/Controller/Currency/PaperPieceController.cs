@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
+using Server.Api.Dto.Request.Currency;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
 using Server.Application.Port.Input.Currency;
@@ -31,8 +32,10 @@ namespace Server.Api.Controller.Currency
         [HttpGet]
         public async Task<ActionResult<BaseResponse<GetPaperPieceResponse>>> GetPaperPiece()
         {
+            var userId = GetUserId();
+            
             var result = await _getPaperPieceUseCase.ExecuteAsync(new GetPaperPieceCommand(
-                UserId)
+                userId)
             );
 
             var response = new GetPaperPieceResponse
@@ -47,8 +50,10 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<GainPaperPieceResponse>>> GainPaperPiece(
             [FromBody] GainPaperPieceRequest request)
         {
-            var result = await _gainPaperPieceUseCase.ExecuteAsync(new GainPaperPieceCommand(
-                UserId, request.PaperPiece)
+            var userId = GetUserId();
+            
+            var result = await _gainPaperPieceUseCase.ExecuteWithTransactionAsync(new GainPaperPieceCommand(
+                userId, request.PaperPiece)
             );
             
             var response = new GainPaperPieceResponse
@@ -63,8 +68,10 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<SpendPaperPieceResponse>>> SpendPaperPiece(
             [FromBody] SpendPaperPieceRequest request)
         {
+            var userId = GetUserId();
+            
             var result = await _spendPaperPieceUseCase.ExecuteAsync(new SpendPaperPieceCommand(
-                UserId, request.PaperPiece)
+                userId, request.PaperPiece)
             );
 
             var response = new SpendPaperPieceResponse

@@ -9,18 +9,18 @@ namespace Server.Application.UseCase.Currency;
 
 public class GetCurrencyDataUseCase : IGetCurrencyDataUseCase
 {
-    private readonly ICurrencyRepository _repository;
+    private readonly ICurrencyDao _dao;
 
-    public GetCurrencyDataUseCase(ICurrencyRepository repository)
+    public GetCurrencyDataUseCase(ICurrencyDao dao)
     {
-        _repository = repository;
+        _dao = dao;
     }
     
     public async Task<GetCurrencyDataResult> ExecuteAsync(GetCurrencyDataCommand request)
     {
         request.Validate();
         
-        var data = await _repository.FindByUserIdAsync(request.UserId)
+        var data = await _dao.FindByUserIdAsync(request.UserId)
             ?? throw new RequestException(
                 ErrorStatusCode.NotFound,
                 "PLAYER_NOT_FOUND"

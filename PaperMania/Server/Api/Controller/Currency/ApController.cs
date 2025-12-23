@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
+using Server.Api.Dto.Request.Currency;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
 using Server.Application.Port.Input.Currency;
@@ -35,8 +36,10 @@ namespace Server.Api.Controller.Currency
         [HttpGet]
         public async Task<ActionResult<BaseResponse<GetPlayerActionPointResponse>>> GetPlayerActionPointById()
         {
+            var userId = GetUserId();
+            
             var result = await _getActionPointUseCase.ExecuteAsync(new GetActionPointCommand(
-                UserId)
+                userId)
             );
 
             var response = new GetPlayerActionPointResponse
@@ -44,7 +47,7 @@ namespace Server.Api.Controller.Currency
                 CurrentActionPoint = result.ActionPoint
             };
                 
-            return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : UserId : {UserId}", response));
+            return Ok(ApiResponse.Ok($"플레이어 AP 조회 성공 : UserId : {userId}", response));
         }
         
         /// <summary>
@@ -54,8 +57,10 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<UpdatePlayerMaxActionPointResponse>>> UpdatePlayerMaxActionPoint(
             [FromBody] UpdatePlayerMaxActionPointRequest request)
         {
+            var userId = GetUserId();
+            
             var result = await _updateMaxActionPointUseCase.ExecuteAsync(new UpdateMaxActionPointCommand(
-                UserId, request.NewMaxActionPoint)
+                userId, request.NewMaxActionPoint)
             
             );
             var response = new UpdatePlayerMaxActionPointResponse
@@ -73,8 +78,10 @@ namespace Server.Api.Controller.Currency
         public async Task<ActionResult<BaseResponse<UsePlayerActionPointResponse>>> UsePlayerActionPoint(
             [FromBody] UsePlayerActionPointRequest request)
         {
+            var userId = GetUserId();
+            
             var result = await _spendActionPointUseCase.ExecuteAsync(new SpendActionPointCommand(
-                UserId, request.UsedActionPoint)
+                userId, request.UsedActionPoint)
             
             );
         

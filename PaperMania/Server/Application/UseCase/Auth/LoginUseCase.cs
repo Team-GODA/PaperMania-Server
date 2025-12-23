@@ -11,17 +11,17 @@ namespace Server.Application.UseCase.Auth;
 
 public class LoginUseCase : ILoginUseCase
 {
-    private readonly IAccountRepository _repository;
+    private readonly IAccountDao _dao;
     private readonly ISessionService _sessionService;
     private readonly IPasswordHasher _passwordHasher;
 
     public LoginUseCase(
-        IAccountRepository repository,
+        IAccountDao dao,
         ISessionService sessionService,
         IPasswordHasher passwordHasher
     )
     {
-        _repository = repository;
+        _dao = dao;
         _sessionService = sessionService;
         _passwordHasher = passwordHasher;
     }
@@ -30,7 +30,7 @@ public class LoginUseCase : ILoginUseCase
     {
         request.Validate();
         
-        var account = await _repository.FindByPlayerIdAsync(request.PlayerId);
+        var account = await _dao.FindByPlayerIdAsync(request.PlayerId);
         if (account == null || string.IsNullOrEmpty(account.Password))
         {
             _passwordHasher.Verify(request.Password, "DUMMY_HASH");

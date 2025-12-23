@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
+using Server.Api.Dto.Request.Data;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
 using Server.Application.Port.Input.Player;
@@ -32,13 +33,15 @@ public class ProfileController : BaseController
     [HttpGet("name")]
     public async Task<ActionResult<BaseResponse<GetPlayerNameResponse>>> GetPlayerName()
     {
+        var userId = GetUserId();
+        
         var result = await _getPlayerNameUseCase.ExecuteAsync(
-            new GetPlayerNameCommand(UserId)
+            new GetPlayerNameCommand(userId)
         );
 
         var response = new GetPlayerNameResponse
         {
-            Id = UserId,
+            Id = userId,
             PlayerName = result.PlayerName
         };
 
@@ -53,13 +56,15 @@ public class ProfileController : BaseController
         [FromBody] RenamePlayerNameRequest request
     )
     {
+        var userId = GetUserId();
+        
         var result = await _renameUseCase.ExecuteAsync(
-            new RenameCommand(UserId, request.NewName)
+            new RenameCommand(userId, request.NewName)
         );
 
         var response = new RenamePlayerNameResponse
         {
-            Id = UserId,
+            Id = userId,
             NewPlayerName = result.NewName
         };
 

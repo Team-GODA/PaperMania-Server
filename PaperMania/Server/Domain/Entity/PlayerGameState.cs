@@ -2,6 +2,6 @@
 
 public class PlayerGameState
 {
-    public int Level { get; init; }
-    public int Exp { get; init; }
+    public int Level { get; set; }
+    public int Exp { get; set; }
 }

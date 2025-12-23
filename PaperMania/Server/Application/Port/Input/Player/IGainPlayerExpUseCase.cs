@@ -5,5 +5,6 @@ namespace Server.Application.Port.Input.Player;
 
 public interface IGainPlayerExpUseCase
 {
-    Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpUseCaseCommand request);
+    Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpCommand request);
+    Task<GainPlayerExpUseCaseResult> ExecuteWithTransactionAsync(GainPlayerExpCommand request);
 }

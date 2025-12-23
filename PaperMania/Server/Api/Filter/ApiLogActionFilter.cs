@@ -37,48 +37,50 @@ public class ApiLogActionFilter : IAsyncActionFilter
             ? uid
             : null;
 
-        _logger.LogInformation(
-            "[{Domain}][{Method}] Request - Path: {Path}, UserId: {UserId}, SessionId: {SessionId}",
-            apiLog.Domain,
-            httpMethod,
-            path,
-            userId,
-            sessionId
-        );
-
-        ActionExecutedContext? executedContext;
-
-        try
-        {
-            executedContext = await next();
-        }
-        catch (Exception ex)
-        {
-            stopwatch.Stop();
-
-            _logger.LogError(
-                ex,
-                "[{Domain}][{Method}] Exception - Path: {Path}, ElapsedMs: {ElapsedMs}",
-                apiLog.Domain,
-                httpMethod,
-                path,
-                stopwatch.ElapsedMilliseconds
-            );
-
-            throw;
-        }
-
-        stopwatch.Stop();
-
-        if (executedContext.Exception == null)
+        using (_logger.BeginScope(new Dictionary<string, object?>
+               {
+                   ["Domain"] = apiLog.Domain,
+                   ["UserId"] = userId,
+                   ["SessionId"] = sessionId,
+                   ["Path"] = path
+               }))
         {
             _logger.LogInformation(
-                "[{Domain}][{Method}] Success - Path: {Path}, ElapsedMs: {ElapsedMs}",
-                apiLog.Domain,
-                httpMethod,
-                path,
-                stopwatch.ElapsedMilliseconds
+                "[{Method}] Request",
+                httpMethod
             );
+
+            ActionExecutedContext? executedContext;
+
+            try
+            {
+                executedContext = await next();
+            }
+            catch (Exception ex)
+            {
+                stopwatch.Stop();
+
+                _logger.LogError(
+                    ex,
+                    "[{Method}] Exception - ElapsedMs: {ElapsedMs}",
+                    httpMethod,
+                    stopwatch.ElapsedMilliseconds
+                );
+
+                throw;
+            }
+
+            stopwatch.Stop();
+
+            if (executedContext.Exception == null)
+            {
+                _logger.LogInformation(
+                    "[{Method}] Success - ElapsedMs: {ElapsedMs}",
+                    httpMethod,
+                    stopwatch.ElapsedMilliseconds
+                );
+            }
         }
     }
+
 }

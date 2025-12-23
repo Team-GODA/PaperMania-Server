@@ -10,15 +10,15 @@ namespace Server.Application.UseCase.Currency;
 
 public class SpendActionPointUseCase : ISpendActionPointUseCase
 {
-    private readonly ICurrencyRepository _repository;
+    private readonly ICurrencyDao _dao;
     private readonly ITransactionScope _transactionScope;
 
     public SpendActionPointUseCase(
-        ICurrencyRepository repository,
+        ICurrencyDao dao,
         ITransactionScope transactionScope
     )
     {
-        _repository = repository;
+        _dao = dao;
         _transactionScope = transactionScope;
     }
     
@@ -28,7 +28,7 @@ public class SpendActionPointUseCase : ISpendActionPointUseCase
         
         return await _transactionScope.ExecuteAsync(async () =>
         {
-            var data = await _repository.FindByUserIdAsync(request.UserId);
+            var data = await _dao.FindByUserIdAsync(request.UserId);
             if (data == null)
                 throw new RequestException(
                     ErrorStatusCode.NotFound,
@@ -42,7 +42,7 @@ public class SpendActionPointUseCase : ISpendActionPointUseCase
             data.ActionPoint = Math.Max(data.ActionPoint - request.ActionPoint, 0);
             data.LastActionPointUpdated = DateTime.UtcNow;
             
-            await _repository.UpdateAsync(data);
+            await _dao.UpdateAsync(data);
 
             return new SpendActionPointResult(
                 data.ActionPoint

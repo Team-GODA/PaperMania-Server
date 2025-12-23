@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
+using Server.Api.Dto.Request.Auth;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;
 using Server.Application.Port.Input.Auth;
@@ -37,7 +38,9 @@ namespace Server.Api.Controller.Auth
         [SessionAuthorize]
         public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUser()
         {
-           await _validateUseCase.ExecuteAsync(SessionId);
+            var sessionId = GetSessionId();
+            
+           await _validateUseCase.ExecuteAsync(sessionId);
            return Ok(ApiResponse.Ok<EmptyResponse>("유저 인증 성공"));
         }
         
@@ -87,7 +90,9 @@ namespace Server.Api.Controller.Auth
         [HttpPost("logout")]
         public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout()
         {
-            await _logoutUseCase.ExecuteAsync(SessionId);
+            var sessionId = GetSessionId();
+            
+            await _logoutUseCase.ExecuteAsync(sessionId);
             return Ok(ApiResponse.Ok<EmptyResponse>("로그아웃 성공"));
         }
     }

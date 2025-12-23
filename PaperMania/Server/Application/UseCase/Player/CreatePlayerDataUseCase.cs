@@ -6,32 +6,29 @@ using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
-using Server.Domain.Entity;
+using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.UseCase.Player;
 
 public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
 {
-    private readonly IDataRepository _dataRepository;
-    private readonly IAccountRepository _accountRepository;
-    private readonly ICurrencyRepository _currencyRepository;
+    private readonly IDataDao _dataDao;
+    private readonly IAccountDao _accountDao;
+    private readonly ICurrencyDao _currencyDao;
     private readonly ISessionService _sessionService;
-    private readonly IStageRepository _stageRepository;
     private readonly ITransactionScope _transactionScope;
 
     public CreatePlayerDataUseCase(
-        IDataRepository  dataRepository,
-        IAccountRepository  accountRepository,
-        ICurrencyRepository currencyRepository,
+        IDataDao  dataDao,
+        IAccountDao  accountDao,
+        ICurrencyDao currencyDao,
         ISessionService sessionService,
-        IStageRepository stageRepository,
         ITransactionScope transactionScope)
     {
-        _dataRepository = dataRepository;
-        _accountRepository = accountRepository;
-        _currencyRepository = currencyRepository;
+        _dataDao = dataDao;
+        _accountDao = accountDao;
+        _currencyDao = currencyDao;
         _sessionService = sessionService;
-        _stageRepository = stageRepository;
         _transactionScope = transactionScope;
     }
     
@@ -39,7 +36,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
     {
         var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
 
-        var account = await _accountRepository.FindByUserIdAsync(userId);
+        var account = await _accountDao.FindByUserIdAsync(userId);
         if (account == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,
@@ -55,17 +52,16 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
             var player = new PlayerGameData
             {
                 UserId = userId,
-                PlayerName = request.PlayerName,
-                PlayerLevel = 1,
-                PlayerExp = 0
+                Name = request.PlayerName,
+                Level = 1,
+                Exp = 0
             };
             
-            await _dataRepository.CreateAsync(player);
-            await _currencyRepository.CreateByUserIdAsync(userId);
-            await _stageRepository.CreatePlayerStageDataAsync(userId);
+            await _dataDao.CreateAsync(player);
+            await _currencyDao.CreateByUserIdAsync(userId);
             
             account.IsNewAccount = false;
-            await _accountRepository.UpdateAsync(account);
+            await _accountDao.UpdateAsync(account);
         });
 
         return new AddPlayerDataResult(

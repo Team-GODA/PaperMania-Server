@@ -10,14 +10,14 @@ namespace Server.Application.UseCase.Currency;
 
 public class GainGoldUseCase : IGainGoldUseCase
 {
-    private readonly ICurrencyRepository _repository;
+    private readonly ICurrencyDao _dao;
     private readonly ITransactionScope _transactionScope;
 
     public GainGoldUseCase(
-        ICurrencyRepository repository,
+        ICurrencyDao dao,
         ITransactionScope transactionScope)
     {
-        _repository = repository;
+        _dao = dao;
         _transactionScope = transactionScope;
     }
     
@@ -25,18 +25,22 @@ public class GainGoldUseCase : IGainGoldUseCase
     {
         request.Validate();
 
+        var data = await _dao.FindByUserIdAsync(request.UserId)
+                   ?? throw new RequestException(
+                       ErrorStatusCode.NotFound,
+                       "PLAYER_NOT_FOUND");
+
+
+        data.Gold += request.Gold;
+        await _dao.UpdateAsync(data);
+
+        return new GainGoldResult(data.Gold);
+    }
+    
+    public async Task<GainGoldResult>  ExecuteWithTransactionAsync(GainGoldCommand request)
+    {
         return await _transactionScope.ExecuteAsync(async () =>
-        {
-            var data = await _repository.FindByUserIdAsync(request.UserId)
-                       ?? throw new RequestException(
-                           ErrorStatusCode.NotFound,
-                           "PLAYER_NOT_FOUND");
-
-
-            data.Gold += request.Gold;
-            await _repository.UpdateAsync(data);
-
-            return new GainGoldResult(data.Gold);
-        });
+            await ExecuteAsync(request)
+            );
     }
 }

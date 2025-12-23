@@ -1,7 +1,9 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
+using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 
@@ -9,39 +11,54 @@ namespace Server.Application.UseCase.Player;
 
 public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 {
-    private readonly IDataRepository _repository;
+    private readonly IDataDao _dataDao;
+    private readonly ILevelDefinitionStore _store;
+    private readonly ITransactionScope _transactionScope;
 
     public GainPlayerExpUseCase(
-        IDataRepository repository
-    )
+        IDataDao dataDao,
+        ILevelDefinitionStore store,
+        ITransactionScope transactionScope)
     {
-        _repository = repository;
+        _dataDao = dataDao;
+        _store = store;
+        _transactionScope = transactionScope;
     }
     
-    public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpUseCaseCommand request)
+    public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpCommand request)
     {
-        var data = await _repository.FindByUserIdAsync(request.UserId);
-        if (data == null)
-            throw new RequestException(
-                ErrorStatusCode.NotFound,
-                "PLAYER_DATA_NOT_FOUND");
+        request.Validate();
 
-        data.PlayerExp += request.Exp;
+        var data = await _dataDao.FindByUserIdAsync(request.UserId)
+                   ?? throw new RequestException(
+                       ErrorStatusCode.NotFound,
+                       "PLAYER_DATA_NOT_FOUND"
+                   );
+
+        data.Exp += request.Exp;
 
         while (true)
         {
-            var levelData = await _repository.FindLevelDataAsync(data.PlayerLevel);
-            if (levelData == null || data.PlayerExp < levelData.MaxExp)
+            var levelData = _store.GetLevelDefinition(data.Level);
+            if (levelData == null || data.Exp < levelData.MaxExp)
                 break;
             
-            data.PlayerExp -= levelData.MaxExp;
-            data.PlayerLevel++;
+            data.Exp -= levelData.MaxExp;
+            data.Level++;
         }
 
-        await _repository.UpdatePlayerLevelAsync(request.UserId, data.PlayerLevel, data.PlayerExp);
+        await _dataDao.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp);
+        
         return new GainPlayerExpUseCaseResult(
-            Level:data.PlayerLevel,
-            Exp:data.PlayerExp
+            Level: data.Level,
+            Exp: data.Exp
+        );
+    }
+
+    public async Task<GainPlayerExpUseCaseResult> ExecuteWithTransactionAsync(GainPlayerExpCommand request)
+    {
+        return await _transactionScope.ExecuteAsync(async () => 
+            await ExecuteAsync(request)
             );
     }
 }

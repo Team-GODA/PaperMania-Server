@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
+using Server.Api.Dto.Request.Data;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
 using Server.Application.Port.Input.Player;
@@ -35,8 +36,10 @@ namespace Server.Api.Controller.Player
         [HttpPost]
         public async Task<ActionResult<BaseResponse<AddPlayerDataResponse>>> AddPlayerData([FromBody] AddPlayerDataRequest request)
         {
+            var sessionId = GetSessionId();
+            
             var result =  await _createPlayerDataUseCase.ExecuteAsync(new AddPlayerDataCommand(
-                request.PlayerName, SessionId)
+                request.PlayerName, sessionId)
             );
 
             var response = new AddPlayerDataResponse
@@ -53,8 +56,10 @@ namespace Server.Api.Controller.Player
         [HttpGet("level")]
         public async Task<ActionResult<BaseResponse<GetPlayerLevelResponse>>> GetPlayerLevel()
         {
+            var userId = GetUserId();
+            
             var result = await _getPlayerLevelUseCase.ExecuteAsync(new GetPlayerLevelCommand(
-                UserId)
+                userId)
             );
 
             var response = new GetPlayerLevelResponse
@@ -72,14 +77,16 @@ namespace Server.Api.Controller.Player
         [HttpPatch("level")]
         public async Task<ActionResult<BaseResponse<UpdatePlayerLevelByExpResponse>>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request)
         {
-            var result = await _gainPlayerExpUseCase.ExecuteAsync(new GainPlayerExpUseCaseCommand(
-                UserId, 
+            var userId = GetUserId();
+            
+            var result = await _gainPlayerExpUseCase.ExecuteWithTransactionAsync(new GainPlayerExpCommand(
+                userId, 
                 request.NewExp)
             );
 
             var response = new UpdatePlayerLevelByExpResponse
             {
-                Id = UserId,
+                Id = userId,
                 NewLevel = result.Level,
                 NewExp = result.Exp
             };
