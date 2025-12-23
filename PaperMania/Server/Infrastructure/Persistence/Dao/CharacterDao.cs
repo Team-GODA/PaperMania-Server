@@ -53,7 +53,7 @@ public class CharacterDao : DaoBase, ICharacterDao
                 @SupportSkillLevel
             )
             ";
-        
+
         public const string CreatePieceData = @"
             INSERT INTO paper_mania_game_data.player_character_piece_data (
                 user_id,
@@ -65,6 +65,18 @@ public class CharacterDao : DaoBase, ICharacterDao
                 @CharacterId,
                 @PieceAmount
             )
+            ";
+            
+        public const string UpdateData = @"
+            UPDATE paper_mania_game_data.player_character_data
+            SET
+                character_level = @CharacterLevel,
+                character_exp = @CharacterExp,
+                normal_skill_level = @NormalSkillLevel,
+                ultimate_skill_level = @UltimateSkillLevel,
+                support_skill_level = @SupportSkillLevel
+            WHERE user_id = @UserId
+                AND character_id = @CharacterId
             ";
     }
 
@@ -101,7 +113,15 @@ public class CharacterDao : DaoBase, ICharacterDao
 
     public async Task<PlayerCharacterData> UpdateAsync(PlayerCharacterData data)
     {
-        throw new NotImplementedException();
+        await ExecuteAsync((connection, transaction) =>
+            connection.ExecuteAsync(
+                Sql.UpdateData,
+                data,
+                transaction
+            )
+        );
+
+        return data;
     }
 
     public async Task CreateAsync(PlayerCharacterData data)
