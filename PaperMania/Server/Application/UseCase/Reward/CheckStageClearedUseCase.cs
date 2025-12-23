@@ -17,13 +17,12 @@ public class CheckStageClearedUseCase : ICheckStageClearedUseCase
     {
         request.Validate();
         
-        var stageData  = _dao.FindByUserIdAsync(
+        var stageData  = await _dao.FindByUserIdAsync(
             request.UserId,
             request.StageNum,
             request.StageSubNum
             );
 
-       return await 
-           stageData != null;
+       return stageData != null;
     }
 }
