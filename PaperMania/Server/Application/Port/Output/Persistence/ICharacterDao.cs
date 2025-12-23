@@ -1,12 +1,12 @@
-﻿using Server.Domain.Entity;
-using Server.Infrastructure.Persistence.Model;
+﻿using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.Port.Output.Persistence;
 
 public interface ICharacterDao
 {
-    Task<IEnumerable<PlayerCharacterData>> GetPlayerCharactersDataByUserIdAsync(int userId);
-    Task AddPlayerCharacterDataByUserIdAsync(PlayerCharacterData data);
-    Task<bool> HasCharacterAsync(int userId, string characterId);
-    Task AddCharacterPiecesAsync(int userId, string characterId, int amount);
+    Task<IEnumerable<PlayerCharacterData>> FindAll(int userId);
+    Task<PlayerCharacterData?> FindCharacter(int userId, int characterId);
+    Task<PlayerCharacterData> UpdateAsync(PlayerCharacterData data);
+    Task CreateAsync(PlayerCharacterData data);
+    Task CreatePieceData(PlayerCharacterPieceData data);
 }

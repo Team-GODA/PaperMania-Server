@@ -31,8 +31,8 @@ public class GetPlayerLevelUseCase : IGetPlayerLevelUseCase
             
         var gameState = new PlayerGameState
         {
-            Level = data.PlayerLevel,
-            Exp = data.PlayerExp
+            Level = data.Level,
+            Exp = data.Exp
         };
 
         return new GetPlayerLevelResult(

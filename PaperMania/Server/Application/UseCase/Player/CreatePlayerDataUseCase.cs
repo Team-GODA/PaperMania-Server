@@ -6,7 +6,6 @@ using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
-using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.UseCase.Player;
@@ -17,7 +16,6 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
     private readonly IAccountDao _accountDao;
     private readonly ICurrencyDao _currencyDao;
     private readonly ISessionService _sessionService;
-    private readonly IStageDao _stageDao;
     private readonly ITransactionScope _transactionScope;
 
     public CreatePlayerDataUseCase(
@@ -25,14 +23,12 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
         IAccountDao  accountDao,
         ICurrencyDao currencyDao,
         ISessionService sessionService,
-        IStageDao stageDao,
         ITransactionScope transactionScope)
     {
         _dataDao = dataDao;
         _accountDao = accountDao;
         _currencyDao = currencyDao;
         _sessionService = sessionService;
-        _stageDao = stageDao;
         _transactionScope = transactionScope;
     }
     
@@ -56,14 +52,13 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
             var player = new PlayerGameData
             {
                 UserId = userId,
-                PlayerName = request.PlayerName,
-                PlayerLevel = 1,
-                PlayerExp = 0
+                Name = request.PlayerName,
+                Level = 1,
+                Exp = 0
             };
             
             await _dataDao.CreateAsync(player);
             await _currencyDao.CreateByUserIdAsync(userId);
-            await _stageDao.CreatePlayerStageDataAsync(userId);
             
             account.IsNewAccount = false;
             await _accountDao.UpdateAsync(account);

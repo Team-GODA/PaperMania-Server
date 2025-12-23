@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
 using Server.Api.Dto.Request;
+using Server.Api.Dto.Request.Currency;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
 using Server.Application.Port.Input.Currency;
@@ -51,7 +52,7 @@ namespace Server.Api.Controller.Currency
         {
             var userId = GetUserId();
             
-            var result = await _gainPaperPieceUseCase.ExecuteAsync(new GainPaperPieceCommand(
+            var result = await _gainPaperPieceUseCase.ExecuteWithTransactionAsync(new GainPaperPieceCommand(
                 userId, request.PaperPiece)
             );
             

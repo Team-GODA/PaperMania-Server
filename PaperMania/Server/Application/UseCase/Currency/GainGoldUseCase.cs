@@ -25,18 +25,22 @@ public class GainGoldUseCase : IGainGoldUseCase
     {
         request.Validate();
 
+        var data = await _dao.FindByUserIdAsync(request.UserId)
+                   ?? throw new RequestException(
+                       ErrorStatusCode.NotFound,
+                       "PLAYER_NOT_FOUND");
+
+
+        data.Gold += request.Gold;
+        await _dao.UpdateAsync(data);
+
+        return new GainGoldResult(data.Gold);
+    }
+    
+    public async Task<GainGoldResult>  ExecuteWithTransactionAsync(GainGoldCommand request)
+    {
         return await _transactionScope.ExecuteAsync(async () =>
-        {
-            var data = await _dao.FindByUserIdAsync(request.UserId)
-                       ?? throw new RequestException(
-                           ErrorStatusCode.NotFound,
-                           "PLAYER_NOT_FOUND");
-
-
-            data.Gold += request.Gold;
-            await _dao.UpdateAsync(data);
-
-            return new GainGoldResult(data.Gold);
-        });
+            await ExecuteAsync(request)
+            );
     }
 }

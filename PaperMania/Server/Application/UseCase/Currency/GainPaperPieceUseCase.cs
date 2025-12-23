@@ -26,18 +26,22 @@ public class GainPaperPieceUseCase : IGainPaperPieceUseCase
     {
         request.Validate();
 
+        var data = await _dao.FindByUserIdAsync(request.UserId)
+                   ?? throw new RequestException(
+                       ErrorStatusCode.NotFound,
+                       "CURRENCY_DATA_NOT_FOUND");
+            
+        data.GainPaperPiece(request.PaperPiece);
+            
+        await _dao.UpdateAsync(data);
+            
+        return new GainPaperPieceResult(data.PaperPiece);
+    }
+    
+    public async Task<GainPaperPieceResult>  ExecuteWithTransactionAsync(GainPaperPieceCommand request)
+    {
         return await _transactionScope.ExecuteAsync(async () =>
-        {
-            var data = await _dao.FindByUserIdAsync(request.UserId)
-                       ?? throw new RequestException(
-                           ErrorStatusCode.NotFound,
-                           "CURRENCY_DATA_NOT_FOUND");
-            
-            data.GainPaperPiece(request.PaperPiece);
-            
-            await _dao.UpdateAsync(data);
-            
-            return new GainPaperPieceResult(data.PaperPiece);
-        });
+            await ExecuteAsync(request)
+        );
     }
 }

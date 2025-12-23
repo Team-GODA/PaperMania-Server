@@ -1,17 +1,23 @@
 ﻿using Server.Api.Filter;
 using Server.Application.Port.Input.Auth;
+using Server.Application.Port.Input.Character;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Input.Player;
+using Server.Application.Port.Input.Reward;
 using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
+using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Auth;
+using Server.Application.UseCase.Character;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Player;
+using Server.Application.UseCase.Reward;
 using Server.Domain.Service;
 using Server.Infrastructure.Cache;
 using Server.Infrastructure.Persistence.Dao;
 using Server.Infrastructure.Service;
+using Server.Infrastructure.StaticData.Store;
 using StackExchange.Redis;
 
 namespace Server.Api.Extensions;
@@ -48,8 +54,7 @@ public static class ServiceExtensions
         services.AddScoped<ICharacterDao>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            var cache = provider.GetRequiredService<CharacterDataCache>();
-            return new CharacterDao(connectionString, cache);
+            return new CharacterDao(connectionString);
         });
         
         services.AddScoped<IStageDao>(provider =>
@@ -61,7 +66,7 @@ public static class ServiceExtensions
         services.AddScoped<IRewardDao>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            var cache = provider.GetRequiredService<StageRewardCache>();
+            var cache = provider.GetRequiredService<StageRewardStore>();
             return new RewardDao(connectionString, cache);
         });
         
@@ -76,6 +81,28 @@ public static class ServiceExtensions
             options.Filters.Add<ApiLogActionFilter>();
         });
 
+        return services;
+    }
+    
+    public static IServiceCollection AddStaticDataStores(
+        this IServiceCollection services)
+    {
+        services.AddSingleton<IStageRewardStore, StageRewardStore>();
+        services.AddHostedService(sp => 
+            (StageRewardStore)sp.GetRequiredService<IStageRewardStore>());
+        
+        services.AddSingleton<ILevelDefinitionStore, LevelDefinitionStore>();
+        services.AddHostedService(sp => 
+            (LevelDefinitionStore)sp.GetRequiredService<ILevelDefinitionStore>());
+        
+        services.AddSingleton<ISkillDataStore, SkillDataStore>();
+        services.AddHostedService(sp => 
+            (SkillDataStore)sp.GetRequiredService<ISkillDataStore>());
+        
+        services.AddSingleton<ICharacterStore, CharacterStore>();
+        services.AddHostedService(sp => 
+            (CharacterStore)sp.GetRequiredService<ICharacterStore>());
+    
         return services;
     }
 
@@ -103,8 +130,6 @@ public static class ServiceExtensions
     {
         var redis = ConnectionMultiplexer.Connect(redisConnectionString);
         services.AddSingleton<IConnectionMultiplexer>(redis);
-        services.AddSingleton<StageRewardCache>();
-        services.AddSingleton<CharacterDataCache>();
         services.AddScoped<ICacheService, CacheService>();
 
         return services;
@@ -139,6 +164,16 @@ public static class ServiceExtensions
         services.AddScoped<IGainPaperPieceUseCase, GainPaperPieceUseCase>();
         services.AddScoped<IGetPaperPieceUseCase, GetPaperPieceUseCase>();
         services.AddScoped<ISpendPaperPieceUseCase, SpendPaperPieceUseCase>();
+        
+        // reward use case
+        services.AddScoped<IGetStageRewardUseCase, GetStageRewardUseCase>();
+        services.AddScoped<ICheckStageClearedUseCase, CheckStageClearedUseCase>();
+        services.AddScoped<IClaimStageRewardUseCase, ClaimStageRewardUseCase>();
+
+        // character use case
+        services.AddScoped<IGetPlayerCharacterUseCase, GetPlayerCharacterUseCase>();
+        services.AddScoped<IGetAllPlayerCharacterDataUseCase, GetAllPlayerCharacterDataUseCase>();
+        services.AddScoped<ICreatePlayerCharacterDataUseCase, CreatePlayerCharacterDataUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();
