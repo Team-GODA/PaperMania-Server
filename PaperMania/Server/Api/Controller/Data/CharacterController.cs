@@ -35,7 +35,6 @@ public class CharacterController : BaseController
     /// <summary>
     /// 전체 캐릭터 정보를 조회합니다.
     /// </summary>
-    [SessionAuthorize]
     [HttpGet("all")]
     public ActionResult<BaseResponse<GetAllCharacterResponse>> GetAllCharacters()
     {
@@ -75,6 +74,7 @@ public class CharacterController : BaseController
     /// <summary>
     /// 유저의 보유 캐릭터를 전부 조회합니다.
     /// </summary>
+    [SessionAuthorize]
     [HttpGet("player/all")]
     public async Task<ActionResult<BaseResponse<GetAllPlayerCharactersResponse>>> GetAllPlayerCharacters()
     {
