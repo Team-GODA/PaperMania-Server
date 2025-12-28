@@ -73,7 +73,6 @@ public class CharacterStore : ICharacterStore, IHostedService
     {
         return Task.CompletedTask;
     } 
-        
 
     private static CharacterData Map(string[] cols)
     {
