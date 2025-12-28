@@ -1,9 +1,10 @@
 using Azure.Identity;
 using Server.Api.Extensions;
 using Server.Api.Middleware;
-using Server.Infrastructure.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseUrls("http://0.0.0.0:80");
 
 var keyVaultName = builder.Configuration["Azure:KeyVaultName"] 
                    ?? "papermaniadbconnection";
@@ -48,6 +49,8 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 app.UseSwaggerConfiguration();
+
+app.UseRouting(); 
 
 app.UseCors("ClientPolicy");
 
