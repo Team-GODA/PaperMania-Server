@@ -11,7 +11,7 @@ namespace Server.Api.Controller.Data;
 [ApiLog("Character")]
 [Route("api/v3/character")]
 [ApiController]
-[SessionAuthorize]
+
 public class CharacterController : BaseController
 {
     private readonly IGetPlayerCharacterUseCase _getPlayerCharacterUseCase;
@@ -35,6 +35,7 @@ public class CharacterController : BaseController
     /// <summary>
     /// 전체 캐릭터 정보를 조회합니다.
     /// </summary>
+    [SessionAuthorize]
     [HttpGet("all")]
     public ActionResult<BaseResponse<GetAllCharacterResponse>> GetAllCharacters()
     {
@@ -51,6 +52,7 @@ public class CharacterController : BaseController
     /// <summary>
     /// 유저 보유 캐릭터 정보를 조회합니다.
     /// </summary>
+    [SessionAuthorize]
     [HttpGet("player/{characterId:int}")]
     public async Task<ActionResult<BaseResponse<GetCharacterDataResponse>>> GetCharacterData(
         [FromRoute] int characterId)
