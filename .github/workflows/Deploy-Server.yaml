@@ -38,7 +38,7 @@ jobs:
             --name papermania-server \
             --restart unless-stopped \
             --network papermania-net \
-            -p 80:80 \
+            -p 29489:80 \
             -e ASPNETCORE_URLS=http://+:80 \
             -e ASPNETCORE_ENVIRONMENT=Production \
             -e AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }} \
