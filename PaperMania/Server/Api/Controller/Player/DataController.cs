@@ -65,7 +65,8 @@ namespace Server.Api.Controller.Player
             var response = new GetPlayerLevelResponse
             {
                 Level = result.Level,
-                Exp = result.Exp
+                Exp = result.Exp,
+                MaxExp = result.MaxExp
             };
 
             return Ok(ApiResponse.Ok("플레이어 레벨 조회 성공", response));

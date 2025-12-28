@@ -2,6 +2,7 @@
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 using Server.Domain.Entity;
@@ -12,12 +13,15 @@ namespace Server.Application.UseCase.Player;
 public class GetPlayerLevelUseCase : IGetPlayerLevelUseCase
 {
     private readonly IDataDao _dao;
+    private readonly ILevelDefinitionStore _store;
 
     public GetPlayerLevelUseCase(
-        IDataDao dao
+        IDataDao dao,
+        ILevelDefinitionStore store
         )
     {
         _dao = dao;
+        _store = store;
     }
 
 
@@ -28,16 +32,17 @@ public class GetPlayerLevelUseCase : IGetPlayerLevelUseCase
                 ErrorStatusCode.NotFound,
                 "PLAYER_NOT_FOUND",
                 new { UserId = request.UserId });
-            
-        var gameState = new PlayerGameState
-        {
-            Level = data.Level,
-            Exp = data.Exp
-        };
 
+        var levelDef = _store.GetLevelDefinition(data.Level)
+                        ?? throw new RequestException(
+                            ErrorStatusCode.NotFound,
+                            "LEVEL_NOT_FOUND",
+                            new { Level = data.Level });
+            
         return new GetPlayerLevelResult(
-            Level: gameState.Level,
-            Exp: gameState.Exp
+            data.Level,
+            data.Exp,
+            levelDef.MaxExp
         );
     }
 }
