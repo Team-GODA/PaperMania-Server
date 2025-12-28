@@ -40,7 +40,7 @@ jobs:
           docker run -d \
             --name papermania-server \
             --network papermania-net \
-            -p 29489:8080 \
+            -p 29489:80 \
             -e ASPNETCORE_URLS=http://+:8080 \
             -e ASPNETCORE_ENVIRONMENT=Production \
             -e AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }} \
