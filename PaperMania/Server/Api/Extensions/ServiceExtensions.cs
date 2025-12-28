@@ -174,6 +174,7 @@ public static class ServiceExtensions
         services.AddScoped<IGetPlayerCharacterUseCase, GetPlayerCharacterUseCase>();
         services.AddScoped<IGetAllPlayerCharacterDataUseCase, GetAllPlayerCharacterDataUseCase>();
         services.AddScoped<ICreatePlayerCharacterDataUseCase, CreatePlayerCharacterDataUseCase>();
+        services.AddScoped<IGetAllCharacterDataUseCase, GetAllCharacterDataUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();
