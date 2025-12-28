@@ -1,31 +1,28 @@
 name: Deploy to Server
-
 on:
   push:
     branches:
       - release
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
+    
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
+    
     - name: Build Docker image
       run: |
         docker build \
           -t ${{ secrets.DOCKER_USERNAME }}/papermania-server:latest \
           -f PaperMania/Server/Dockerfile \
           PaperMania/Server
-
+    
     - name: Push Docker image
       run: docker push ${{ secrets.DOCKER_USERNAME }}/papermania-server:latest
-
+    
     - name: Deploy to server via SSH
       uses: appleboy/ssh-action@v0.1.10
       with:
@@ -39,11 +36,16 @@ jobs:
           docker rm papermania-server || true
           docker run -d \
             --name papermania-server \
+            --restart unless-stopped \
             --network papermania-net \
-            -p 0.0.0.0:29489:80 \
+            -p 80:80 \
             -e ASPNETCORE_URLS=http://+:80 \
             -e ASPNETCORE_ENVIRONMENT=Production \
             -e AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }} \
             -e AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }} \
             -e AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }} \
             ${{ secrets.DOCKER_USERNAME }}/papermania-server:latest
+          
+          sleep 5
+          docker ps | grep papermania-server
+          docker logs papermania-server --tail 20
