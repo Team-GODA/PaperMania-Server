@@ -49,6 +49,8 @@ var app = builder.Build();
 
 app.UseSwaggerConfiguration();
 
+app.UseRouting(); 
+
 app.UseCors("ClientPolicy");
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
