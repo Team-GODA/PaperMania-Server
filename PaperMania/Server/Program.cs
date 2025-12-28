@@ -1,5 +1,6 @@
 using Azure.Identity;
 using Server.Api.Extensions;
+using Server.Api.Middleware;
 using Server.Infrastructure.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,10 +47,13 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-app.UseSwaggerConfiguration()
-    .UseCustomMiddleware();
+app.UseSwaggerConfiguration();
 
 app.UseCors("ClientPolicy");
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseCustomMiddleware();
 
 if (!app.Environment.IsProduction())
     app.UseHttpsRedirection();
