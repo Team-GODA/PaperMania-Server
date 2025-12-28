@@ -66,7 +66,6 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                 request.StageSubNum
             );
             var isCleared = await _checkStageClearedUseCase.ExecuteAsync(checkCommand);
-            Console.WriteLine($"{isCleared}", isCleared);
             
             if (!isCleared)
             {
@@ -78,8 +77,6 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                 };
                 await _stageDao.CreateAsync(stageData);
             }
-
-            Console.WriteLine($"{isCleared}", isCleared);
             
             var goldToGain = stageReward.Gold;
             var paperPieceToGain = !isCleared ? stageReward.PaperPiece : 0;
@@ -123,6 +120,7 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                 currencyData.PaperPiece,
                 playerData.Level,
                 playerData.Exp,
+                currencyData.MaxActionPoint,
                 isCleared
             );
         });

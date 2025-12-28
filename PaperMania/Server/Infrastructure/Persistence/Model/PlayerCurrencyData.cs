@@ -12,6 +12,26 @@ public class PlayerCurrencyData
     public int PaperPiece { get; set; }
     public DateTime LastActionPointUpdated { get; set; }
 
+    public void SetMaxActionPoint(int amount)
+    {
+        if (amount <= 0)
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_MAX_ACTION_POINT");
+        
+        MaxActionPoint = amount;
+    }
+
+    public void SetActionPoint(int amount)
+    {
+        if (amount <= 0)
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID__POINT");
+        
+        ActionPoint = amount;
+    }
+    
     public void SpendGold(int amount)
     {
         if (amount <= 0)

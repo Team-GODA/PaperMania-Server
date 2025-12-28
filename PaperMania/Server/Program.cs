@@ -21,6 +21,17 @@ builder.Services
     .AddRepositories()
     .AddApiFilters();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ClientPolicy", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -37,6 +48,8 @@ var app = builder.Build();
 
 app.UseSwaggerConfiguration()
     .UseCustomMiddleware();
+
+app.UseCors("ClientPolicy");
 
 if (!app.Environment.IsProduction())
     app.UseHttpsRedirection();
