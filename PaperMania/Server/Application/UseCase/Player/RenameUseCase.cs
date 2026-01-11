@@ -9,24 +9,24 @@ namespace Server.Application.UseCase.Player;
 
 public class RenameUseCase : IRenameUseCase
 {
-    private readonly IDataDao _dao;
+    private readonly IDataRepository _repository;
     
-    public RenameUseCase(IDataDao dao)
+    public RenameUseCase(IDataRepository repository)
     {
-        _dao = dao;
+        _repository = repository;
     }
     
     public async Task<RenameResult> ExecuteAsync(RenameCommand request)
     {
         request.Validate();
 
-        var exist = await _dao.ExistsPlayerNameAsync(request.NewName);
+        var exist = await _repository.ExistsPlayerNameAsync(request.NewName);
         if (exist != null)
             throw new RequestException(
                 ErrorStatusCode.Conflict,
                 "PLAYER_NAME_EXIST");
 
-        await _dao.RenamePlayerNameAsync(request.UserId, request.NewName);
+        await _repository.RenamePlayerNameAsync(request.UserId, request.NewName);
 
         return new RenameResult(
             UserId: request.UserId,

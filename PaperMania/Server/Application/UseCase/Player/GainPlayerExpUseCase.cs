@@ -11,19 +11,19 @@ namespace Server.Application.UseCase.Player;
 
 public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 {
-    private readonly IDataDao _dataDao;
-    private readonly ICurrencyDao _currencyDao;
+    private readonly IDataRepository _dataRepository;
+    private readonly ICurrencyRepository _currencyRepository;
     private readonly ILevelDefinitionStore _store;
     private readonly ITransactionScope _transactionScope;
 
     public GainPlayerExpUseCase(
-        IDataDao dataDao,
-        ICurrencyDao currencyDao,
+        IDataRepository dataRepository,
+        ICurrencyRepository currencyRepository,
         ILevelDefinitionStore store,
         ITransactionScope transactionScope)
     {
-        _dataDao = dataDao;
-        _currencyDao = currencyDao;
+        _dataRepository = dataRepository;
+        _currencyRepository = currencyRepository;
         _store = store;
         _transactionScope = transactionScope;
     }
@@ -32,7 +32,7 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
     {
         request.Validate();
 
-        var data = await _dataDao.FindByUserIdAsync(request.UserId)
+        var data = await _dataRepository.FindByUserIdAsync(request.UserId)
                    ?? throw new RequestException(
                        ErrorStatusCode.NotFound,
                        "PLAYER_DATA_NOT_FOUND"
@@ -40,7 +40,7 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 
         data.Exp += request.Exp;
 
-        var currencyData = await _currencyDao.FindByUserIdAsync(request.UserId)
+        var currencyData = await _currencyRepository.FindByUserIdAsync(request.UserId)
                             ?? throw new RequestException(
                                 ErrorStatusCode.NotFound,
                                 "PLAYER_CURRENCY_DATA_NOT_FOUND"
@@ -62,8 +62,8 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
             maxExp = levelData.MaxExp;
         }
 
-        await _dataDao.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp);
-        await _currencyDao.UpdateAsync(currencyData);
+        await _dataRepository.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp);
+        await _currencyRepository.UpdateAsync(currencyData);
         
         return new GainPlayerExpUseCaseResult(
             data.Level,

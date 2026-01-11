@@ -12,22 +12,22 @@ namespace Server.Application.UseCase.Player;
 
 public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
 {
-    private readonly IDataDao _dataDao;
-    private readonly IAccountDao _accountDao;
-    private readonly ICurrencyDao _currencyDao;
+    private readonly IDataRepository _dataRepository;
+    private readonly IAccountRepository _accountRepository;
+    private readonly ICurrencyRepository _currencyRepository;
     private readonly ISessionService _sessionService;
     private readonly ITransactionScope _transactionScope;
 
     public CreatePlayerDataUseCase(
-        IDataDao  dataDao,
-        IAccountDao  accountDao,
-        ICurrencyDao currencyDao,
+        IDataRepository  dataRepository,
+        IAccountRepository  accountRepository,
+        ICurrencyRepository currencyRepository,
         ISessionService sessionService,
         ITransactionScope transactionScope)
     {
-        _dataDao = dataDao;
-        _accountDao = accountDao;
-        _currencyDao = currencyDao;
+        _dataRepository = dataRepository;
+        _accountRepository = accountRepository;
+        _currencyRepository = currencyRepository;
         _sessionService = sessionService;
         _transactionScope = transactionScope;
     }
@@ -36,7 +36,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
     {
         var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
 
-        var account = await _accountDao.FindByUserIdAsync(userId);
+        var account = await _accountRepository.FindByUserIdAsync(userId);
         if (account == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,
@@ -57,11 +57,11 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
                 Exp = 0
             };
             
-            await _dataDao.CreateAsync(player);
-            await _currencyDao.CreateByUserIdAsync(userId);
+            await _dataRepository.CreateAsync(player);
+            await _currencyRepository.CreateByUserIdAsync(userId);
             
             account.IsNewAccount = false;
-            await _accountDao.UpdateAsync(account);
+            await _accountRepository.UpdateAsync(account);
         });
 
         return new AddPlayerDataResult(

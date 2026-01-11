@@ -5,7 +5,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
-public class StageDao : DaoBase, IStageDao
+public class StageRepository : RepositoryBase, IStageRepository
 {
     private static class Sql
     {
@@ -25,7 +25,7 @@ public class StageDao : DaoBase, IStageDao
         ";
     }
     
-    public StageDao(
+    public StageRepository(
         string connectionString,
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)

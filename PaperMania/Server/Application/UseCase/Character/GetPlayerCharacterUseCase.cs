@@ -9,18 +9,18 @@ namespace Server.Application.UseCase.Character;
 
 public class GetPlayerCharacterUseCase : IGetPlayerCharacterUseCase
 {
-    private readonly ICharacterDao _dao;
+    private readonly ICharacterRepository _repository;
 
-    public GetPlayerCharacterUseCase(ICharacterDao dao)
+    public GetPlayerCharacterUseCase(ICharacterRepository repository)
     {
-        _dao = dao;
+        _repository = repository;
     }
     
     public async Task<PlayerCharacterData> ExecuteAsync(GetPlayerCharacterCommand request)
     {
         request.Validate();
         
-        var data = await _dao.FindCharacter(request.UserId, request.CharacterId)
+        var data = await _repository.FindCharacter(request.UserId, request.CharacterId)
                    ?? throw new RequestException(
                        ErrorStatusCode.NotFound,
                        "PLAYER_CHARACTER_DATA_NOT_FOUND");

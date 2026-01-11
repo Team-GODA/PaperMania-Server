@@ -10,14 +10,14 @@ namespace Server.Application.UseCase.Currency;
 
 public class SpendPaperPieceUseCase : ISpendPaperPieceUseCase
 {
-    private readonly ICurrencyDao _dao;
+    private readonly ICurrencyRepository _repository;
     private readonly ITransactionScope _transactionScope;
     
     public SpendPaperPieceUseCase(
-        ICurrencyDao dao,
+        ICurrencyRepository repository,
         ITransactionScope transactionScope)
     {
-        _dao = dao;
+        _repository = repository;
         _transactionScope = transactionScope;
     }
     
@@ -27,14 +27,14 @@ public class SpendPaperPieceUseCase : ISpendPaperPieceUseCase
 
         return await _transactionScope.ExecuteAsync(async () =>
         {
-            var data = await _dao.FindByUserIdAsync(request.UserId)
+            var data = await _repository.FindByUserIdAsync(request.UserId)
                        ?? throw new RequestException(
                            ErrorStatusCode.NotFound,
                            "CURRENCY_DATA_NOT_FOUND");
 
             data.SpendPaperPiece(request.PaperPiece);
 
-            await _dao.UpdateAsync(data);
+            await _repository.UpdateAsync(data);
 
             return new SpendPaperPieceResult(data.PaperPiece);
         });

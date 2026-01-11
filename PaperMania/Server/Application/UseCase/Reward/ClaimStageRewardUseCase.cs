@@ -16,9 +16,9 @@ namespace Server.Application.UseCase.Reward;
  
 public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
 {
-    private readonly IStageDao _stageDao;
-    private readonly ICurrencyDao _currencyDao;
-    private readonly IDataDao _dataDao;
+    private readonly IStageRepository _stageRepository;
+    private readonly ICurrencyRepository _currencyRepository;
+    private readonly IDataRepository _dataRepository;
     private readonly IStageRewardStore _stageRewardStore;
     private readonly ICheckStageClearedUseCase _checkStageClearedUseCase;
     private readonly IGainGoldUseCase _gainGoldUseCase;
@@ -27,9 +27,9 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
     private readonly ITransactionScope _transactionScope;
 
     public ClaimStageRewardUseCase(
-        IStageDao stageDao,
-        ICurrencyDao currencyDao,
-        IDataDao dataDao,
+        IStageRepository stageRepository,
+        ICurrencyRepository currencyRepository,
+        IDataRepository dataRepository,
         IStageRewardStore stageRewardStore,
         ICheckStageClearedUseCase checkStageClearedUseCase,
         IGainGoldUseCase gainGoldUseCase,
@@ -37,9 +37,9 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
         IGainPlayerExpUseCase gainPlayerExpUseCase,
         ITransactionScope transactionScope)
     {
-        _stageDao = stageDao;
-        _currencyDao = currencyDao;
-        _dataDao = dataDao;
+        _stageRepository = stageRepository;
+        _currencyRepository = currencyRepository;
+        _dataRepository = dataRepository;
         _stageRewardStore = stageRewardStore;
         _checkStageClearedUseCase = checkStageClearedUseCase;
         _gainGoldUseCase = gainGoldUseCase;
@@ -75,7 +75,7 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                     StageNum = request.StageNum,
                     StageSubNum = request.StageSubNum
                 };
-                await _stageDao.CreateAsync(stageData);
+                await _stageRepository.CreateAsync(stageData);
             }
             
             var goldToGain = stageReward.Gold;
@@ -103,13 +103,13 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                 );
             }
 
-            var currencyData = await _currencyDao.FindByUserIdAsync(request.UserId)
+            var currencyData = await _currencyRepository.FindByUserIdAsync(request.UserId)
                                ?? throw new RequestException(
                                    ErrorStatusCode.NotFound,
                                    "PLAYER_CURRENCY_DATA_NOT_FOUND"
                                );
 
-            var playerData = await _dataDao.FindByUserIdAsync(request.UserId)
+            var playerData = await _dataRepository.FindByUserIdAsync(request.UserId)
                              ?? throw new RequestException(
                                  ErrorStatusCode.NotFound,
                                  "PLAYER_DATA_NOT_FOUND"

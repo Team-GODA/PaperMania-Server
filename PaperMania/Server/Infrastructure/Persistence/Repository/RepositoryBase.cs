@@ -3,12 +3,12 @@ using Server.Application.Port.Output.Infrastructure;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
-public class DaoBase
+public class RepositoryBase
 { 
     private readonly string _connectionString;
     private readonly ITransactionScope? _transactionScope;
 
-    protected DaoBase(
+    protected RepositoryBase(
         string connectionString,
         ITransactionScope? transactionScope)
     {

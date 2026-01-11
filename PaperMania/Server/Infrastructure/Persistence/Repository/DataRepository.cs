@@ -7,7 +7,7 @@ using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
-public class DataDao : DaoBase, IDataDao
+public class DataRepository : RepositoryBase, IDataRepository
 {
     private static class Sql
     {
@@ -51,7 +51,7 @@ public class DataDao : DaoBase, IDataDao
             ";
     }
     
-    public DataDao(
+    public DataRepository(
         string connectionString, 
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)

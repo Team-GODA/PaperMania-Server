@@ -12,22 +12,22 @@ namespace Server.Application.UseCase.Player;
 
 public class GetPlayerLevelUseCase : IGetPlayerLevelUseCase
 {
-    private readonly IDataDao _dao;
+    private readonly IDataRepository _repository;
     private readonly ILevelDefinitionStore _store;
 
     public GetPlayerLevelUseCase(
-        IDataDao dao,
+        IDataRepository repository,
         ILevelDefinitionStore store
         )
     {
-        _dao = dao;
+        _repository = repository;
         _store = store;
     }
 
 
     public async Task<GetPlayerLevelResult> ExecuteAsync(GetPlayerLevelCommand request)
     {
-        var data = await _dao.FindByUserIdAsync(request.UserId)
+        var data = await _repository.FindByUserIdAsync(request.UserId)
             ?? throw new RequestException(
                 ErrorStatusCode.NotFound,
                 "PLAYER_NOT_FOUND",

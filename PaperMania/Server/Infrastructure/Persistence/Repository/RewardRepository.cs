@@ -10,7 +10,7 @@ using Server.Infrastructure.StaticData.Store;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
-public class RewardDao : DaoBase, IRewardDao
+public class RewardRepository : RepositoryBase, IRewardRepository
 {
     private static class Sql
     {
@@ -30,7 +30,7 @@ public class RewardDao : DaoBase, IRewardDao
     
     private readonly StageRewardStore _store;
     
-    public RewardDao(
+    public RewardRepository(
         string connectionString,
         StageRewardStore store,
         ITransactionScope? transactionScope = null) 

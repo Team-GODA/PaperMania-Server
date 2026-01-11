@@ -33,41 +33,41 @@ public static class ServiceExtensions
             return new TransactionScope(connectionString);
         });
         
-        services.AddScoped<IAccountDao>(provider =>
+        services.AddScoped<IAccountRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new AccountDao(connectionString);
+            return new AccountRepository(connectionString);
         });
         
-        services.AddScoped<IDataDao>(provider =>
+        services.AddScoped<IDataRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new DataDao(connectionString);
+            return new DataRepository(connectionString);
         });
         
-        services.AddScoped<ICurrencyDao>(provider =>
+        services.AddScoped<ICurrencyRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new CurrencyDao(connectionString);
+            return new CurrencyRepository(connectionString);
         });
         
-        services.AddScoped<ICharacterDao>(provider =>
+        services.AddScoped<ICharacterRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new CharacterDao(connectionString);
+            return new CharacterRepository(connectionString);
         });
         
-        services.AddScoped<IStageDao>(provider =>
+        services.AddScoped<IStageRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new StageDao(connectionString);
+            return new StageRepository(connectionString);
         });
         
-        services.AddScoped<IRewardDao>(provider =>
+        services.AddScoped<IRewardRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
             var cache = provider.GetRequiredService<StageRewardStore>();
-            return new RewardDao(connectionString, cache);
+            return new RewardRepository(connectionString, cache);
         });
         
         return services;
@@ -179,7 +179,7 @@ public static class ServiceExtensions
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();
         
-        services.AddScoped<CacheWrapper>();
+        services.AddScoped<CacheAsideService>();
         
         return services;
     }

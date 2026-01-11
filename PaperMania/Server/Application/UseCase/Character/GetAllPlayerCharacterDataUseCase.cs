@@ -8,11 +8,11 @@ namespace Server.Application.UseCase.Character;
 
 public class GetAllPlayerCharacterDataUseCase : IGetAllPlayerCharacterDataUseCase
 {
-    private readonly ICharacterDao _dao;
+    private readonly ICharacterRepository _repository;
 
-    public GetAllPlayerCharacterDataUseCase(ICharacterDao dao)
+    public GetAllPlayerCharacterDataUseCase(ICharacterRepository repository)
     {
-        _dao = dao;
+        _repository = repository;
     }
     
     public async Task<List<PlayerCharacterData>> ExecuteAsync(int userId)
@@ -23,7 +23,7 @@ public class GetAllPlayerCharacterDataUseCase : IGetAllPlayerCharacterDataUseCas
                 "INVALID_USER_ID"
                 );
 
-        var data = await _dao.FindAll(userId);
+        var data = await _repository.FindAll(userId);
 
         return data.ToList();
     }

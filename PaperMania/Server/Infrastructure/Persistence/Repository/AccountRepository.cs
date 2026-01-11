@@ -5,7 +5,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
-public class AccountDao : DaoBase, IAccountDao
+public class AccountRepository : RepositoryBase, IAccountRepository
 {
     private static class Sql
     {
@@ -58,7 +58,7 @@ public class AccountDao : DaoBase, IAccountDao
             WHERE id = @Id";
     }
     
-    public AccountDao(
+    public AccountRepository(
         string connectionString, 
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)

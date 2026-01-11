@@ -2,7 +2,7 @@
 
 namespace Server.Application.Port.Output.Persistence;
 
-public interface ICharacterDao
+public interface ICharacterRepository
 {
     Task<IEnumerable<PlayerCharacterData>> FindAll(int userId);
     Task<PlayerCharacterData?> FindCharacter(int userId, int characterId);

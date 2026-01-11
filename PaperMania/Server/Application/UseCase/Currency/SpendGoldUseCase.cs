@@ -10,14 +10,14 @@ namespace Server.Application.UseCase.Currency;
 
 public class SpendGoldUseCase : ISpendGoldUseCase
 {
-    private readonly ICurrencyDao _dao;
+    private readonly ICurrencyRepository _repository;
     private readonly ITransactionScope _transactionScope;
     
     public SpendGoldUseCase(
-        ICurrencyDao dao,
+        ICurrencyRepository repository,
         ITransactionScope transactionScope)
     {
-        _dao = dao;
+        _repository = repository;
         _transactionScope = transactionScope;
     }
     
@@ -27,14 +27,14 @@ public class SpendGoldUseCase : ISpendGoldUseCase
 
         return await _transactionScope.ExecuteAsync(async () =>
         {
-            var data = await _dao.FindByUserIdAsync(request.UserId)
+            var data = await _repository.FindByUserIdAsync(request.UserId)
                        ?? throw new RequestException(
                            ErrorStatusCode.NotFound,
                            "PLAYER_NOT_FOUND");
 
             data.SpendGold(request.Gold);
 
-            await _dao.UpdateAsync(data);
+            await _repository.UpdateAsync(data);
 
             return new SpendGoldResult(data.Gold);
         });

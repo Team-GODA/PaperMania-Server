@@ -6,18 +6,18 @@ namespace Server.Application.UseCase.Reward;
 
 public class CheckStageClearedUseCase : ICheckStageClearedUseCase
 {
-    private readonly IStageDao _dao;
+    private readonly IStageRepository _repository;
 
-    public CheckStageClearedUseCase(IStageDao dao)
+    public CheckStageClearedUseCase(IStageRepository repository)
     {
-        _dao = dao;
+        _repository = repository;
     }
     
     public async Task<bool> ExecuteAsync(CheckStageClearedCommand request)
     {
         request.Validate();
         
-        var stageData  = await _dao.FindByUserIdAsync(
+        var stageData  = await _repository.FindByUserIdAsync(
             request.UserId,
             request.StageNum,
             request.StageSubNum

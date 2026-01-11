@@ -5,7 +5,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
-public class CurrencyDao : DaoBase, ICurrencyDao
+public class CurrencyRepository : RepositoryBase, ICurrencyRepository
 {
     private static class Sql
     {
@@ -46,7 +46,7 @@ public class CurrencyDao : DaoBase, ICurrencyDao
             ";
     }
     
-    public CurrencyDao(
+    public CurrencyRepository(
         string connectionString,
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)

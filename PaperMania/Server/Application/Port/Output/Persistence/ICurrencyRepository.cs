@@ -3,7 +3,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Application.Port.Output.Persistence;
 
-public interface ICurrencyDao
+public interface ICurrencyRepository
 {
     Task CreateByUserIdAsync(int userId);
     Task<PlayerCurrencyData?> FindByUserIdAsync(int userId);

@@ -5,7 +5,7 @@ using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Infrastructure.Persistence.Dao;
 
-public class CharacterDao : DaoBase, ICharacterDao
+public class CharacterRepository : RepositoryBase, ICharacterRepository
 {
     private static class Sql
     {
@@ -80,7 +80,7 @@ public class CharacterDao : DaoBase, ICharacterDao
             ";
     }
 
-    public CharacterDao(
+    public CharacterRepository(
         string connectionString,
         ITransactionScope? transactionScope = null
         ) : base(connectionString, transactionScope)

@@ -11,17 +11,17 @@ namespace Server.Application.UseCase.Character;
 
 public class CreatePlayerCharacterDataUseCase : ICreatePlayerCharacterDataUseCase
 {
-    private readonly ICharacterDao _dao;
+    private readonly ICharacterRepository _repository;
     private readonly ICharacterStore _store;
     private readonly ITransactionScope _transactionScope;
 
     public CreatePlayerCharacterDataUseCase(
-        ICharacterDao dao,
+        ICharacterRepository repository,
         ICharacterStore store,
         ITransactionScope transactionScope
         )
     {
-        _dao = dao; 
+        _repository = repository; 
         _store = store;
         _transactionScope = transactionScope;
     }
@@ -56,9 +56,9 @@ public class CreatePlayerCharacterDataUseCase : ICreatePlayerCharacterDataUseCas
                     character.SupportSkillId == 0 ? 0 : 1
             };
 
-            await _dao.CreateAsync(data);
+            await _repository.CreateAsync(data);
             
-            await _dao.CreatePieceData(new PlayerCharacterPieceData
+            await _repository.CreatePieceData(new PlayerCharacterPieceData
             {
                 UserId = data.UserId,
                 CharacterId = data.CharacterId,
