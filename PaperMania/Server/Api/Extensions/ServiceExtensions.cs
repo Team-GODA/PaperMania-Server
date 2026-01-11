@@ -164,6 +164,7 @@ public static class ServiceExtensions
         services.AddScoped<IGainPaperPieceUseCase, GainPaperPieceUseCase>();
         services.AddScoped<IGetPaperPieceUseCase, GetPaperPieceUseCase>();
         services.AddScoped<ISpendPaperPieceUseCase, SpendPaperPieceUseCase>();
+        services.AddScoped<IGetCurrencyDataUseCase, GetCurrencyDataUseCase>();
         
         // reward use case
         services.AddScoped<IGetStageRewardUseCase, GetStageRewardUseCase>();
