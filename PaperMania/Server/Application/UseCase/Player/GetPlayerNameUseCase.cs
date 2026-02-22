@@ -1,6 +1,7 @@
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
+using Server.Application.Port.Output.Cache;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
@@ -11,11 +12,11 @@ namespace Server.Application.UseCase.Player;
     public class GetPlayerNameUseCase : IGetPlayerNameUseCase
     {
         private readonly IDataRepository _repository;
-        private readonly CacheAsideService _cache;
+        private readonly ICacheAsideService _cache;
 
         public GetPlayerNameUseCase(
             IDataRepository repository,
-            CacheAsideService cache
+            ICacheAsideService cache
             )
         {
             _repository = repository;

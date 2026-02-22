@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
-using Server.Api.Dto.Request;
 using Server.Api.Dto.Request.Auth;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Auth;

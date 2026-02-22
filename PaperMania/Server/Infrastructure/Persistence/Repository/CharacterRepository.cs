@@ -3,7 +3,7 @@ using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.Persistence.Model;
 
-namespace Server.Infrastructure.Persistence.Dao;
+namespace Server.Infrastructure.Persistence.Repository;
 
 public class CharacterRepository : RepositoryBase, ICharacterRepository
 {

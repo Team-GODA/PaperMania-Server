@@ -2,10 +2,9 @@ using Dapper;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.Persistence.Model;
-using Server.Infrastructure.StaticData;
 using Server.Infrastructure.StaticData.Model;
 
-namespace Server.Infrastructure.Persistence.Dao;
+namespace Server.Infrastructure.Persistence.Repository;
 
 public class DataRepository : RepositoryBase, IDataRepository
 {
