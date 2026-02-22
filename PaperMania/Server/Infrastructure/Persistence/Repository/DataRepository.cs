@@ -1,6 +1,6 @@
-﻿using Dapper;
-using Server.Application.Port.Output.Infrastructure;
+using Dapper;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.Persistence.Model;
 using Server.Infrastructure.StaticData;
 using Server.Infrastructure.StaticData.Model;
@@ -58,68 +58,56 @@ public class DataRepository : RepositoryBase, IDataRepository
     {
     }
     
-    public async Task<PlayerGameData?> ExistsPlayerNameAsync(string playerName)
+    public async Task<PlayerGameData?> ExistsPlayerNameAsync(string playerName, CancellationToken ct)
     {
-        return await ExecuteAsync( (connection, transaction) =>
+        return await ExecuteAsync((connection, transaction) =>
              connection.QueryFirstOrDefaultAsync<PlayerGameData>(
-                Sql.ExistsPlayerName,
-                new { Name = playerName },
-                transaction)
-             );
+                new CommandDefinition(Sql.ExistsPlayerName, new { Name = playerName }, transaction: transaction, cancellationToken: ct)
+             ), ct);
     }
 
-    public async Task CreateAsync(PlayerGameData player)
+    public async Task CreateAsync(PlayerGameData player, CancellationToken ct)
     {
-        await ExecuteAsync( (connection, transaction) =>
+        await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                Sql.AddPlayerData,
-                new { UserId = player.UserId, Name = player.Name },
-                transaction)
-        );
+                new CommandDefinition(Sql.AddPlayerData, new { UserId = player.UserId, Name = player.Name }, transaction: transaction, cancellationToken: ct)
+        ), ct);
     }
 
-    public async Task<PlayerGameData?> FindByUserIdAsync(int? userId)
+    public async Task<PlayerGameData?> FindByUserIdAsync(int? userId, CancellationToken ct)
     {
         return await QueryAsync(connection =>
              connection.QueryFirstOrDefaultAsync<PlayerGameData>(
-                Sql.GetPlayerDataById,
-                new { UserId = userId }
-                )
-             );
+                new CommandDefinition(Sql.GetPlayerDataById, new { UserId = userId }, cancellationToken: ct)
+             ), ct);
     }
 
-    public async Task<PlayerGameData?> UpdatePlayerLevelAsync(int? userId, int newLevel, int newExp)
+    public async Task<PlayerGameData?> UpdatePlayerLevelAsync(int? userId, int newLevel, int newExp, CancellationToken ct)
     {
-        return await ExecuteAsync( (connection, transaction) =>
+        return await ExecuteAsync((connection, transaction) =>
              connection.QueryFirstOrDefaultAsync<PlayerGameData>(
-                Sql.UpdatePlayerLevel,
-                new
+                new CommandDefinition(Sql.UpdatePlayerLevel, new
                 {
                     Level = newLevel,
                     Exp = newExp,
                     UserId = userId
-                },
-                transaction)
-             );
+                }, transaction: transaction, cancellationToken: ct)
+             ), ct);
     }
 
-    public async Task<LevelDefinition?> FindLevelDataAsync(int currentLevel)
+    public async Task<LevelDefinition?> FindLevelDataAsync(int currentLevel, CancellationToken ct)
     {
-        return await QueryAsync( connection =>
+        return await QueryAsync(connection =>
              connection.QueryFirstOrDefaultAsync<LevelDefinition>(
-                Sql.GetLevelData,
-                new { Level = currentLevel }
-                )
-             );
+                new CommandDefinition(Sql.GetLevelData, new { Level = currentLevel }, cancellationToken: ct)
+             ), ct);
     }
 
-    public async Task RenamePlayerNameAsync(int? userId, string newPlayerName)
+    public async Task RenamePlayerNameAsync(int? userId, string newPlayerName, CancellationToken ct)
     {
-        await ExecuteAsync( (connection, transaction) => 
+        await ExecuteAsync((connection, transaction) => 
             connection.ExecuteAsync(
-                Sql.RenamePlayerName,
-                new { Name = newPlayerName, UserId = userId },
-                transaction)
-            );
+                new CommandDefinition(Sql.RenamePlayerName, new { Name = newPlayerName, UserId = userId }, transaction: transaction, cancellationToken: ct)
+            ), ct);
     }
 }

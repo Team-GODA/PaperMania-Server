@@ -1,10 +1,10 @@
-﻿using Server.Application.UseCase.Player.Command;
+using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 
 namespace Server.Application.Port.Input.Player;
 
 public interface IGainPlayerExpUseCase
 {
-    Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpCommand request);
-    Task<GainPlayerExpUseCaseResult> ExecuteWithTransactionAsync(GainPlayerExpCommand request);
+    Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpCommand request, CancellationToken ct);
+    Task<GainPlayerExpUseCaseResult> ExecuteWithTransactionAsync(GainPlayerExpCommand request, CancellationToken ct);
 }

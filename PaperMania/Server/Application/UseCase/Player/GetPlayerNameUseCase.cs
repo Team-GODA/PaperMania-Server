@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
 using Server.Application.Port.Output.Persistence;
@@ -22,12 +22,13 @@ namespace Server.Application.UseCase.Player;
             _cache = cache;
         }
         
-        public async Task<GetPlayerNameResult> ExecuteAsync(GetPlayerNameCommand request)
+        public async Task<GetPlayerNameResult> ExecuteAsync(GetPlayerNameCommand request, CancellationToken ct)
         {
             var player = await _cache.GetOrSetAsync(
                 CacheKey.Profile.ByUserId(request.UserId),
-                async () => await _repository.FindByUserIdAsync(request.UserId),
-                TimeSpan.FromDays(30)
+                async (token) => await _repository.FindByUserIdAsync(request.UserId, token),
+                TimeSpan.FromDays(30),
+                ct
             );
                 
             if (player == null)

@@ -1,8 +1,8 @@
-﻿using Dapper;
+using Dapper;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.Service;
 using Server.Infrastructure.StaticData;
 using Server.Infrastructure.StaticData.Model;
@@ -44,28 +44,24 @@ public class RewardRepository : RepositoryBase, IRewardRepository
         return _store.GetStageReward(stageNum, stageSubNum);
     }
 
-    public async Task ClaimStageRewardByUserIdAsync(int userId, StageReward reward)
+    public async Task ClaimStageRewardByUserIdAsync(int userId, StageReward reward, CancellationToken ct)
     {
         await ExecuteAsync(async (connection, transaction) =>
         {
             var updatedCurrency = await connection.ExecuteAsync(
-                Sql.UpdateCurrency,
-                new
+                new CommandDefinition(Sql.UpdateCurrency, new
                 {
                     Gold = reward.Gold,
                     PaperPiece = reward.PaperPiece,
                     UserId = userId
-                },
-                transaction);
+                }, transaction: transaction, cancellationToken: ct));
 
             var updatedExp = await connection.ExecuteAsync(
-                Sql.UpdatePlayerExp,
-                new
+                new CommandDefinition(Sql.UpdatePlayerExp, new
                 {
                     Exp = reward.ClearExp,
                     UserId = userId
-                },
-                transaction);
+                }, transaction: transaction, cancellationToken: ct));
 
             if (updatedCurrency == 0)
                 throw new RequestException(ErrorStatusCode.NotFound,
@@ -76,6 +72,6 @@ public class RewardRepository : RepositoryBase, IRewardRepository
                 throw new RequestException(ErrorStatusCode.NotFound,
                     "PLAYER_GAME_NOT_FOUND",
                     new { UserId = userId });
-        });
+        }, ct);
     }
 }

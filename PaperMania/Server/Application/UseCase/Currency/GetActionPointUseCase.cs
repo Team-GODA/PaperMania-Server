@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Output.Persistence;
@@ -22,9 +22,9 @@ public class GetActionPointUseCase : IGetActionPointUseCase
         _apService = apService;
     }
     
-    public async Task<GetActionPointResult> ExecuteAsync(GetActionPointCommand request)
+    public async Task<GetActionPointResult> ExecuteAsync(GetActionPointCommand request, CancellationToken ct)
     {
-        var data = await _repository.FindByUserIdAsync(request.UserId);
+        var data = await _repository.FindByUserIdAsync(request.UserId, ct);
         if (data == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,
@@ -32,7 +32,7 @@ public class GetActionPointUseCase : IGetActionPointUseCase
         
         var regenerate = _apService.TryRegenerate(data, DateTime.UtcNow);
         if (regenerate)
-            await _repository.UpdateAsync(data);
+            await _repository.UpdateAsync(data, ct);
         
         return new GetActionPointResult(data.ActionPoint);
     }

@@ -1,4 +1,4 @@
-﻿using Server.Application.Port.Input.Auth;
+using Server.Application.Port.Input.Auth;
 using Server.Application.Port.Output.Service;
 
 namespace Server.Application.UseCase.Auth;
@@ -14,9 +14,9 @@ public class LogoutUseCase : ILogoutUseCase
         _sessionService = sessionService;
     }
     
-    public async Task ExecuteAsync(string sessionId)
+    public async Task ExecuteAsync(string sessionId, CancellationToken ct)
     {
         if (!string.IsNullOrWhiteSpace(sessionId))
-            await _sessionService.DeleteSessionAsync(sessionId);
+            await _sessionService.DeleteSessionAsync(sessionId, ct);
     }
 }

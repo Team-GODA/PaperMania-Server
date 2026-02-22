@@ -34,13 +34,13 @@ namespace Server.Api.Controller.Currency
         /// 플레이어의 현재 행동력을 조회합니다.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<BaseResponse<GetPlayerActionPointResponse>>> GetPlayerActionPointById()
+        public async Task<ActionResult<BaseResponse<GetPlayerActionPointResponse>>> GetPlayerActionPointById(CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _getActionPointUseCase.ExecuteAsync(new GetActionPointCommand(
-                userId)
-            );
+                userId),
+                ct);
 
             var response = new GetPlayerActionPointResponse
             {
@@ -55,14 +55,14 @@ namespace Server.Api.Controller.Currency
         /// </summary>
         [HttpPatch("max")]
         public async Task<ActionResult<BaseResponse<UpdatePlayerMaxActionPointResponse>>> UpdatePlayerMaxActionPoint(
-            [FromBody] UpdatePlayerMaxActionPointRequest request)
+            [FromBody] UpdatePlayerMaxActionPointRequest request,
+            CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _updateMaxActionPointUseCase.ExecuteAsync(new UpdateMaxActionPointCommand(
-                userId, request.NewMaxActionPoint)
-            
-            );
+                userId, request.NewMaxActionPoint),
+                ct);
             var response = new UpdatePlayerMaxActionPointResponse
             {
                 NewMaxActionPoint = result.MaxActionPoint
@@ -76,14 +76,14 @@ namespace Server.Api.Controller.Currency
         /// </summary>
         [HttpPatch]
         public async Task<ActionResult<BaseResponse<UsePlayerActionPointResponse>>> UsePlayerActionPoint(
-            [FromBody] UsePlayerActionPointRequest request)
+            [FromBody] UsePlayerActionPointRequest request,
+            CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _spendActionPointUseCase.ExecuteAsync(new SpendActionPointCommand(
-                userId, request.UsedActionPoint)
-            
-            );
+                userId, request.UsedActionPoint),
+                ct);
         
             var response = new UsePlayerActionPointResponse
             {

@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
 using Server.Application.Port.Output.Persistence;
@@ -25,9 +25,9 @@ public class GetPlayerLevelUseCase : IGetPlayerLevelUseCase
     }
 
 
-    public async Task<GetPlayerLevelResult> ExecuteAsync(GetPlayerLevelCommand request)
+    public async Task<GetPlayerLevelResult> ExecuteAsync(GetPlayerLevelCommand request, CancellationToken ct)
     {
-        var data = await _repository.FindByUserIdAsync(request.UserId)
+        var data = await _repository.FindByUserIdAsync(request.UserId, ct)
             ?? throw new RequestException(
                 ErrorStatusCode.NotFound,
                 "PLAYER_NOT_FOUND",

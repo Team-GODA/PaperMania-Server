@@ -1,9 +1,9 @@
-﻿using Server.Application.UseCase.Auth.Command;
+using Server.Application.UseCase.Auth.Command;
 using Server.Application.UseCase.Auth.Result;
 
 namespace Server.Application.Port.Input.Auth;
 
 public interface ILoginUseCase
 {
-    Task<LoginResult> ExecuteAsync(LoginCommand request);
+    Task<LoginResult> ExecuteAsync(LoginCommand request, CancellationToken ct);
 }

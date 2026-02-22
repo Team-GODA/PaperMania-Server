@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Configure;
 using Server.Application.Exceptions;
 using Server.Application.Port.Output.Service;
@@ -19,9 +19,9 @@ public class SessionService : ISessionService
         _logger = logger;
     }
     
-    public async Task<string> CreateSessionAsync(int userId)
+    public async Task<string> CreateSessionAsync(int userId, CancellationToken ct)
     {
-        await CleanupExistingSessionAsync(userId);
+        await CleanupExistingSessionAsync(userId, ct);
         
         var sessionId = GenerateSessionId();
         
@@ -29,11 +29,13 @@ public class SessionService : ISessionService
             _cacheService.SetAsync(
                 CacheKey.Session.BySessionId(sessionId), 
                 userId.ToString(), 
-                CacheTTLConfig.Session.Timeout),
+                CacheTTLConfig.Session.Timeout,
+                ct),
             _cacheService.SetAsync(
                 CacheKey.Session.ByUserId(userId), 
                 sessionId, 
-                CacheTTLConfig.Session.Timeout)
+                CacheTTLConfig.Session.Timeout,
+                ct)
         );
         
         _logger.LogInformation(
@@ -44,17 +46,18 @@ public class SessionService : ISessionService
         return sessionId;
     }
     
-    private async Task CleanupExistingSessionAsync(int userId)
+    private async Task CleanupExistingSessionAsync(int userId, CancellationToken ct)
     {
         var existingSessionId = await _cacheService.GetAsync(
-            CacheKey.Session.ByUserId(userId));
+            CacheKey.Session.ByUserId(userId),
+            ct);
         
         if (existingSessionId == null)
             return;
         
         await Task.WhenAll(
-            _cacheService.DeleteAsync(CacheKey.Session.BySessionId(existingSessionId)),
-            _cacheService.DeleteAsync(CacheKey.Session.ByUserId(userId))
+            _cacheService.DeleteAsync(CacheKey.Session.BySessionId(existingSessionId), ct),
+            _cacheService.DeleteAsync(CacheKey.Session.ByUserId(userId), ct)
         );
         
         _logger.LogInformation(
@@ -66,24 +69,27 @@ public class SessionService : ISessionService
     private static string GenerateSessionId()
         => Guid.NewGuid().ToString("N");
 
-    public async Task<bool> ValidateSessionAsync(string sessionId)
+    public async Task<bool> ValidateSessionAsync(string sessionId, CancellationToken ct)
     {
         var value = await _cacheService.GetAsync(
-            CacheKey.Session.BySessionId(sessionId));
+            CacheKey.Session.BySessionId(sessionId),
+            ct);
         return !string.IsNullOrEmpty(value);
     }
 
-    public async Task RefreshSessionAsync(string sessionId)
+    public async Task RefreshSessionAsync(string sessionId, CancellationToken ct)
     {
-        var userId = await FindUserIdBySessionIdAsync(sessionId);
+        var userId = await FindUserIdBySessionIdAsync(sessionId, ct);
 
         await Task.WhenAll(
             _cacheService.SetExpirationAsync(
                 CacheKey.Session.BySessionId(sessionId), 
-                CacheTTLConfig.Session.Timeout),
+                CacheTTLConfig.Session.Timeout,
+                ct),
             _cacheService.SetExpirationAsync(
                 CacheKey.Session.ByUserId(userId), 
-                CacheTTLConfig.Session.Timeout)
+                CacheTTLConfig.Session.Timeout,
+                ct)
         );
         
         _logger.LogInformation(
@@ -92,10 +98,11 @@ public class SessionService : ISessionService
             sessionId);
     }
 
-    public async Task<int> FindUserIdBySessionIdAsync(string sessionId)
+    public async Task<int> FindUserIdBySessionIdAsync(string sessionId, CancellationToken ct)
     {
         var userIdStr = await _cacheService.GetAsync(
-            CacheKey.Session.BySessionId(sessionId));
+            CacheKey.Session.BySessionId(sessionId),
+            ct);
     
         if (string.IsNullOrEmpty(userIdStr))
         {
@@ -114,7 +121,7 @@ public class SessionService : ISessionService
                 sessionId, 
                 userIdStr);
             
-            await DeleteSessionAsync(sessionId);
+            await DeleteSessionAsync(sessionId, ct);
             
             throw new RequestException(
                 ErrorStatusCode.ServerError,
@@ -124,10 +131,11 @@ public class SessionService : ISessionService
         return userId;
     }
 
-    public async Task DeleteSessionAsync(string sessionId)
+    public async Task DeleteSessionAsync(string sessionId, CancellationToken ct)
     {
         var userIdStr = await _cacheService.GetAsync(
-            CacheKey.Session.BySessionId(sessionId));
+            CacheKey.Session.BySessionId(sessionId),
+            ct);
     
         if (string.IsNullOrEmpty(userIdStr))
         {
@@ -140,8 +148,8 @@ public class SessionService : ISessionService
         if (int.TryParse(userIdStr, out var userId))
         {
             await Task.WhenAll(
-                _cacheService.DeleteAsync(CacheKey.Session.BySessionId(sessionId)),
-                _cacheService.DeleteAsync(CacheKey.Session.ByUserId(userId))
+                _cacheService.DeleteAsync(CacheKey.Session.BySessionId(sessionId), ct),
+                _cacheService.DeleteAsync(CacheKey.Session.ByUserId(userId), ct)
             );
         
             _logger.LogInformation(
@@ -151,7 +159,7 @@ public class SessionService : ISessionService
         }
         else
         {
-            await _cacheService.DeleteAsync(CacheKey.Session.BySessionId(sessionId));
+            await _cacheService.DeleteAsync(CacheKey.Session.BySessionId(sessionId), ct);
             
             _logger.LogWarning(
                 "유효하지 않은 userId 데이터를 가진 세션 삭제. SessionId={SessionId}, Value={Value}", 

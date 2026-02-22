@@ -1,6 +1,6 @@
-﻿namespace Server.Application.Port.Input.Auth;
+namespace Server.Application.Port.Input.Auth;
 
 public interface ILogoutUseCase
 {
-    Task ExecuteAsync(string sessionId);
+    Task ExecuteAsync(string sessionId, CancellationToken ct);
 }

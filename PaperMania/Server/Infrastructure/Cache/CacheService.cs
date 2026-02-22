@@ -1,4 +1,3 @@
-﻿using Server.Application.Port;
 using Server.Application.Port.Output.Service;
 using StackExchange.Redis;
 
@@ -16,15 +15,17 @@ public class CacheService : ICacheService
         _logger = logger;
     }
 
-    public async Task SetAsync(string key, string value, TimeSpan? expiration = null)
+    public async Task SetAsync(string key, string value, TimeSpan? expiration, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         _logger.LogInformation($"Cache SET: {key} = {value}");
         
         await _db.StringSetAsync(key, value, expiration);
     }
 
-    public async Task<string?> GetAsync(string key)
+    public async Task<string?> GetAsync(string key, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var value = await _db.StringGetAsync(key);
         
         _logger.LogInformation($"Cache GET: {key} = {value}");
@@ -32,15 +33,17 @@ public class CacheService : ICacheService
         return value.IsNullOrEmpty ? null : value.ToString();
     }
 
-    public async Task DeleteAsync(string key)
+    public async Task DeleteAsync(string key, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         _logger.LogInformation($"Cache DELETE: {key}");
         
         await _db.KeyDeleteAsync(key);
     }
 
-    public async Task<bool> ExistsAsync(string key)
+    public async Task<bool> ExistsAsync(string key, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var exists = await _db.KeyExistsAsync(key);
 
         _logger.LogInformation($"Cache EXISTS: {key} = {exists}");
@@ -48,35 +51,40 @@ public class CacheService : ICacheService
         return exists;
     }
 
-    public async Task SetExpirationAsync(string key, TimeSpan expiration)
+    public async Task SetExpirationAsync(string key, TimeSpan expiration, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         _logger.LogInformation($"Cache EXPIRE: {key} = {expiration}");
         
         await _db.KeyExpireAsync(key, expiration);
     }
 
-    public async Task SetHashAsync(string key, string field, string value)
+    public async Task SetHashAsync(string key, string field, string value, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         _logger.LogInformation($"Cache SET HSET: {key} -> {field} = {value}");
         await _db.HashSetAsync(key, field, value);
     }
 
-    public async Task<string?> HashGetAsync(string key, string field)
+    public async Task<string?> HashGetAsync(string key, string field, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var value = await _db.HashGetAsync(key, field);
         
         _logger.LogInformation($"Cache GET HSET: {key} -> {field} = {value}");
         return value.IsNullOrEmpty ? null : value.ToString();
     }
 
-    public async Task HashDeleteAsync(string key, string field)
+    public async Task HashDeleteAsync(string key, string field, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         _logger.LogInformation($"Cache DELETE HSET: {key} -> {field}");
         await _db.HashDeleteAsync(key, field);
     }
 
-    public async Task<bool> HashExistsAsync(string key, string field)
+    public async Task<bool> HashExistsAsync(string key, string field, CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var exists = await _db.HashExistsAsync(key, field);
         
         _logger.LogInformation($"Cache EXIST HSET: {key} -> {field} = {exists}");

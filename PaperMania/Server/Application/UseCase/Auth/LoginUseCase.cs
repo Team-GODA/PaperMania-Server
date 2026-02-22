@@ -1,6 +1,7 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Auth;
+using Server.Application.Port.Output.Cache;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Auth.Command;
@@ -15,13 +16,13 @@ public class LoginUseCase : ILoginUseCase
     private readonly IAccountRepository _repository;
     private readonly ISessionService _sessionService;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly CacheAsideService _cacheAsideService;
+    private readonly ICacheAsideService _cacheAsideService;
 
     public LoginUseCase(
         IAccountRepository repository,
         ISessionService sessionService,
         IPasswordHasher passwordHasher,
-        CacheAsideService cacheAsideService
+        ICacheAsideService cacheAsideService
     )
     {
         _repository = repository;
@@ -30,14 +31,15 @@ public class LoginUseCase : ILoginUseCase
         _cacheAsideService = cacheAsideService;
     }
     
-    public async Task<LoginResult> ExecuteAsync(LoginCommand request)
+    public async Task<LoginResult> ExecuteAsync(LoginCommand request, CancellationToken ct)
     {
         request.Validate();
         
         var account = await _cacheAsideService.GetOrSetAsync(
             CacheKey.Account.ByPlayerId(request.PlayerId),
-            async () => await _repository.FindByPlayerIdAsync(request.PlayerId),
-            expiration: TimeSpan.FromDays(7)
+            async (token) => await _repository.FindByPlayerIdAsync(request.PlayerId, token),
+            TimeSpan.FromDays(7),
+            ct
         );
         
         if (account == null || string.IsNullOrEmpty(account.Password))
@@ -53,7 +55,7 @@ public class LoginUseCase : ILoginUseCase
                 ErrorStatusCode.Unauthorized,
                 "INVALID_PASSWORD");
         
-        var sessionId = await _sessionService.CreateSessionAsync(account.Id);
+        var sessionId = await _sessionService.CreateSessionAsync(account.Id, ct);
         if (string.IsNullOrEmpty(sessionId))
             throw new RequestException(
                 ErrorStatusCode.ServerError,

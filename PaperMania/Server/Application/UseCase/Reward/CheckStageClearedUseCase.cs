@@ -1,4 +1,4 @@
-﻿using Server.Application.Port.Input.Reward;
+using Server.Application.Port.Input.Reward;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Reward.Command;
 
@@ -13,14 +13,15 @@ public class CheckStageClearedUseCase : ICheckStageClearedUseCase
         _repository = repository;
     }
     
-    public async Task<bool> ExecuteAsync(CheckStageClearedCommand request)
+    public async Task<bool> ExecuteAsync(CheckStageClearedCommand request, CancellationToken ct)
     {
         request.Validate();
         
         var stageData  = await _repository.FindByUserIdAsync(
             request.UserId,
             request.StageNum,
-            request.StageSubNum
+            request.StageSubNum,
+            ct
             );
 
        return stageData != null;

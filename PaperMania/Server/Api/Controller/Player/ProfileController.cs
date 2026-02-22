@@ -31,12 +31,13 @@ public class ProfileController : BaseController
     /// 현재 플레이어의 이름을 조회합니다.
     /// </summary>
     [HttpGet("name")]
-    public async Task<ActionResult<BaseResponse<GetPlayerNameResponse>>> GetPlayerName()
+    public async Task<ActionResult<BaseResponse<GetPlayerNameResponse>>> GetPlayerName(CancellationToken ct)
     {
         var userId = GetUserId();
         
         var result = await _getPlayerNameUseCase.ExecuteAsync(
-            new GetPlayerNameCommand(userId)
+            new GetPlayerNameCommand(userId),
+            ct
         );
 
         var response = new GetPlayerNameResponse
@@ -53,13 +54,14 @@ public class ProfileController : BaseController
     /// </summary>
     [HttpPatch("name")]
     public async Task<ActionResult<BaseResponse<RenamePlayerNameResponse>>> RenamePlayerName(
-        [FromBody] RenamePlayerNameRequest request
-    )
+        [FromBody] RenamePlayerNameRequest request,
+        CancellationToken ct)
     {
         var userId = GetUserId();
         
         var result = await _renameUseCase.ExecuteAsync(
-            new RenameCommand(userId, request.NewName)
+            new RenameCommand(userId, request.NewName),
+            ct
         );
 
         var response = new RenamePlayerNameResponse

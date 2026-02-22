@@ -1,11 +1,11 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Input.Player;
 using Server.Application.Port.Input.Reward;
-using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.StaticData;
+using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Currency.Command;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Reward.Command;
@@ -48,7 +48,7 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
         _transactionScope = transactionScope;
     }
     
-    public async Task<ClaimStageRewardResult> ExecuteAsync(ClaimStageRewardCommand request)
+    public async Task<ClaimStageRewardResult> ExecuteAsync(ClaimStageRewardCommand request, CancellationToken ct)
     {
         request.Validate();
 
@@ -58,14 +58,14 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                               "STAGE_REWARD_NOT_FOUND"
                           );
 
-        return await _transactionScope.ExecuteAsync(async () =>
+        return await _transactionScope.ExecuteAsync(async (innerCt) =>
         {
             var checkCommand = new CheckStageClearedCommand(
                 request.UserId,
                 request.StageNum,
                 request.StageSubNum
             );
-            var isCleared = await _checkStageClearedUseCase.ExecuteAsync(checkCommand);
+            var isCleared = await _checkStageClearedUseCase.ExecuteAsync(checkCommand, innerCt);
             
             if (!isCleared)
             {
@@ -75,7 +75,7 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                     StageNum = request.StageNum,
                     StageSubNum = request.StageSubNum
                 };
-                await _stageRepository.CreateAsync(stageData);
+                await _stageRepository.CreateAsync(stageData, innerCt);
             }
             
             var goldToGain = stageReward.Gold;
@@ -85,35 +85,38 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
             if (goldToGain > 0)
             {
                 await _gainGoldUseCase.ExecuteAsync(
-                    new GainGoldCommand(request.UserId, goldToGain)
+                    new GainGoldCommand(request.UserId, goldToGain),
+                    innerCt
                 );
             }
 
             if (paperPieceToGain > 0)
             {
                 await _gainPaperPieceUseCase.ExecuteAsync(
-                    new GainPaperPieceCommand(request.UserId, paperPieceToGain)
+                    new GainPaperPieceCommand(request.UserId, paperPieceToGain),
+                    innerCt
                 );
             }
 
             if (expToGain > 0)
             {
                 await _gainPlayerExpUseCase.ExecuteAsync(
-                    new GainPlayerExpCommand(request.UserId, expToGain)
+                    new GainPlayerExpCommand(request.UserId, expToGain),
+                    innerCt
                 );
             }
 
-            var currencyData = await _currencyRepository.FindByUserIdAsync(request.UserId)
+            var currencyData = await _currencyRepository.FindByUserIdAsync(request.UserId, innerCt)
                                ?? throw new RequestException(
                                    ErrorStatusCode.NotFound,
                                    "PLAYER_CURRENCY_DATA_NOT_FOUND"
-                               );
+                                   );
 
-            var playerData = await _dataRepository.FindByUserIdAsync(request.UserId)
+            var playerData = await _dataRepository.FindByUserIdAsync(request.UserId, innerCt)
                              ?? throw new RequestException(
                                  ErrorStatusCode.NotFound,
                                  "PLAYER_DATA_NOT_FOUND"
-                             );
+                                 );
 
             return new ClaimStageRewardResult(
                 currencyData.Gold,
@@ -123,6 +126,6 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
                 currencyData.MaxActionPoint,
                 isCleared
             );
-        });
+        }, ct);
     }
 }

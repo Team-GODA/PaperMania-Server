@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
 using Server.Application.Port.Output.Persistence;
@@ -16,17 +16,17 @@ public class RenameUseCase : IRenameUseCase
         _repository = repository;
     }
     
-    public async Task<RenameResult> ExecuteAsync(RenameCommand request)
+    public async Task<RenameResult> ExecuteAsync(RenameCommand request, CancellationToken ct)
     {
         request.Validate();
 
-        var exist = await _repository.ExistsPlayerNameAsync(request.NewName);
+        var exist = await _repository.ExistsPlayerNameAsync(request.NewName, ct);
         if (exist != null)
             throw new RequestException(
                 ErrorStatusCode.Conflict,
                 "PLAYER_NAME_EXIST");
 
-        await _repository.RenamePlayerNameAsync(request.UserId, request.NewName);
+        await _repository.RenamePlayerNameAsync(request.UserId, request.NewName, ct);
 
         return new RenameResult(
             UserId: request.UserId,

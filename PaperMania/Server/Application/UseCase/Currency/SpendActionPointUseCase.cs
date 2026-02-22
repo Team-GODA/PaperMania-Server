@@ -1,8 +1,8 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Currency;
-using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Currency.Command;
 using Server.Application.UseCase.Currency.Result;
 
@@ -22,13 +22,13 @@ public class SpendActionPointUseCase : ISpendActionPointUseCase
         _transactionScope = transactionScope;
     }
     
-    public async Task<SpendActionPointResult> ExecuteAsync(SpendActionPointCommand request)
+    public async Task<SpendActionPointResult> ExecuteAsync(SpendActionPointCommand request, CancellationToken ct)
     {
         request.Validate();
         
-        return await _transactionScope.ExecuteAsync(async () =>
+        return await _transactionScope.ExecuteAsync(async (innerCt) =>
         {
-            var data = await _repository.FindByUserIdAsync(request.UserId);
+            var data = await _repository.FindByUserIdAsync(request.UserId, innerCt);
             if (data == null)
                 throw new RequestException(
                     ErrorStatusCode.NotFound,
@@ -42,11 +42,11 @@ public class SpendActionPointUseCase : ISpendActionPointUseCase
             data.ActionPoint = Math.Max(data.ActionPoint - request.ActionPoint, 0);
             data.LastActionPointUpdated = DateTime.UtcNow;
             
-            await _repository.UpdateAsync(data);
+            await _repository.UpdateAsync(data, innerCt);
 
             return new SpendActionPointResult(
                 data.ActionPoint
                 );
-        });
+        }, ct);
     }
 }

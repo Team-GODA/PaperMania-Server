@@ -52,16 +52,16 @@ namespace Server.Api.Controller.Data
         [HttpPost("{stageNum:int}/{stageSubNum:int}")]
         public async Task<ActionResult<BaseResponse<ClaimStageRewardResponse>>> ClaimStageReward(
             [FromRoute] int stageNum,
-            [FromRoute] int stageSubNum
-            )
+            [FromRoute] int stageSubNum,
+            CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _claimStageRewardUseCase.ExecuteAsync(new ClaimStageRewardCommand(
                 userId,
                 stageNum,
-                stageSubNum)
-            );
+                stageSubNum),
+                ct);
 
             var response = new ClaimStageRewardResponse
             {

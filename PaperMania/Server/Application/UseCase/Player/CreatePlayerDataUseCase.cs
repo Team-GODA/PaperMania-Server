@@ -1,9 +1,9 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
-using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
+using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 using Server.Infrastructure.Persistence.Model;
@@ -32,11 +32,11 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
         _transactionScope = transactionScope;
     }
     
-    public async Task<AddPlayerDataResult> ExecuteAsync(AddPlayerDataCommand request)
+    public async Task<AddPlayerDataResult> ExecuteAsync(AddPlayerDataCommand request, CancellationToken ct)
     {
-        var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId);
+        var userId = await _sessionService.FindUserIdBySessionIdAsync(request.SessionId, ct);
 
-        var account = await _accountRepository.FindByUserIdAsync(userId);
+        var account = await _accountRepository.FindByUserIdAsync(userId, ct);
         if (account == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,
@@ -47,7 +47,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
                 ErrorStatusCode.Conflict,
                 "PLAYER_DATA_EXIST");
     
-        await _transactionScope.ExecuteAsync(async () =>
+        await _transactionScope.ExecuteAsync(async (innerCt) =>
         {
             var player = new PlayerGameData
             {
@@ -57,12 +57,12 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
                 Exp = 0
             };
             
-            await _dataRepository.CreateAsync(player);
-            await _currencyRepository.CreateByUserIdAsync(userId);
+            await _dataRepository.CreateAsync(player, innerCt);
+            await _currencyRepository.CreateByUserIdAsync(userId, innerCt);
             
             account.IsNewAccount = false;
-            await _accountRepository.UpdateAsync(account);
-        });
+            await _accountRepository.UpdateAsync(account, innerCt);
+        }, ct);
 
         return new AddPlayerDataResult(
             PlayerName: request.PlayerName

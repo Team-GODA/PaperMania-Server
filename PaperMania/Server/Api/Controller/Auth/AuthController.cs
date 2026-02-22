@@ -36,11 +36,11 @@ namespace Server.Api.Controller.Auth
         /// </summary>
         [HttpPost("validate")]
         [SessionAuthorize]
-        public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUser()
+        public async Task<ActionResult<BaseResponse<ValidateUserResponse>>> ValidateUser(CancellationToken ct)
         {
             var sessionId = GetSessionId();
             
-           await _validateUseCase.ExecuteAsync(sessionId);
+           await _validateUseCase.ExecuteAsync(sessionId, ct);
            return Ok(ApiResponse.Ok<EmptyResponse>("유저 인증 성공"));
         }
         
@@ -48,7 +48,7 @@ namespace Server.Api.Controller.Auth
         /// 신규 회원가입 API
         /// </summary>
         [HttpPost("register")]
-        public async Task<ActionResult<BaseResponse<RegisterResponse>>> Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult<BaseResponse<RegisterResponse>>> Register([FromBody] RegisterRequest request, CancellationToken ct)
         {
             await _registerUseCase.ExecuteAsync(
                 new RegisterCommand(
@@ -56,7 +56,7 @@ namespace Server.Api.Controller.Auth
                     request.Email,
                     request.Password
                     )
-                );
+                , ct);
 
             return Ok(ApiResponse.Ok<EmptyResponse>("회원가입 성공"));
         }
@@ -65,14 +65,14 @@ namespace Server.Api.Controller.Auth
         /// 로그인 APi
         /// </summary>
         [HttpPost("login")]
-        public async Task<ActionResult<BaseResponse<LoginResponse>>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<BaseResponse<LoginResponse>>> Login([FromBody] LoginRequest request, CancellationToken ct)
         {
             var result = await _loginUseCase.ExecuteAsync(
                 new LoginCommand(
                     request.PlayerId,
                     request.Password
                     )
-                );
+                , ct);
 
             var response = new LoginResponse
             {
@@ -88,11 +88,11 @@ namespace Server.Api.Controller.Auth
         /// </summary>
         [SessionAuthorize]
         [HttpPost("logout")]
-        public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout()
+        public async Task<ActionResult<BaseResponse<EmptyResponse>>> Logout(CancellationToken ct)
         {
             var sessionId = GetSessionId();
             
-            await _logoutUseCase.ExecuteAsync(sessionId);
+            await _logoutUseCase.ExecuteAsync(sessionId, ct);
             return Ok(ApiResponse.Ok<EmptyResponse>("로그아웃 성공"));
         }
     }

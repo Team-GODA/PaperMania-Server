@@ -1,6 +1,6 @@
-﻿using Dapper;
-using Server.Application.Port.Output.Infrastructure;
+using Dapper;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Infrastructure.Persistence.Dao;
@@ -53,65 +53,55 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
     {
     }
     
-    public async Task CreateByUserIdAsync(int userId)
+    public async Task CreateByUserIdAsync(int userId, CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
              connection.ExecuteAsync(
-                Sql.AddPlayerCurrencyData,
-                new { UserId = userId },
-                transaction)
-             );
+                new CommandDefinition(Sql.AddPlayerCurrencyData, new { UserId = userId }, transaction: transaction, cancellationToken: ct)
+             ), ct);
     }
 
-    public async Task<PlayerCurrencyData?> FindByUserIdAsync(int userId)
+    public async Task<PlayerCurrencyData?> FindByUserIdAsync(int userId, CancellationToken ct)
     {
         return await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerCurrencyData>(
-                Sql.GetPlayerCurrencyData,
-                new { UserId = userId }
-                )
-            );
+                new CommandDefinition(Sql.GetPlayerCurrencyData, new { UserId = userId }, cancellationToken: ct)
+            ), ct);
     }
 
-    public async Task UpdateAsync(PlayerCurrencyData data)
+    public async Task UpdateAsync(PlayerCurrencyData data, CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                Sql.UpdatePlayerCurrencyData,
-                data,
-                transaction)
-            );
+                new CommandDefinition(Sql.UpdatePlayerCurrencyData, data, transaction: transaction, cancellationToken: ct)
+            ), ct);
     }
 
     public async Task RegenerateActionPointAsync(int userId, 
         int newActionPoint,
-        DateTime lastUpdated
-        )
+        DateTime lastUpdated,
+        CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                Sql.RegenerateActionPoint,
-                new 
+                new CommandDefinition(Sql.RegenerateActionPoint, new 
                 {
                     UserId = userId, 
                     NewActionPoint = newActionPoint,
                     LastUpdated = lastUpdated.ToUniversalTime()
-                },
-                transaction)
-        );
+                }, transaction: transaction, cancellationToken: ct)
+        ), ct);
     }
 
-    public async Task SetActionPointToMaxAsync(int userId)
+    public async Task SetActionPointToMaxAsync(int userId, CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                Sql.SetActionPointToMax,
-                new
+                new CommandDefinition(Sql.SetActionPointToMax, new
                 {
                     UserId = userId,
                     LastUpdated = DateTime.UtcNow
-                },
-                transaction)
-        );
+                }, transaction: transaction, cancellationToken: ct)
+        ), ct);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Character;
 using Server.Application.Port.Output.Persistence;
@@ -15,7 +15,7 @@ public class GetAllPlayerCharacterDataUseCase : IGetAllPlayerCharacterDataUseCas
         _repository = repository;
     }
     
-    public async Task<List<PlayerCharacterData>> ExecuteAsync(int userId)
+    public async Task<List<PlayerCharacterData>> ExecuteAsync(int userId, CancellationToken ct)
     {
         if (userId <= 0)
             throw new RequestException(
@@ -23,7 +23,7 @@ public class GetAllPlayerCharacterDataUseCase : IGetAllPlayerCharacterDataUseCas
                 "INVALID_USER_ID"
                 );
 
-        var data = await _repository.FindAll(userId);
+        var data = await _repository.FindAll(userId, ct);
 
         return data.ToList();
     }

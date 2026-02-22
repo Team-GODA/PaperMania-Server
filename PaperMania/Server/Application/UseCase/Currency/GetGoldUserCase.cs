@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Output.Persistence;
@@ -17,9 +17,9 @@ public class GetGoldUseCase : IGetGoldUseCase
         _repository = repository;
     }
 
-    public async Task<GetGoldResult> ExecuteAsync(int userId)
+    public async Task<GetGoldResult> ExecuteAsync(int userId, CancellationToken ct)
     {
-        var data = await _repository.FindByUserIdAsync(userId);
+        var data = await _repository.FindByUserIdAsync(userId, ct);
         if (data == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,
