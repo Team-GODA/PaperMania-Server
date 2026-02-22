@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
-using Server.Api.Dto.Request;
 using Server.Api.Dto.Request.Data;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Data;
@@ -34,13 +33,13 @@ namespace Server.Api.Controller.Player
         /// 플레이어 데이터을 등록합니다.
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult<BaseResponse<AddPlayerDataResponse>>> AddPlayerData([FromBody] AddPlayerDataRequest request)
+        public async Task<ActionResult<BaseResponse<AddPlayerDataResponse>>> AddPlayerData([FromBody] AddPlayerDataRequest request, CancellationToken ct)
         {
             var sessionId = GetSessionId();
             
             var result =  await _createPlayerDataUseCase.ExecuteAsync(new AddPlayerDataCommand(
-                request.PlayerName, sessionId)
-            );
+                request.PlayerName, sessionId),
+                ct);
 
             var response = new AddPlayerDataResponse
             {
@@ -54,13 +53,13 @@ namespace Server.Api.Controller.Player
         /// 플레이어의 현재 레벨과 경험치를 조회합니다.
         /// </summary>
         [HttpGet("level")]
-        public async Task<ActionResult<BaseResponse<GetPlayerLevelResponse>>> GetPlayerLevel()
+        public async Task<ActionResult<BaseResponse<GetPlayerLevelResponse>>> GetPlayerLevel(CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _getPlayerLevelUseCase.ExecuteAsync(new GetPlayerLevelCommand(
-                userId)
-            );
+                userId),
+                ct);
 
             var response = new GetPlayerLevelResponse
             {
@@ -76,14 +75,14 @@ namespace Server.Api.Controller.Player
         /// 플레이어의 경험치를 추가하고 레벨을 갱신합니다.
         /// </summary>
         [HttpPatch("level")]
-        public async Task<ActionResult<BaseResponse<UpdatePlayerLevelByExpResponse>>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request)
+        public async Task<ActionResult<BaseResponse<UpdatePlayerLevelByExpResponse>>> UpdatePlayerLevelByExp([FromBody] AddPlayerExpRequest request, CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _gainPlayerExpUseCase.ExecuteWithTransactionAsync(new GainPlayerExpCommand(
                 userId, 
-                request.NewExp)
-            );
+                request.NewExp),
+                ct);
 
             var response = new UpdatePlayerLevelByExpResponse
             {

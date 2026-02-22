@@ -1,8 +1,8 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Currency;
-using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Currency.Command;
 using Server.Application.UseCase.Currency.Result;
 
@@ -10,33 +10,33 @@ namespace Server.Application.UseCase.Currency;
 
 public class SpendGoldUseCase : ISpendGoldUseCase
 {
-    private readonly ICurrencyDao _dao;
+    private readonly ICurrencyRepository _repository;
     private readonly ITransactionScope _transactionScope;
     
     public SpendGoldUseCase(
-        ICurrencyDao dao,
+        ICurrencyRepository repository,
         ITransactionScope transactionScope)
     {
-        _dao = dao;
+        _repository = repository;
         _transactionScope = transactionScope;
     }
     
-    public async Task<SpendGoldResult> ExecuteAsync(SpendGoldCommand request)
+    public async Task<SpendGoldResult> ExecuteAsync(SpendGoldCommand request, CancellationToken ct)
     {
         request.Validate();
 
-        return await _transactionScope.ExecuteAsync(async () =>
+        return await _transactionScope.ExecuteAsync(async (innerCt) =>
         {
-            var data = await _dao.FindByUserIdAsync(request.UserId)
+            var data = await _repository.FindByUserIdAsync(request.UserId, innerCt)
                        ?? throw new RequestException(
                            ErrorStatusCode.NotFound,
                            "PLAYER_NOT_FOUND");
 
             data.SpendGold(request.Gold);
 
-            await _dao.UpdateAsync(data);
+            await _repository.UpdateAsync(data, innerCt);
 
             return new SpendGoldResult(data.Gold);
-        });
+        }, ct);
     }
 }

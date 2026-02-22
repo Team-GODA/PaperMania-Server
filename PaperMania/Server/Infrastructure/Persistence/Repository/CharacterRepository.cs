@@ -1,11 +1,11 @@
-﻿using Dapper;
-using Server.Application.Port.Output.Infrastructure;
+using Dapper;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.Persistence.Model;
 
-namespace Server.Infrastructure.Persistence.Dao;
+namespace Server.Infrastructure.Persistence.Repository;
 
-public class CharacterDao : DaoBase, ICharacterDao
+public class CharacterRepository : RepositoryBase, ICharacterRepository
 {
     private static class Sql
     {
@@ -80,67 +80,52 @@ public class CharacterDao : DaoBase, ICharacterDao
             ";
     }
 
-    public CharacterDao(
+    public CharacterRepository(
         string connectionString,
         ITransactionScope? transactionScope = null
         ) : base(connectionString, transactionScope)
     {
     }
 
-    public async Task<IEnumerable<PlayerCharacterData>> FindAll(int userId)
+    public async Task<IEnumerable<PlayerCharacterData>> FindAll(int userId, CancellationToken ct)
     {
         return await QueryAsync(conn =>
             conn.QueryAsync<PlayerCharacterData>(
-                Sql.GetAllByUserId,
-                new { UserId = userId }
-            )
-        );
+                new CommandDefinition(Sql.GetAllByUserId, new { UserId = userId }, cancellationToken: ct)
+            ), ct);
     }
 
-    public async Task<PlayerCharacterData?> FindCharacter(int userId, int characterId)
+    public async Task<PlayerCharacterData?> FindCharacter(int userId, int characterId, CancellationToken ct)
     {
-        return await QueryAsync(async conn =>
-            await conn.QuerySingleOrDefaultAsync<PlayerCharacterData>(
-                Sql.GetByUserId,
-                new
-                {
-                    UserId = userId,
-                    CharacterId = characterId
-                }
-            )
-        );
+        return await QueryAsync(conn =>
+            conn.QuerySingleOrDefaultAsync<PlayerCharacterData>(
+                new CommandDefinition(Sql.GetByUserId, new { UserId = userId, CharacterId = characterId }, cancellationToken: ct)
+            ), ct);
     }
 
-    public async Task<PlayerCharacterData> UpdateAsync(PlayerCharacterData data)
+    public async Task<PlayerCharacterData> UpdateAsync(PlayerCharacterData data, CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                Sql.UpdateData,
-                data,
-                transaction
-            )
-        );
+                new CommandDefinition(Sql.UpdateData, data, transaction: transaction, cancellationToken: ct)
+            ), ct);
 
         return data;
     }
 
-    public async Task CreateAsync(PlayerCharacterData data)
+    public async Task CreateAsync(PlayerCharacterData data, CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                Sql.createData,
-                data,
-                transaction)
-        );
+                new CommandDefinition(Sql.createData, data, transaction: transaction, cancellationToken: ct)
+            ), ct);
     }
 
-    public async Task CreatePieceData(PlayerCharacterPieceData data)
+    public async Task CreatePieceData(PlayerCharacterPieceData data, CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                Sql.CreatePieceData, 
-                data,
-                transaction)
-        );
+                new CommandDefinition(Sql.CreatePieceData, data, transaction: transaction, cancellationToken: ct)
+            ), ct);
     }
 }

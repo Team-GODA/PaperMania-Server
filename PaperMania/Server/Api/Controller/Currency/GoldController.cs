@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
-using Server.Api.Dto.Request;
 using Server.Api.Dto.Request.Currency;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
@@ -35,11 +34,11 @@ namespace Server.Api.Controller.Currency
         /// </summary>
         /// <returns>현재 골드</returns>
         [HttpGet]
-        public async Task<ActionResult<BaseResponse<BaseResponse<GetPlayerGoldResponse>>>> GetPlayerGold()
+        public async Task<ActionResult<BaseResponse<BaseResponse<GetPlayerGoldResponse>>>> GetPlayerGold(CancellationToken ct)
         {
             var userId = GetUserId();
             
-            var result = await _getGoldUseCase.ExecuteAsync(userId);
+            var result = await _getGoldUseCase.ExecuteAsync(userId, ct);
             var response = new GetPlayerGoldResponse
             {
                 CurrentGold = result.Gold
@@ -50,13 +49,14 @@ namespace Server.Api.Controller.Currency
 
         [HttpPatch("gain")]
         public async Task<ActionResult<BaseResponse<GetPlayerGoldResponse>>> GainGold(
-            [FromBody] GainGoldRequest request)
+            [FromBody] GainGoldRequest request,
+            CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _gainGoldUseCase.ExecuteWithTransactionAsync(new GainGoldCommand(
-                userId, request.Gold)
-            );
+                userId, request.Gold),
+                ct);
 
             var response = new GainGoldResponse
             {
@@ -68,13 +68,14 @@ namespace Server.Api.Controller.Currency
 
         [HttpPatch("spend")]
         public async Task<ActionResult<BaseResponse<SpendGoldResponse>>> SpendGold(
-            [FromBody] SpendGoldRequest request)
+            [FromBody] SpendGoldRequest request,
+            CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _spendGoldUseCase.ExecuteAsync(new SpendGoldCommand(
-                userId, request.Gold)
-            );
+                userId, request.Gold),
+                ct);
 
             var response = new SpendGoldResponse
             {

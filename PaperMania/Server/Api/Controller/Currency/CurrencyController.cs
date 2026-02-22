@@ -23,13 +23,13 @@ namespace Server.Api.Controller.Currency
         }
 
         [HttpGet]
-        public async Task<ActionResult<BaseResponse<GetCurrencyDataResponse>>> GetCurrencyData()
+        public async Task<ActionResult<BaseResponse<GetCurrencyDataResponse>>> GetCurrencyData(CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _getCurrencyDataUseCase.ExecuteAsync(new GetCurrencyDataCommand(
-                userId)
-            );
+                userId),
+                ct);
 
             var response = new GetCurrencyDataResponse
             {

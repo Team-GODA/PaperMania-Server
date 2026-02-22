@@ -1,11 +1,11 @@
-﻿using Dapper;
-using Server.Application.Port.Output.Infrastructure;
+using Dapper;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.Persistence.Model;
 
-namespace Server.Infrastructure.Persistence.Dao;
+namespace Server.Infrastructure.Persistence.Repository;
 
-public class AccountDao : DaoBase, IAccountDao
+public class AccountRepository : RepositoryBase, IAccountRepository
 {
     private static class Sql
     {
@@ -58,83 +58,72 @@ public class AccountDao : DaoBase, IAccountDao
             WHERE id = @Id";
     }
     
-    public AccountDao(
+    public AccountRepository(
         string connectionString, 
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)
     {
     }
     
-    public async Task<PlayerAccountData?> FindByUserIdAsync(int userId)
+    public async Task<PlayerAccountData?> FindByUserIdAsync(int userId, CancellationToken ct)
     {
         return await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
-                Sql.GetByUserId, 
-                new { UserId = userId }
-            )
-        );
+                new CommandDefinition(Sql.GetByUserId, new { UserId = userId }, cancellationToken: ct)
+            ), ct);
     }
     
-    public async Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId)
+    public async Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(playerId);
         
         return await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
-                Sql.GetByPlayerId, 
-                new { PlayerId = playerId }
-            )
-        );
+                new CommandDefinition(Sql.GetByPlayerId, new { PlayerId = playerId }, cancellationToken: ct)
+            ), ct);
     }
 
-    public async Task<PlayerAccountData?> FindByEmailAsync(string email)
+    public async Task<PlayerAccountData?> FindByEmailAsync(string email, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         
         return await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
-                Sql.GetByEmail, 
-                new { Email = email }
-            )
-        );
+                new CommandDefinition(Sql.GetByEmail, new { Email = email }, cancellationToken: ct)
+            ), ct);
     }
     
-    public async Task<bool> ExistsByPlayerIdAsync(string playerId)
+    public async Task<bool> ExistsByPlayerIdAsync(string playerId, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(playerId);
 
         var result = await QueryAsync(connection =>
             connection.ExecuteScalarAsync<int?>(
-                Sql.ExistsByPlayerId,
-                new { PlayerId = playerId }
-            ));
+                new CommandDefinition(Sql.ExistsByPlayerId, new { PlayerId = playerId }, cancellationToken: ct)
+            ), ct);
 
         return result.HasValue;
     }
 
-    public async Task<PlayerAccountData> CreateAsync(PlayerAccountData account)
+    public async Task<PlayerAccountData> CreateAsync(PlayerAccountData account, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(account);
         
         return await ExecuteAsync((connection, transaction) =>
             connection.QuerySingleAsync<PlayerAccountData>(
-                Sql.InsertAccount, 
-                account,
-                transaction)
-        );
+                new CommandDefinition(Sql.InsertAccount, account, transaction: transaction, cancellationToken: ct)
+            ), ct);
     }
     
     
-    public async Task UpdateAsync(PlayerAccountData account)
+    public async Task UpdateAsync(PlayerAccountData account, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(account);
 
         var rows = await ExecuteAsync((conn, transaction) =>
             conn.ExecuteAsync(
-                Sql.UpdateAccount,
-                account,
-                transaction
-            ));
+                new CommandDefinition(Sql.UpdateAccount, account, transaction: transaction, cancellationToken: ct)
+            ), ct);
 
         if (rows == 0)
             throw new InvalidOperationException($"ACCOUNT_NOT_FOUND: id={account.Id}");

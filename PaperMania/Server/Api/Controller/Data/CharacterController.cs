@@ -54,14 +54,15 @@ public class CharacterController : BaseController
     [SessionAuthorize]
     [HttpGet("player/{characterId:int}")]
     public async Task<ActionResult<BaseResponse<GetCharacterDataResponse>>> GetCharacterData(
-        [FromRoute] int characterId)
+        [FromRoute] int characterId,
+        CancellationToken ct)
     {
         var userId = GetUserId();
 
         var result = await _getPlayerCharacterUseCase.ExecuteAsync(new GetPlayerCharacterCommand(
             userId,
-            characterId)
-        );
+            characterId),
+            ct);
             
         var response = new GetCharacterDataResponse
         {
@@ -76,11 +77,11 @@ public class CharacterController : BaseController
     /// </summary>
     [SessionAuthorize]
     [HttpGet("player/all")]
-    public async Task<ActionResult<BaseResponse<GetAllPlayerCharactersResponse>>> GetAllPlayerCharacters()
+    public async Task<ActionResult<BaseResponse<GetAllPlayerCharactersResponse>>> GetAllPlayerCharacters(CancellationToken ct)
     {
         var userId = GetUserId();
         
-        var result = await _getAllPlayerCharacterDataUseCase.ExecuteAsync(userId);
+        var result = await _getAllPlayerCharacterDataUseCase.ExecuteAsync(userId, ct);
 
         var response = new GetAllPlayerCharactersResponse
         {
@@ -95,14 +96,15 @@ public class CharacterController : BaseController
     /// </summary>
     [HttpPost]
     public async Task<ActionResult<BaseResponse<EmptyResponse>>> AddPlayerCharacterData(
-        [FromBody] AddPlayerCharacterRequest request)
+        [FromBody] AddPlayerCharacterRequest request,
+        CancellationToken ct)
     {
         var userId = GetUserId();
 
         await _createPlayerCharacterDataUseCase.ExecuteAsync(new CreatePlayerCharacterCommand(
             userId,
-            request.CharacterId)
-        );
+            request.CharacterId),
+            ct);
             
         return Ok(ApiResponse.Ok<EmptyResponse>("플레이어 보유 캐릭터 추가 성공"));
     }

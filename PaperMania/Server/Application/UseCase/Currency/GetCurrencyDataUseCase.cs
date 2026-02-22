@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Output.Persistence;
@@ -9,18 +9,18 @@ namespace Server.Application.UseCase.Currency;
 
 public class GetCurrencyDataUseCase : IGetCurrencyDataUseCase
 {
-    private readonly ICurrencyDao _dao;
+    private readonly ICurrencyRepository _repository;
 
-    public GetCurrencyDataUseCase(ICurrencyDao dao)
+    public GetCurrencyDataUseCase(ICurrencyRepository repository)
     {
-        _dao = dao;
+        _repository = repository;
     }
     
-    public async Task<GetCurrencyDataResult> ExecuteAsync(GetCurrencyDataCommand request)
+    public async Task<GetCurrencyDataResult> ExecuteAsync(GetCurrencyDataCommand request, CancellationToken ct)
     {
         request.Validate();
         
-        var data = await _dao.FindByUserIdAsync(request.UserId)
+        var data = await _repository.FindByUserIdAsync(request.UserId, ct)
             ?? throw new RequestException(
                 ErrorStatusCode.NotFound,
                 "PLAYER_NOT_FOUND"

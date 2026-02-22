@@ -1,16 +1,14 @@
-﻿using Dapper;
+using Dapper;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
-using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
-using Server.Infrastructure.Service;
-using Server.Infrastructure.StaticData;
+using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.StaticData.Model;
 using Server.Infrastructure.StaticData.Store;
 
-namespace Server.Infrastructure.Persistence.Dao;
+namespace Server.Infrastructure.Persistence.Repository;
 
-public class RewardDao : DaoBase, IRewardDao
+public class RewardRepository : RepositoryBase, IRewardRepository
 {
     private static class Sql
     {
@@ -30,7 +28,7 @@ public class RewardDao : DaoBase, IRewardDao
     
     private readonly StageRewardStore _store;
     
-    public RewardDao(
+    public RewardRepository(
         string connectionString,
         StageRewardStore store,
         ITransactionScope? transactionScope = null) 
@@ -44,28 +42,24 @@ public class RewardDao : DaoBase, IRewardDao
         return _store.GetStageReward(stageNum, stageSubNum);
     }
 
-    public async Task ClaimStageRewardByUserIdAsync(int userId, StageReward reward)
+    public async Task ClaimStageRewardByUserIdAsync(int userId, StageReward reward, CancellationToken ct)
     {
         await ExecuteAsync(async (connection, transaction) =>
         {
             var updatedCurrency = await connection.ExecuteAsync(
-                Sql.UpdateCurrency,
-                new
+                new CommandDefinition(Sql.UpdateCurrency, new
                 {
                     Gold = reward.Gold,
                     PaperPiece = reward.PaperPiece,
                     UserId = userId
-                },
-                transaction);
+                }, transaction: transaction, cancellationToken: ct));
 
             var updatedExp = await connection.ExecuteAsync(
-                Sql.UpdatePlayerExp,
-                new
+                new CommandDefinition(Sql.UpdatePlayerExp, new
                 {
                     Exp = reward.ClearExp,
                     UserId = userId
-                },
-                transaction);
+                }, transaction: transaction, cancellationToken: ct));
 
             if (updatedCurrency == 0)
                 throw new RequestException(ErrorStatusCode.NotFound,
@@ -76,6 +70,6 @@ public class RewardDao : DaoBase, IRewardDao
                 throw new RequestException(ErrorStatusCode.NotFound,
                     "PLAYER_GAME_NOT_FOUND",
                     new { UserId = userId });
-        });
+        }, ct);
     }
 }

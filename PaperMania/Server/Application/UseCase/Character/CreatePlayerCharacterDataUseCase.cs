@@ -1,9 +1,9 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Character;
-using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.StaticData;
+using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Character.Command;
 using Server.Infrastructure.Persistence.Model;
 
@@ -11,22 +11,22 @@ namespace Server.Application.UseCase.Character;
 
 public class CreatePlayerCharacterDataUseCase : ICreatePlayerCharacterDataUseCase
 {
-    private readonly ICharacterDao _dao;
+    private readonly ICharacterRepository _repository;
     private readonly ICharacterStore _store;
     private readonly ITransactionScope _transactionScope;
 
     public CreatePlayerCharacterDataUseCase(
-        ICharacterDao dao,
+        ICharacterRepository repository,
         ICharacterStore store,
         ITransactionScope transactionScope
         )
     {
-        _dao = dao; 
+        _repository = repository; 
         _store = store;
         _transactionScope = transactionScope;
     }
     
-    public async Task ExecuteAsync(CreatePlayerCharacterCommand request)
+    public async Task ExecuteAsync(CreatePlayerCharacterCommand request, CancellationToken ct)
     {
         request.Validate();
 
@@ -36,7 +36,7 @@ public class CreatePlayerCharacterDataUseCase : ICreatePlayerCharacterDataUseCas
                             "CHARACTER_NOT_FOUND"
                             );
         
-        await _transactionScope.ExecuteAsync(async () =>
+        await _transactionScope.ExecuteAsync(async (innerCt) =>
         {
             var data = new PlayerCharacterData
             {
@@ -56,14 +56,14 @@ public class CreatePlayerCharacterDataUseCase : ICreatePlayerCharacterDataUseCas
                     character.SupportSkillId == 0 ? 0 : 1
             };
 
-            await _dao.CreateAsync(data);
+            await _repository.CreateAsync(data, innerCt);
             
-            await _dao.CreatePieceData(new PlayerCharacterPieceData
+            await _repository.CreatePieceData(new PlayerCharacterPieceData
             {
                 UserId = data.UserId,
                 CharacterId = data.CharacterId,
                 PieceAmount = 0
-            });
-        });
+            }, innerCt);
+        }, ct);
     }
 }

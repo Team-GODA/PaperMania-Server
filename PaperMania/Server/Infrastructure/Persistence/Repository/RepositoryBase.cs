@@ -1,14 +1,14 @@
-﻿using Npgsql;
-using Server.Application.Port.Output.Infrastructure;
+using Npgsql;
+using Server.Application.Port.Output.Transaction;
 
-namespace Server.Infrastructure.Persistence.Dao;
+namespace Server.Infrastructure.Persistence.Repository;
 
-public class DaoBase
+public class RepositoryBase
 { 
     private readonly string _connectionString;
     private readonly ITransactionScope? _transactionScope;
 
-    protected DaoBase(
+    protected RepositoryBase(
         string connectionString,
         ITransactionScope? transactionScope)
     {
@@ -17,7 +17,8 @@ public class DaoBase
     }
 
     protected async Task<T> ExecuteAsync<T>(
-        Func<NpgsqlConnection, NpgsqlTransaction?, Task<T>> query)
+        Func<NpgsqlConnection, NpgsqlTransaction?, Task<T>> query,
+        CancellationToken ct)
     {
         if (_transactionScope != null)
         {
@@ -27,12 +28,13 @@ public class DaoBase
         }
 
         await using var conn = new NpgsqlConnection(_connectionString);
-        await conn.OpenAsync();
+        await conn.OpenAsync(ct);
         return await query(conn, null);
     }
     
     protected async Task ExecuteAsync(
-        Func<NpgsqlConnection, NpgsqlTransaction?, Task> query)
+        Func<NpgsqlConnection, NpgsqlTransaction?, Task> query,
+        CancellationToken ct)
     {
         if (_transactionScope != null)
         {
@@ -43,12 +45,13 @@ public class DaoBase
         }
 
         await using var conn = new NpgsqlConnection(_connectionString);
-        await conn.OpenAsync();
+        await conn.OpenAsync(ct);
         await query(conn, null);
     }
     
     protected async Task<T> QueryAsync<T>(
-        Func<NpgsqlConnection, Task<T>> query)
+        Func<NpgsqlConnection, Task<T>> query,
+        CancellationToken ct)
     {
         if (_transactionScope != null)
         {
@@ -57,7 +60,7 @@ public class DaoBase
         }
 
         await using var conn = new NpgsqlConnection(_connectionString);
-        await conn.OpenAsync();
+        await conn.OpenAsync(ct);
         return await query(conn);
     }
 }

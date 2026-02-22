@@ -1,11 +1,11 @@
-﻿using Dapper;
-using Server.Application.Port.Output.Infrastructure;
+using Dapper;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Transaction;
 using Server.Infrastructure.Persistence.Model;
 
-namespace Server.Infrastructure.Persistence.Dao;
+namespace Server.Infrastructure.Persistence.Repository;
 
-public class StageDao : DaoBase, IStageDao
+public class StageRepository : RepositoryBase, IStageRepository
 {
     private static class Sql
     {
@@ -25,30 +25,26 @@ public class StageDao : DaoBase, IStageDao
         ";
     }
     
-    public StageDao(
+    public StageRepository(
         string connectionString,
         ITransactionScope? transactionScope = null) 
         : base(connectionString, transactionScope)
     {
     }
 
-    public async Task<PlayerStageData?> FindByUserIdAsync(int userId, int stageNum, int stageSubNum)
+    public async Task<PlayerStageData?> FindByUserIdAsync(int userId, int stageNum, int stageSubNum, CancellationToken ct)
     {
         return await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerStageData>(
-                Sql.GetStageData,
-                new { UserId = userId, StageNum = stageNum, StageSubNum = stageSubNum }
-            )
-        );
+                new CommandDefinition(Sql.GetStageData, new { UserId = userId, StageNum = stageNum, StageSubNum = stageSubNum }, cancellationToken: ct)
+            ), ct);
     }
 
-    public async Task CreateAsync(PlayerStageData data)    
+    public async Task CreateAsync(PlayerStageData data, CancellationToken ct)
     {
-        await ExecuteAsync( (connection, transaction) =>
+        await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                Sql.CreateStageData,
-                new { UserId = data.UserId, StageNum = data.StageNum, StageSubNum = data.StageSubNum },
-                transaction)
-        );
+                new CommandDefinition(Sql.CreateStageData, new { UserId = data.UserId, StageNum = data.StageNum, StageSubNum = data.StageSubNum }, transaction: transaction, cancellationToken: ct)
+        ), ct);
     }
 }

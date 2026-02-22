@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Output.Service;
@@ -38,7 +38,8 @@ public class SessionValidationFilter : IAsyncActionFilter
             );
         }
 
-        var isValid = await _sessionService.ValidateSessionAsync(sessionId!);
+        var ct = context.HttpContext.RequestAborted;
+        var isValid = await _sessionService.ValidateSessionAsync(sessionId!, ct);
         if (!isValid)
         {
             _logger.LogWarning("유효하지 않은 세션");
@@ -48,7 +49,7 @@ public class SessionValidationFilter : IAsyncActionFilter
             );
         }
 
-        var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!);
+        var userId = await _sessionService.FindUserIdBySessionIdAsync(sessionId!, ct);
 
         context.HttpContext.Items["SessionId"] = sessionId.ToString();
         context.HttpContext.Items["UserId"] = userId;

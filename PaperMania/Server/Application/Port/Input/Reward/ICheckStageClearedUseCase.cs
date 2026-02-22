@@ -1,8 +1,8 @@
-﻿using Server.Application.UseCase.Reward.Command;
+using Server.Application.UseCase.Reward.Command;
 
 namespace Server.Application.Port.Input.Reward;
 
 public interface ICheckStageClearedUseCase
 {
-    Task<bool> ExecuteAsync(CheckStageClearedCommand request);
+    Task<bool> ExecuteAsync(CheckStageClearedCommand request, CancellationToken ct);
 }

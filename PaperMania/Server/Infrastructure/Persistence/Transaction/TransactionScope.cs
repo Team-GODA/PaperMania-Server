@@ -1,8 +1,8 @@
-﻿using System.Data;
+using System.Data;
 using Npgsql;
-using Server.Application.Port.Output.Infrastructure;
+using Server.Application.Port.Output.Transaction;
 
-namespace Server.Infrastructure.Persistence.Dao;
+namespace Server.Infrastructure.Persistence.Transaction;
 
 public class TransactionScope : ITransactionScope
 {
@@ -39,7 +39,7 @@ public class TransactionScope : ITransactionScope
         }
     }
     
-    private async Task EnsureConnectionAsync()
+    private async Task EnsureConnectionAsync(CancellationToken ct)
     {
         if (_connection?.State == ConnectionState.Open)
             return;
@@ -53,7 +53,7 @@ public class TransactionScope : ITransactionScope
                 await _connection.DisposeAsync();
             
             _connection = new NpgsqlConnection(_connectionString);
-            await _connection.OpenAsync();
+            await _connection.OpenAsync(ct);
             
             _logger?.LogDebug("데이터베이스 연결 열림");
         }
@@ -89,7 +89,8 @@ public class TransactionScope : ITransactionScope
     }
     
     public async Task BeginTransactionAsync(
-        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+        IsolationLevel isolationLevel,
+        CancellationToken ct)
     {
         ThrowIfDisposed();
         
@@ -98,8 +99,8 @@ public class TransactionScope : ITransactionScope
 
         try
         {
-            await EnsureConnectionAsync();
-            _transaction = await _connection!.BeginTransactionAsync(isolationLevel);
+            await EnsureConnectionAsync(ct);
+            _transaction = await _connection!.BeginTransactionAsync(isolationLevel, ct);
             
             _logger?.LogDebug("트랜잭션 시작: IsolationLevel = {IsolationLevel}", isolationLevel);
         }
@@ -110,14 +111,14 @@ public class TransactionScope : ITransactionScope
         }
     }
 
-    public async Task CommitAsync()
+    public async Task CommitAsync(CancellationToken ct)
     {
         ThrowIfDisposed();
         ThrowIfNoTransaction();
         
         try
         {
-            await _transaction!.CommitAsync();
+            await _transaction!.CommitAsync(ct);
             _logger?.LogDebug("트랜잭션 커밋 성공");
         }
         catch (Exception ex)
@@ -131,14 +132,14 @@ public class TransactionScope : ITransactionScope
         }
     }
 
-    public async Task RollbackAsync()
+    public async Task RollbackAsync(CancellationToken ct)
     {
         ThrowIfDisposed();
         ThrowIfNoTransaction();
 
         try
         {
-            await _transaction!.RollbackAsync();
+            await _transaction!.RollbackAsync(ct);
             _logger?.LogDebug("트랜잭션 롤백 완료");
         }
         catch (Exception ex)
@@ -236,17 +237,17 @@ public class TransactionScope : ITransactionScope
         _disposed = true;
     }
     
-    public async Task ExecuteAsync(Func<Task> action)
+    public async Task ExecuteAsync(Func<CancellationToken, Task> action, CancellationToken ct)
     {
         if (action == null)
             throw new ArgumentNullException(nameof(action));
 
-        await BeginTransactionAsync();
+        await BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
         
         try
         {
-            await action();
-            await CommitAsync();
+            await action(ct);
+            await CommitAsync(ct);
         }
         catch (Exception ex)
         {
@@ -254,7 +255,7 @@ public class TransactionScope : ITransactionScope
             
             try
             {
-                await RollbackAsync();
+                await RollbackAsync(ct);
             }
             catch (Exception rollbackEx)
             {
@@ -265,17 +266,17 @@ public class TransactionScope : ITransactionScope
         }
     }
     
-    public async Task<TResult> ExecuteAsync<TResult>(Func<Task<TResult>> action)
+    public async Task<TResult> ExecuteAsync<TResult>(Func<CancellationToken, Task<TResult>> action, CancellationToken ct)
     {
         if (action == null)
             throw new ArgumentNullException(nameof(action));
 
-        await BeginTransactionAsync();
+        await BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
         
         try
         {
-            var result = await action();
-            await CommitAsync();
+            var result = await action(ct);
+            await CommitAsync(ct);
             return result;
         }
         catch (Exception ex)
@@ -284,7 +285,7 @@ public class TransactionScope : ITransactionScope
             
             try
             {
-                await RollbackAsync();
+                await RollbackAsync(ct);
             }
             catch (Exception rollbackEx)
             {

@@ -4,10 +4,11 @@ using Server.Application.Port.Input.Character;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Input.Player;
 using Server.Application.Port.Input.Reward;
-using Server.Application.Port.Output.Infrastructure;
+using Server.Application.Port.Output.Cache;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
 using Server.Application.Port.Output.StaticData;
+using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Character;
 using Server.Application.UseCase.Currency;
@@ -15,7 +16,8 @@ using Server.Application.UseCase.Player;
 using Server.Application.UseCase.Reward;
 using Server.Domain.Service;
 using Server.Infrastructure.Cache;
-using Server.Infrastructure.Persistence.Dao;
+using Server.Infrastructure.Persistence.Repository;
+using Server.Infrastructure.Persistence.Transaction;
 using Server.Infrastructure.Service;
 using Server.Infrastructure.StaticData.Store;
 using StackExchange.Redis;
@@ -33,41 +35,41 @@ public static class ServiceExtensions
             return new TransactionScope(connectionString);
         });
         
-        services.AddScoped<IAccountDao>(provider =>
+        services.AddScoped<IAccountRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new AccountDao(connectionString);
+            return new AccountRepository(connectionString);
         });
         
-        services.AddScoped<IDataDao>(provider =>
+        services.AddScoped<IDataRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new DataDao(connectionString);
+            return new DataRepository(connectionString);
         });
         
-        services.AddScoped<ICurrencyDao>(provider =>
+        services.AddScoped<ICurrencyRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new CurrencyDao(connectionString);
+            return new CurrencyRepository(connectionString);
         });
         
-        services.AddScoped<ICharacterDao>(provider =>
+        services.AddScoped<ICharacterRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new CharacterDao(connectionString);
+            return new CharacterRepository(connectionString);
         });
         
-        services.AddScoped<IStageDao>(provider =>
+        services.AddScoped<IStageRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new StageDao(connectionString);
+            return new StageRepository(connectionString);
         });
         
-        services.AddScoped<IRewardDao>(provider =>
+        services.AddScoped<IRewardRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
             var cache = provider.GetRequiredService<StageRewardStore>();
-            return new RewardDao(connectionString, cache);
+            return new RewardRepository(connectionString, cache);
         });
         
         return services;
@@ -180,7 +182,7 @@ public static class ServiceExtensions
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ActionPointService>();
         
-        services.AddScoped<CacheWrapper>();
+        services.AddScoped<ICacheAsideService ,CacheAsideService>();
         
         return services;
     }
