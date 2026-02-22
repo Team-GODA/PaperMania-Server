@@ -10,5 +10,6 @@ public class ClaimStageRewardResponse
     public int PaperPiece { get; set; }
     public int Level { get; set; }
     public int Exp { get; set; }
+    public int MaxActionPoint { get; set; }
     public bool IsCleared { get; set; }
 }

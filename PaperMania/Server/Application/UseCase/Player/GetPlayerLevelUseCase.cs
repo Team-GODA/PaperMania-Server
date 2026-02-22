@@ -1,7 +1,8 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 using Server.Domain.Entity;
@@ -11,33 +12,37 @@ namespace Server.Application.UseCase.Player;
 
 public class GetPlayerLevelUseCase : IGetPlayerLevelUseCase
 {
-    private readonly IDataDao _dao;
+    private readonly IDataRepository _repository;
+    private readonly ILevelDefinitionStore _store;
 
     public GetPlayerLevelUseCase(
-        IDataDao dao
+        IDataRepository repository,
+        ILevelDefinitionStore store
         )
     {
-        _dao = dao;
+        _repository = repository;
+        _store = store;
     }
 
 
-    public async Task<GetPlayerLevelResult> ExecuteAsync(GetPlayerLevelCommand request)
+    public async Task<GetPlayerLevelResult> ExecuteAsync(GetPlayerLevelCommand request, CancellationToken ct)
     {
-        var data = await _dao.FindByUserIdAsync(request.UserId)
+        var data = await _repository.FindByUserIdAsync(request.UserId, ct)
             ?? throw new RequestException(
                 ErrorStatusCode.NotFound,
                 "PLAYER_NOT_FOUND",
                 new { UserId = request.UserId });
-            
-        var gameState = new PlayerGameState
-        {
-            Level = data.Level,
-            Exp = data.Exp
-        };
 
+        var levelDef = _store.GetLevelDefinition(data.Level)
+                        ?? throw new RequestException(
+                            ErrorStatusCode.NotFound,
+                            "LEVEL_NOT_FOUND",
+                            new { Level = data.Level });
+            
         return new GetPlayerLevelResult(
-            Level: gameState.Level,
-            Exp: gameState.Exp
+            data.Level,
+            data.Exp,
+            levelDef.MaxExp
         );
     }
 }

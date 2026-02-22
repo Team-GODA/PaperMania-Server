@@ -1,6 +1,7 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
+using Server.Application.Port.Output.Cache;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
@@ -10,37 +11,32 @@ namespace Server.Application.UseCase.Player;
 
     public class GetPlayerNameUseCase : IGetPlayerNameUseCase
     {
-        private readonly IDataDao _dao;
-        private readonly CacheWrapper _cache;
+        private readonly IDataRepository _repository;
+        private readonly ICacheAsideService _cache;
 
         public GetPlayerNameUseCase(
-            IDataDao dao,
-            CacheWrapper cache
+            IDataRepository repository,
+            ICacheAsideService cache
             )
         {
-            _dao = dao;
+            _repository = repository;
             _cache = cache;
         }
         
-        public async Task<GetPlayerNameResult> ExecuteAsync(GetPlayerNameCommand request)
+        public async Task<GetPlayerNameResult> ExecuteAsync(GetPlayerNameCommand request, CancellationToken ct)
         {
-            var playerName = await _cache.FetchAsync(
+            var player = await _cache.GetOrSetAsync(
                 CacheKey.Profile.ByUserId(request.UserId),
-                async () =>
-                {
-                    var data = await _dao.FindByUserIdAsync(request.UserId);
-                    return data?.Name;
-                },
-                TimeSpan.FromDays(30)
+                async (token) => await _repository.FindByUserIdAsync(request.UserId, token),
+                TimeSpan.FromDays(30),
+                ct
             );
                 
-            if (playerName == null)
+            if (player == null)
                 throw new RequestException(
                     ErrorStatusCode.NotFound,
                     "PLAYER_NOT_FOUND");
 
-            return new GetPlayerNameResult(
-                PlayerName: playerName
-            );
+            return new GetPlayerNameResult(player.Name);
         }
     }

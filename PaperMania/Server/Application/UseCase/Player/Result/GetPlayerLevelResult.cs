@@ -2,5 +2,6 @@
 
 public record GetPlayerLevelResult(
     int Level,
-    int Exp
+    int Exp,
+    int MaxExp
     );

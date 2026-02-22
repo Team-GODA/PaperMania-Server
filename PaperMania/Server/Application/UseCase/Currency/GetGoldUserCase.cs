@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Output.Persistence;
@@ -8,18 +8,18 @@ namespace Server.Application.UseCase.Currency;
 
 public class GetGoldUseCase : IGetGoldUseCase
 {
-    private readonly ICurrencyDao _dao;
+    private readonly ICurrencyRepository _repository;
     
     public GetGoldUseCase(
-        ICurrencyDao dao
+        ICurrencyRepository repository
         )
     {
-        _dao = dao;
+        _repository = repository;
     }
 
-    public async Task<GetGoldResult> ExecuteAsync(int userId)
+    public async Task<GetGoldResult> ExecuteAsync(int userId, CancellationToken ct)
     {
-        var data = await _dao.FindByUserIdAsync(userId);
+        var data = await _repository.FindByUserIdAsync(userId, ct);
         if (data == null)
             throw new RequestException(
                 ErrorStatusCode.NotFound,

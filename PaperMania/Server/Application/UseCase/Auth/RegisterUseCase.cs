@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Auth;
 using Server.Application.Port.Output.Persistence;
@@ -11,23 +11,23 @@ namespace Server.Application.UseCase.Auth;
 
 public class RegisterUseCase : IRegisterUseCase
 {
-    private readonly IAccountDao _dao;
+    private readonly IAccountRepository _repository;
     private readonly IPasswordHasher _passwordHasher;
 
     public RegisterUseCase(
-        IAccountDao dao,
+        IAccountRepository repository,
         IPasswordHasher passwordHasher
     )
     {
-        _dao = dao;
+        _repository = repository;
         _passwordHasher = passwordHasher;
     }
     
-    public async Task ExecuteAsync(RegisterCommand request)
+    public async Task ExecuteAsync(RegisterCommand request, CancellationToken ct)
     {
         request.Validate();
 
-        var exists = await _dao.ExistsByPlayerIdAsync(request.PlayerId);
+        var exists = await _repository.ExistsByPlayerIdAsync(request.PlayerId, ct);
         if (exists)
             throw new RequestException(
                 ErrorStatusCode.Conflict,
@@ -45,6 +45,6 @@ public class RegisterUseCase : IRegisterUseCase
             Role = "user"
         };
         
-        await _dao.CreateAsync(newAccount);
+        await _repository.CreateAsync(newAccount, ct);
     }
 }

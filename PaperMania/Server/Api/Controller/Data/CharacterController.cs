@@ -11,37 +11,58 @@ namespace Server.Api.Controller.Data;
 [ApiLog("Character")]
 [Route("api/v3/character")]
 [ApiController]
-[SessionAuthorize]
+
 public class CharacterController : BaseController
 {
     private readonly IGetPlayerCharacterUseCase _getPlayerCharacterUseCase;
     private readonly IGetAllPlayerCharacterDataUseCase _getAllPlayerCharacterDataUseCase;
     private readonly ICreatePlayerCharacterDataUseCase _createPlayerCharacterDataUseCase;
+    private readonly IGetAllCharacterDataUseCase _getAllCharacterDataUseCase;
 
     public CharacterController(
         IGetPlayerCharacterUseCase getPlayerCharacterUseCase,
         IGetAllPlayerCharacterDataUseCase getAllPlayerCharacterDataUseCase,
-        ICreatePlayerCharacterDataUseCase createPlayerCharacterDataUseCase
+        ICreatePlayerCharacterDataUseCase createPlayerCharacterDataUseCase,
+        IGetAllCharacterDataUseCase getAllCharacterDataUseCase
     )
     {
         _getPlayerCharacterUseCase = getPlayerCharacterUseCase;
         _getAllPlayerCharacterDataUseCase = getAllPlayerCharacterDataUseCase;
         _createPlayerCharacterDataUseCase = createPlayerCharacterDataUseCase;
+        _getAllCharacterDataUseCase = getAllCharacterDataUseCase;
     }
+
+    /// <summary>
+    /// 전체 캐릭터 정보를 조회합니다.
+    /// </summary>
+    [HttpGet("all")]
+    public ActionResult<BaseResponse<GetAllCharacterResponse>> GetAllCharacters()
+    {
+        var result = _getAllCharacterDataUseCase.Execute();
+
+        var response = new GetAllCharacterResponse
+        {
+            Characters = result
+        };
         
+        return Ok(ApiResponse.Ok("캐릭터 전체 정보 조회", response));
+    }
+    
     /// <summary>
     /// 유저 보유 캐릭터 정보를 조회합니다.
     /// </summary>
-    [HttpGet("{characterId:int}")]
+    [SessionAuthorize]
+    [HttpGet("player/{characterId:int}")]
     public async Task<ActionResult<BaseResponse<GetCharacterDataResponse>>> GetCharacterData(
-        [FromRoute] int characterId)
+        [FromRoute] int characterId,
+        CancellationToken ct)
     {
         var userId = GetUserId();
 
         var result = await _getPlayerCharacterUseCase.ExecuteAsync(new GetPlayerCharacterCommand(
             userId,
-            characterId)
-        );
+            characterId),
+            ct);
             
         var response = new GetCharacterDataResponse
         {
@@ -54,12 +75,13 @@ public class CharacterController : BaseController
     /// <summary>
     /// 유저의 보유 캐릭터를 전부 조회합니다.
     /// </summary>
-    [HttpGet("all")]
-    public async Task<ActionResult<BaseResponse<GetAllPlayerCharactersResponse>>> GetAllPlayerCharacters()
+    [SessionAuthorize]
+    [HttpGet("player/all")]
+    public async Task<ActionResult<BaseResponse<GetAllPlayerCharactersResponse>>> GetAllPlayerCharacters(CancellationToken ct)
     {
         var userId = GetUserId();
         
-        var result = await _getAllPlayerCharacterDataUseCase.ExecuteAsync(userId);
+        var result = await _getAllPlayerCharacterDataUseCase.ExecuteAsync(userId, ct);
 
         var response = new GetAllPlayerCharactersResponse
         {
@@ -74,14 +96,15 @@ public class CharacterController : BaseController
     /// </summary>
     [HttpPost]
     public async Task<ActionResult<BaseResponse<EmptyResponse>>> AddPlayerCharacterData(
-        [FromBody] AddPlayerCharacterRequest request)
+        [FromBody] AddPlayerCharacterRequest request,
+        CancellationToken ct)
     {
         var userId = GetUserId();
 
         await _createPlayerCharacterDataUseCase.ExecuteAsync(new CreatePlayerCharacterCommand(
             userId,
-            request.CharacterId)
-        );
+            request.CharacterId),
+            ct);
             
         return Ok(ApiResponse.Ok<EmptyResponse>("플레이어 보유 캐릭터 추가 성공"));
     }

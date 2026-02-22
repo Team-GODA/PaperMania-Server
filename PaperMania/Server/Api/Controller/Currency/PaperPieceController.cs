@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Server.Api.Attribute;
-using Server.Api.Dto.Request;
 using Server.Api.Dto.Request.Currency;
 using Server.Api.Dto.Response;
 using Server.Api.Dto.Response.Currency;
@@ -30,13 +29,13 @@ namespace Server.Api.Controller.Currency
         }
 
         [HttpGet]
-        public async Task<ActionResult<BaseResponse<GetPaperPieceResponse>>> GetPaperPiece()
+        public async Task<ActionResult<BaseResponse<GetPaperPieceResponse>>> GetPaperPiece(CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _getPaperPieceUseCase.ExecuteAsync(new GetPaperPieceCommand(
-                userId)
-            );
+                userId),
+                ct);
 
             var response = new GetPaperPieceResponse
             {
@@ -48,13 +47,14 @@ namespace Server.Api.Controller.Currency
 
         [HttpPatch("gain")]
         public async Task<ActionResult<BaseResponse<GainPaperPieceResponse>>> GainPaperPiece(
-            [FromBody] GainPaperPieceRequest request)
+            [FromBody] GainPaperPieceRequest request,
+            CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _gainPaperPieceUseCase.ExecuteWithTransactionAsync(new GainPaperPieceCommand(
-                userId, request.PaperPiece)
-            );
+                userId, request.PaperPiece),
+                ct);
             
             var response = new GainPaperPieceResponse
             {
@@ -66,13 +66,14 @@ namespace Server.Api.Controller.Currency
 
         [HttpPatch("spend")]
         public async Task<ActionResult<BaseResponse<SpendPaperPieceResponse>>> SpendPaperPiece(
-            [FromBody] SpendPaperPieceRequest request)
+            [FromBody] SpendPaperPieceRequest request,
+            CancellationToken ct)
         {
             var userId = GetUserId();
             
             var result = await _spendPaperPieceUseCase.ExecuteAsync(new SpendPaperPieceCommand(
-                userId, request.PaperPiece)
-            );
+                userId, request.PaperPiece),
+                ct);
 
             var response = new SpendPaperPieceResponse
             {

@@ -1,8 +1,10 @@
 using Azure.Identity;
 using Server.Api.Extensions;
-using Server.Infrastructure.Service;
+using Server.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.UseUrls("http://0.0.0.0:80");
 
 var keyVaultName = builder.Configuration["Azure:KeyVaultName"] 
                    ?? "papermaniadbconnection";
@@ -21,6 +23,17 @@ builder.Services
     .AddRepositories()
     .AddApiFilters();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ClientPolicy", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -35,8 +48,15 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-app.UseSwaggerConfiguration()
-    .UseCustomMiddleware();
+app.UseSwaggerConfiguration();
+
+app.UseRouting(); 
+
+app.UseCors("ClientPolicy");
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseCustomMiddleware();
 
 if (!app.Environment.IsProduction())
     app.UseHttpsRedirection();

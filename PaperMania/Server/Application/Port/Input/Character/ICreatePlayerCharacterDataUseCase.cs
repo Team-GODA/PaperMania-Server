@@ -1,9 +1,9 @@
-﻿using Server.Application.UseCase.Character.Command;
+using Server.Application.UseCase.Character.Command;
 using Server.Application.UseCase.Character.Result;
 
 namespace Server.Application.Port.Input.Character;
 
 public interface ICreatePlayerCharacterDataUseCase
 {
-    Task ExecuteAsync(CreatePlayerCharacterCommand request);
+    Task ExecuteAsync(CreatePlayerCharacterCommand request, CancellationToken ct);
 }

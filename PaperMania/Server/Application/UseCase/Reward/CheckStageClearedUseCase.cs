@@ -1,4 +1,4 @@
-﻿using Server.Application.Port.Input.Reward;
+using Server.Application.Port.Input.Reward;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Reward.Command;
 
@@ -6,24 +6,24 @@ namespace Server.Application.UseCase.Reward;
 
 public class CheckStageClearedUseCase : ICheckStageClearedUseCase
 {
-    private readonly IStageDao _dao;
+    private readonly IStageRepository _repository;
 
-    public CheckStageClearedUseCase(IStageDao dao)
+    public CheckStageClearedUseCase(IStageRepository repository)
     {
-        _dao = dao;
+        _repository = repository;
     }
     
-    public async Task<bool> ExecuteAsync(CheckStageClearedCommand request)
+    public async Task<bool> ExecuteAsync(CheckStageClearedCommand request, CancellationToken ct)
     {
         request.Validate();
         
-        var stageData  = _dao.FindByUserIdAsync(
+        var stageData  = await _repository.FindByUserIdAsync(
             request.UserId,
             request.StageNum,
-            request.StageSubNum
+            request.StageSubNum,
+            ct
             );
 
-       return await 
-           stageData != null;
+       return stageData != null;
     }
 }

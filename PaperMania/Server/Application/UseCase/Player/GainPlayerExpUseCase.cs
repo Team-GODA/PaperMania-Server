@@ -1,9 +1,9 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Player;
-using Server.Application.Port.Output.Infrastructure;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.StaticData;
+using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 
@@ -11,25 +11,28 @@ namespace Server.Application.UseCase.Player;
 
 public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 {
-    private readonly IDataDao _dataDao;
+    private readonly IDataRepository _dataRepository;
+    private readonly ICurrencyRepository _currencyRepository;
     private readonly ILevelDefinitionStore _store;
     private readonly ITransactionScope _transactionScope;
 
     public GainPlayerExpUseCase(
-        IDataDao dataDao,
+        IDataRepository dataRepository,
+        ICurrencyRepository currencyRepository,
         ILevelDefinitionStore store,
         ITransactionScope transactionScope)
     {
-        _dataDao = dataDao;
+        _dataRepository = dataRepository;
+        _currencyRepository = currencyRepository;
         _store = store;
         _transactionScope = transactionScope;
     }
     
-    public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpCommand request)
+    public async Task<GainPlayerExpUseCaseResult> ExecuteAsync(GainPlayerExpCommand request, CancellationToken ct)
     {
         request.Validate();
 
-        var data = await _dataDao.FindByUserIdAsync(request.UserId)
+        var data = await _dataRepository.FindByUserIdAsync(request.UserId, ct)
                    ?? throw new RequestException(
                        ErrorStatusCode.NotFound,
                        "PLAYER_DATA_NOT_FOUND"
@@ -37,6 +40,13 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
 
         data.Exp += request.Exp;
 
+        var currencyData = await _currencyRepository.FindByUserIdAsync(request.UserId, ct)
+                            ?? throw new RequestException(
+                                ErrorStatusCode.NotFound,
+                                "PLAYER_CURRENCY_DATA_NOT_FOUND"
+                                );
+
+        var maxExp = 0;
         while (true)
         {
             var levelData = _store.GetLevelDefinition(data.Level);
@@ -45,20 +55,28 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
             
             data.Exp -= levelData.MaxExp;
             data.Level++;
+            
+            currencyData.SetMaxActionPoint(levelData.MaxActionPoint);
+            currencyData.SetActionPoint(levelData.MaxActionPoint);
+            
+            maxExp = levelData.MaxExp;
         }
 
-        await _dataDao.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp);
+        await _dataRepository.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp, ct);
+        await _currencyRepository.UpdateAsync(currencyData, ct);
         
         return new GainPlayerExpUseCaseResult(
-            Level: data.Level,
-            Exp: data.Exp
+            data.Level,
+            data.Exp,
+            maxExp,
+            MaxActionPoint: currencyData.MaxActionPoint
         );
     }
 
-    public async Task<GainPlayerExpUseCaseResult> ExecuteWithTransactionAsync(GainPlayerExpCommand request)
+    public async Task<GainPlayerExpUseCaseResult> ExecuteWithTransactionAsync(GainPlayerExpCommand request, CancellationToken ct)
     {
-        return await _transactionScope.ExecuteAsync(async () => 
-            await ExecuteAsync(request)
-            );
+        return await _transactionScope.ExecuteAsync(async (innerCt) => 
+            await ExecuteAsync(request, innerCt)
+            , ct);
     }
 }

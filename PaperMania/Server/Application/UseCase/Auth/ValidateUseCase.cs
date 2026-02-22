@@ -1,4 +1,4 @@
-﻿using Server.Api.Dto.Response;
+using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Auth;
 using Server.Application.Port.Output.Service;
@@ -16,10 +16,10 @@ public class ValidateUseCase : IValidateUseCase
         _sessionService = sessionService;
     }
     
-    public async Task ExecuteAsync(string sessionId)
+    public async Task ExecuteAsync(string sessionId, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(sessionId) ||
-            !await _sessionService.ValidateSessionAsync(sessionId))
+            !await _sessionService.ValidateSessionAsync(sessionId, ct))
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
                 "INVALID_SESSION_ID");
