@@ -3,7 +3,6 @@ using Server.Application.Exceptions;
 using Server.Application.Port.Input.Auth;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Auth.Command;
-using Server.Domain.Entity;
 using Server.Domain.Service;
 using Server.Infrastructure.Persistence.Model;
 
