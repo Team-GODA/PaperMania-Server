@@ -8,7 +8,7 @@ public class ActionPointService
     private const int RegenerationIntervalMinutes = 4;
     private const int RegenerationAmount = 1;
 
-    public bool TryRegenerate(PlayerCurrencyData data, DateTime nowUtc)
+    public bool TryRegenerate(Currency data, DateTime nowUtc)
     {
         if (data.ActionPoint >= data.MaxActionPoint)
             return false;

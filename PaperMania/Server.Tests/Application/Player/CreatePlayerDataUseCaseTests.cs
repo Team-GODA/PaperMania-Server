@@ -7,6 +7,7 @@ using Server.Application.Port.Output.Service;
 using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Player;
 using Server.Application.UseCase.Player.Command;
+using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Tests.Application.Player;
@@ -19,16 +20,13 @@ public class CreatePlayerDataUseCaseTests
     private readonly Mock<ISessionService> _sessionServiceMock = new();
     private readonly Mock<ITransactionScope> _transactionScopeMock = new();
     
-    private CreatePlayerDataUseCase CreateUseCase()
-    {
-        return new CreatePlayerDataUseCase(
-            _dataRepositoryMock.Object,
-            _accountRepositoryMock.Object,
-            _currencyRepositoryMock.Object,
-            _sessionServiceMock.Object,
-            _transactionScopeMock.Object
-        );
-    }
+    private CreatePlayerDataUseCase CreateUseCase() => new(
+        _dataRepositoryMock.Object,
+        _accountRepositoryMock.Object,
+        _currencyRepositoryMock.Object,
+        _sessionServiceMock.Object,
+        _transactionScopeMock.Object
+    );
     
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Account_Not_Found()
@@ -39,30 +37,27 @@ public class CreatePlayerDataUseCaseTests
 
         _accountRepositoryMock
             .Setup(x => x.FindByUserIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((PlayerAccountData?)null);
+            .ReturnsAsync((Account?)null);
 
         var useCase = CreateUseCase();
         var command = new AddPlayerDataCommand("SESSION", "Player1");
 
-        Func<Task> act = async () =>
-            await useCase.ExecuteAsync(command, CancellationToken.None);
+        Func<Task> act = () => useCase.ExecuteAsync(command, CancellationToken.None);
 
-        var exception = await act.Should()
-            .ThrowAsync<RequestException>();
-
-        exception.Which.StatusCode
-            .Should().Be(ErrorStatusCode.NotFound);
+        var exception = await act.Should().ThrowAsync<RequestException>();
+        exception.Which.StatusCode.Should().Be(ErrorStatusCode.NotFound);
     }
     
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_PlayerData_Already_Exists()
     {
-        var account = new PlayerAccountData
-        {
-            Id = 1,
-            IsNewAccount = false
-        };
-
+        var account = new Account( 
+            "player1",
+            "email",
+            "HASHED", 
+            false  
+        );
+        
         _sessionServiceMock
             .Setup(x => x.FindUserIdBySessionIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
@@ -74,24 +69,21 @@ public class CreatePlayerDataUseCaseTests
         var useCase = CreateUseCase();
         var command = new AddPlayerDataCommand("SESSION", "Player1");
 
-        Func<Task> act = async () =>
-            await useCase.ExecuteAsync(command, CancellationToken.None);
+        Func<Task> act = () => useCase.ExecuteAsync(command, CancellationToken.None);
 
-        var exception = await act.Should()
-            .ThrowAsync<RequestException>();
-
-        exception.Which.StatusCode
-            .Should().Be(ErrorStatusCode.Conflict);
+        var exception = await act.Should().ThrowAsync<RequestException>();
+        exception.Which.StatusCode.Should().Be(ErrorStatusCode.Conflict);
     }
     
     [Fact]
     public async Task ExecuteAsync_Should_Create_PlayerData_When_Success()
     {
-        var account = new PlayerAccountData
-        {
-            Id = 1,
-            IsNewAccount = true
-        };
+        var account = new Account( 
+            "player1",
+            "email",
+            "HASHED", 
+            true
+            );
 
         _sessionServiceMock
             .Setup(x => x.FindUserIdBySessionIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -116,7 +108,7 @@ public class CreatePlayerDataUseCaseTests
         result.PlayerName.Should().Be("Player1");
 
         _dataRepositoryMock.Verify(x =>
-                x.CreateAsync(It.IsAny<PlayerGameData>(), It.IsAny<CancellationToken>()),
+                x.CreateAsync(It.IsAny<GameData>(), It.IsAny<CancellationToken>()),
             Times.Once);
 
         _currencyRepositoryMock.Verify(x =>
@@ -125,7 +117,7 @@ public class CreatePlayerDataUseCaseTests
 
         _accountRepositoryMock.Verify(x =>
                 x.UpdateAsync(
-                    It.Is<PlayerAccountData>(a => a.IsNewAccount == false),
+                    It.Is<Account>(a => a.IsNewAccount == false),
                     It.IsAny<CancellationToken>()),
             Times.Once);
     }

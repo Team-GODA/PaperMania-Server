@@ -6,7 +6,7 @@ using Server.Application.Port.Output.Service;
 using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
-using Server.Infrastructure.Persistence.Model;
+using Server.Domain.Entity;
 
 namespace Server.Application.UseCase.Player;
 
@@ -49,13 +49,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
     
         await _transactionScope.ExecuteAsync(async (innerCt) =>
         {
-            var player = new PlayerGameData
-            {
-                UserId = userId,
-                Name = request.PlayerName,
-                Level = 1,
-                Exp = 0
-            };
+            var player = new GameData(userId, request.PlayerName, 0, 1);
             
             await _dataRepository.CreateAsync(player, innerCt);
             await _currencyRepository.CreateByUserIdAsync(userId, innerCt);

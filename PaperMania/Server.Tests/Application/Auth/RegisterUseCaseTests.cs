@@ -5,8 +5,8 @@ using Server.Application.Exceptions;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Auth.Command;
+using Server.Domain.Entity;
 using Server.Domain.Service;
-using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Tests.Application.Auth;
 
@@ -45,7 +45,7 @@ public class RegisterUseCaseTests
             .Should().Be(ErrorStatusCode.Conflict);
 
         _repositoryMock.Verify(x =>
-            x.CreateAsync(It.IsAny<PlayerAccountData>(), It.IsAny<CancellationToken>()),
+            x.CreateAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -69,7 +69,7 @@ public class RegisterUseCaseTests
 
         _repositoryMock.Verify(x =>
             x.CreateAsync(
-                It.Is<PlayerAccountData>(a =>
+                It.Is<Account>(a =>
                     a.PlayerId == "player1" &&
                     a.Email == "test@test.com" &&
                     a.Password == "HASHED_PASSWORD" &&

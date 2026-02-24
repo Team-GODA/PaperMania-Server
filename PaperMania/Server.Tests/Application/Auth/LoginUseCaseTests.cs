@@ -7,8 +7,8 @@ using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Auth.Command;
+using Server.Domain.Entity;
 using Server.Domain.Service;
-using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Tests.Application.Auth;
 
@@ -35,10 +35,10 @@ public class LoginUseCaseTests
         _cacheAsideMock
             .Setup(x => x.GetOrSetAsync(
                 It.IsAny<string>(),
-                It.IsAny<Func<CancellationToken, Task<PlayerAccountData?>>>(),
+                It.IsAny<Func<CancellationToken, Task<Account?>>>(),
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((PlayerAccountData?)null);
+            .ReturnsAsync((Account?)null);
         
         var useCase = CreateUseCase();
         var command = new LoginCommand("player1", "password");
@@ -56,18 +56,12 @@ public class LoginUseCaseTests
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Password_Invalid()
     {
-        var account = new PlayerAccountData
-        {
-            Id = 1,
-            PlayerId = "player1",
-            Password = "HASHED",
-            IsNewAccount = false
-        };
+        var account = new Account("player1", "email", "HASHED", false) { Id = 1 };
         
         _cacheAsideMock
             .Setup(x => x.GetOrSetAsync(
                 It.IsAny<string>(),
-                It.IsAny<Func<CancellationToken, Task<PlayerAccountData?>>>(),
+                It.IsAny<Func<CancellationToken, Task<Account?>>>(),
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
@@ -92,18 +86,12 @@ public class LoginUseCaseTests
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Session_Create_Fails()
     {
-        var account = new PlayerAccountData
-        {
-            Id = 1,
-            PlayerId = "player1",
-            Password = "HASHED",
-            IsNewAccount = false
-        };
+        var account = new Account("player1", "email", "HASHED", true) { Id = 1 };
 
         _cacheAsideMock
             .Setup(x => x.GetOrSetAsync(
                 It.IsAny<string>(),
-                It.IsAny<Func<CancellationToken, Task<PlayerAccountData?>>>(),
+                It.IsAny<Func<CancellationToken, Task<Account?>>>(),
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
@@ -115,7 +103,7 @@ public class LoginUseCaseTests
         _sessionServiceMock
             .Setup(x => x.CreateSessionAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(string.Empty);
-
+        
         var useCase = CreateUseCase();
         var command = new LoginCommand("player1", "password");
 
@@ -132,18 +120,12 @@ public class LoginUseCaseTests
     [Fact]
     public async Task ExecuteAsync_Should_Return_LoginResult_When_Success()
     {
-        var account = new PlayerAccountData
-        {
-            Id = 1,
-            PlayerId = "player1",
-            Password = "HASHED",
-            IsNewAccount = true
-        };
+        var account = new Account("player1", "email", "HASHED", true) { Id = 1 };
 
         _cacheAsideMock
             .Setup(x => x.GetOrSetAsync(
                 It.IsAny<string>(),
-                It.IsAny<Func<CancellationToken, Task<PlayerAccountData?>>>(),
+                It.IsAny<Func<CancellationToken, Task<Account?>>>(),
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);
@@ -162,6 +144,5 @@ public class LoginUseCaseTests
         var result = await useCase.ExecuteAsync(command, CancellationToken.None);
 
         result.SessionId.Should().Be("SESSION123");
-        result.IsNewAccount.Should().BeTrue();
     }
 }

@@ -1,6 +1,7 @@
 using Dapper;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Transaction;
+using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 using Server.Infrastructure.StaticData.Model;
 
@@ -29,9 +30,11 @@ public class DataRepository : RepositoryBase, IDataRepository
             LIMIT 1
             ";
 
-        public const string UpdatePlayerLevel = @"
+        public const string UpdatePlayerData = @"
             UPDATE paper_mania_game_data.player_game_data
-            SET player_level = @Level, player_exp = @Exp
+            SET player_level = @Level,
+                player_exp = @Exp,
+                player_name = @Name
             WHERE user_id = @UserId
             RETURNING user_id, player_name AS Name, player_exp AS Exp, player_level AS Level;
             ";
@@ -57,15 +60,23 @@ public class DataRepository : RepositoryBase, IDataRepository
     {
     }
     
-    public async Task<PlayerGameData?> ExistsPlayerNameAsync(string playerName, CancellationToken ct)
+    private static PlayerGameData MapToModel(GameData entity) => 
+        new(entity.UserId, entity.Name, entity.Exp, entity.Level);
+    
+    private static GameData? MapToEntity(PlayerGameData? data) => 
+        data == null ? null : new GameData(data.UserId, data.Name, data.Exp, data.Level);
+    
+    public async Task<GameData?> ExistsPlayerNameAsync(string playerName, CancellationToken ct)
     {
-        return await ExecuteAsync((connection, transaction) =>
+        var data = await ExecuteAsync((connection, transaction) =>
              connection.QueryFirstOrDefaultAsync<PlayerGameData>(
                 new CommandDefinition(Sql.ExistsPlayerName, new { Name = playerName }, transaction: transaction, cancellationToken: ct)
              ), ct);
+        
+        return  MapToEntity(data);
     }
 
-    public async Task CreateAsync(PlayerGameData player, CancellationToken ct)
+    public async Task CreateAsync(GameData player, CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
@@ -73,25 +84,21 @@ public class DataRepository : RepositoryBase, IDataRepository
         ), ct);
     }
 
-    public async Task<PlayerGameData?> FindByUserIdAsync(int? userId, CancellationToken ct)
+    public async Task<GameData?> FindByUserIdAsync(int? userId, CancellationToken ct)
     {
-        return await QueryAsync(connection =>
+        var data =  await QueryAsync(connection =>
              connection.QueryFirstOrDefaultAsync<PlayerGameData>(
                 new CommandDefinition(Sql.GetPlayerDataById, new { UserId = userId }, cancellationToken: ct)
              ), ct);
+        
+        return  MapToEntity(data);
     }
 
-    public async Task<PlayerGameData?> UpdatePlayerLevelAsync(int? userId, int newLevel, int newExp, CancellationToken ct)
+    public async Task UpdateAsync(GameData data, CancellationToken ct)
     {
-        return await ExecuteAsync((connection, transaction) =>
-             connection.QueryFirstOrDefaultAsync<PlayerGameData>(
-                new CommandDefinition(Sql.UpdatePlayerLevel, new
-                {
-                    Level = newLevel,
-                    Exp = newExp,
-                    UserId = userId
-                }, transaction: transaction, cancellationToken: ct)
-             ), ct);
+        await ExecuteAsync((conn, trans) => conn.ExecuteAsync(
+            new CommandDefinition(Sql.UpdatePlayerData, MapToModel(data), transaction: trans, cancellationToken: ct)
+        ), ct);
     }
 
     public async Task<LevelDefinition?> FindLevelDataAsync(int currentLevel, CancellationToken ct)

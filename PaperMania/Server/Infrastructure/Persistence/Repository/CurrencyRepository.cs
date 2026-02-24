@@ -1,6 +1,7 @@
 using Dapper;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Transaction;
+using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Infrastructure.Persistence.Repository;
@@ -61,16 +62,35 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
              ), ct);
     }
 
-    public async Task<PlayerCurrencyData?> FindByUserIdAsync(int userId, CancellationToken ct)
+    public async Task<Currency?> FindByUserIdAsync(int userId, CancellationToken ct)
     {
-        return await QueryAsync(connection =>
+        var data = await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerCurrencyData>(
                 new CommandDefinition(Sql.GetPlayerCurrencyData, new { UserId = userId }, cancellationToken: ct)
             ), ct);
+
+        return data == null
+            ? null
+            : new Currency(
+                data.UserId,
+                data.ActionPoint,
+                data.MaxActionPoint,
+                data.Gold,
+                data.PaperPiece,
+                data.LastActionPointUpdated);
     }
 
-    public async Task UpdateAsync(PlayerCurrencyData data, CancellationToken ct)
+    public async Task UpdateAsync(Currency currency, CancellationToken ct)
     {
+        var data = new PlayerCurrencyData(
+            currency.UserId,
+            currency.ActionPoint,
+            currency.MaxActionPoint,
+            currency.Gold,
+            currency.PaperPiece,
+            currency.LastActionPointUpdated
+        );
+
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
                 new CommandDefinition(Sql.UpdatePlayerCurrencyData, data, transaction: transaction, cancellationToken: ct)

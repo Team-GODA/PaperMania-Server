@@ -1,6 +1,7 @@
 using Dapper;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Transaction;
+using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Infrastructure.Persistence.Repository;
@@ -65,32 +66,50 @@ public class AccountRepository : RepositoryBase, IAccountRepository
     {
     }
     
-    public async Task<PlayerAccountData?> FindByUserIdAsync(int userId, CancellationToken ct)
+    private static Account? MapToEntity(PlayerAccountData? data)
     {
-        return await QueryAsync(connection =>
+        if (data == null) return null;
+        
+        return new Account(
+            data.PlayerId,
+            data.Email,
+            data.Password,
+            data.IsNewAccount
+        );
+    }
+    
+    public async Task<Account?> FindByUserIdAsync(int userId, CancellationToken ct)
+    {
+        var data = await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
                 new CommandDefinition(Sql.GetByUserId, new { UserId = userId }, cancellationToken: ct)
             ), ct);
+
+        return MapToEntity(data);
     }
     
-    public async Task<PlayerAccountData?> FindByPlayerIdAsync(string playerId, CancellationToken ct)
+    public async Task<Account?> FindByPlayerIdAsync(string playerId, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(playerId);
         
-        return await QueryAsync(connection =>
+        var data =  await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
                 new CommandDefinition(Sql.GetByPlayerId, new { PlayerId = playerId }, cancellationToken: ct)
             ), ct);
+        
+        return MapToEntity(data);
     }
 
-    public async Task<PlayerAccountData?> FindByEmailAsync(string email, CancellationToken ct)
+    public async Task<Account?> FindByEmailAsync(string email, CancellationToken ct)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
         
-        return await QueryAsync(connection =>
+        var data = await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerAccountData>(
                 new CommandDefinition(Sql.GetByEmail, new { Email = email }, cancellationToken: ct)
             ), ct);
+        
+        return MapToEntity(data);
     }
     
     public async Task<bool> ExistsByPlayerIdAsync(string playerId, CancellationToken ct)
@@ -105,18 +124,20 @@ public class AccountRepository : RepositoryBase, IAccountRepository
         return result.HasValue;
     }
 
-    public async Task<PlayerAccountData> CreateAsync(PlayerAccountData account, CancellationToken ct)
+    public async Task<Account?> CreateAsync(Account account, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(account);
         
-        return await ExecuteAsync((connection, transaction) =>
+        var data = await ExecuteAsync((connection, transaction) =>
             connection.QuerySingleAsync<PlayerAccountData>(
                 new CommandDefinition(Sql.InsertAccount, account, transaction: transaction, cancellationToken: ct)
             ), ct);
+        
+        return MapToEntity(data);
     }
     
     
-    public async Task UpdateAsync(PlayerAccountData account, CancellationToken ct)
+    public async Task UpdateAsync(Account account, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(account);
 
