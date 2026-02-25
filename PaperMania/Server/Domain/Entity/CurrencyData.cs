@@ -66,6 +66,26 @@ public class CurrencyData
         
         ActionPoint = amount;
     }
+    
+    public void SetGold(int amount)
+    {
+        if (amount < 0)
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_GOLD_AMOUNT");
+        
+        Gold = amount;
+    }
+    
+    public void SetPaperPiece(int amount)
+    {
+        if (amount < 0)
+            throw new RequestException(
+                ErrorStatusCode.BadRequest,
+                "INVALID_PaperPiece_AMOUNT");
+        
+        PaperPiece = amount;
+    }
 
     public void SpendActionPoint(int amount, DateTime nowUtc)
     {
