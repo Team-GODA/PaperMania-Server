@@ -3,7 +3,7 @@ namespace Server.Domain.Entity;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 
-public class Currency
+public class CurrencyData
 {
     public int UserId { get; }
     public int ActionPoint { get; set; }
@@ -12,7 +12,7 @@ public class Currency
     public int PaperPiece { get; set; }
     public DateTime LastActionPointUpdated { get; set; }
 
-    public Currency(
+    public CurrencyData(
         int userId,
         int actionPoint,
         int maxActionPoint,
@@ -33,14 +33,14 @@ public class Currency
         LastActionPointUpdated = lastActionPointUpdated;
     }
     
-    public static Currency Create(int userId)
+    public static CurrencyData Create(int userId, int Gold = 0, int PaperPiece = 0)
     {
-        return new Currency(
+        return new CurrencyData(
             userId,
             actionPoint: 0,
             maxActionPoint: 100,
-            gold: 0,
-            paperPiece: 0,
+            gold: Gold,
+            paperPiece: PaperPiece,
             lastActionPointUpdated: DateTime.UtcNow);
     }
 

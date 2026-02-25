@@ -62,7 +62,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
              ), ct);
     }
 
-    public async Task<Currency?> FindByUserIdAsync(int userId, CancellationToken ct)
+    public async Task<CurrencyData?> FindByUserIdAsync(int userId, CancellationToken ct)
     {
         var data = await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerCurrencyData>(
@@ -71,7 +71,7 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
 
         return data == null
             ? null
-            : new Currency(
+            : new CurrencyData(
                 data.UserId,
                 data.ActionPoint,
                 data.MaxActionPoint,
@@ -80,15 +80,15 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
                 data.LastActionPointUpdated);
     }
 
-    public async Task UpdateAsync(Currency currency, CancellationToken ct)
+    public async Task UpdateAsync(CurrencyData currencyData, CancellationToken ct)
     {
         var data = new PlayerCurrencyData(
-            currency.UserId,
-            currency.ActionPoint,
-            currency.MaxActionPoint,
-            currency.Gold,
-            currency.PaperPiece,
-            currency.LastActionPointUpdated
+            currencyData.UserId,
+            currencyData.ActionPoint,
+            currencyData.MaxActionPoint,
+            currencyData.Gold,
+            currencyData.PaperPiece,
+            currencyData.LastActionPointUpdated
         );
 
         await ExecuteAsync((connection, transaction) =>
