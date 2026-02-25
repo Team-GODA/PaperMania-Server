@@ -22,7 +22,7 @@ public class GetAllPlayerCharacterDataUseCaseTests
         Func<Task> act = () => useCase.ExecuteAsync(0, CancellationToken.None);
 
         var exception = await act.Should().ThrowAsync<RequestException>();
-        exception.Which.StatusCode.Should().Be(Server.Api.Dto.Response.ErrorStatusCode.BadRequest);
+        exception.Which.StatusCode.Should().Be(Api.Dto.Response.ErrorStatusCode.BadRequest);
         exception.Which.Message.Should().Be("INVALID_USER_ID");
     }
 
