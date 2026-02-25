@@ -3,6 +3,7 @@ using Moq;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Auth;
 using Server.Application.UseCase.Auth.Command;
 using Server.Domain.Entity;

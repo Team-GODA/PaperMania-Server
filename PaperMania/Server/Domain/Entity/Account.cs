@@ -1,5 +1,6 @@
 ﻿using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
+using Server.Application.Port.Output.Service;
 using Server.Domain.Service;
 
 namespace Server.Domain.Entity;

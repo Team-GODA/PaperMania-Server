@@ -180,7 +180,7 @@ public static class ServiceExtensions
         services.AddScoped<IGetAllCharacterDataUseCase, GetAllCharacterDataUseCase>();
         
         services.AddScoped<IPasswordHasher, PasswordHasher>();
-        services.AddScoped<ActionPointService>();
+        services.AddScoped<IActionPointService, ActionPointService>();
         
         services.AddScoped<ICacheAsideService ,CacheAsideService>();
         

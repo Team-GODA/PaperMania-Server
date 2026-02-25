@@ -2,20 +2,20 @@ using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Currency;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Currency.Command;
 using Server.Application.UseCase.Currency.Result;
-using Server.Domain.Service;
 
 namespace Server.Application.UseCase.Currency;
 
 public class GetActionPointUseCase : IGetActionPointUseCase
 {
     private readonly ICurrencyRepository _repository;
-    private readonly ActionPointService _apService;
+    private readonly IActionPointService _apService;
 
     public GetActionPointUseCase(
         ICurrencyRepository repository,
-        ActionPointService apService
+        IActionPointService apService
         )
     {
         _repository = repository;
