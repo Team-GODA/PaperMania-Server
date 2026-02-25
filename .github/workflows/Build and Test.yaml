@@ -20,10 +20,16 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore dependencies
-        run: dotnet restore PaperMania.sln
+        run: |
+          cd PaperMania
+          dotnet restore PaperMania.sln
 
       - name: Build solution
-        run: dotnet build PaperMania.sln --configuration Release
+        run: |
+          cd PaperMania
+          dotnet build PaperMania.sln --configuration Release
 
       - name: Run all tests
-        run: dotnet test Server.Tests/Server.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
+        run: |
+          cd PaperMania
+          dotnet test ../Server.Tests/Server.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
