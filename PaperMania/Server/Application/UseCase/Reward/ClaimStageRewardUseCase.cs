@@ -69,12 +69,12 @@ public class ClaimStageRewardUseCase : IClaimStageRewardUseCase
             
             if (!isCleared)
             {
-                var stageData = new PlayerStageData
-                {
-                    UserId = request.UserId,
-                    StageNum = request.StageNum,
-                    StageSubNum = request.StageSubNum
-                };
+                var stageData = new PlayerStageData(
+                    request.UserId,
+                    request.StageNum,
+                    request.StageSubNum
+                    );
+                
                 await _stageRepository.CreateAsync(stageData, innerCt);
             }
             

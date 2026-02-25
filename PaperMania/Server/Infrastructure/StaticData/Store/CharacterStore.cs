@@ -86,21 +86,19 @@ public class CharacterStore : ICharacterStore, IHostedService
         // 7: UltimateSkillId
         // 8: SupportSkillId
 
-        return new CharacterData
-        {
-            CharacterId = int.Parse(cols[0]),
-            CharacterName = cols[1],
+        return new CharacterData(
+            int.Parse(cols[0]),
+            cols[1],
 
-            Role = CsvHelper.ParseEnum<CharacterRole>(cols[2], "Role"),
-            Rarity = CsvHelper.ParseEnum<CharacterRarity>(cols[3], "Rarity"),
-            BaseHP = float.Parse(cols[4]),
-            BaseATK = float.Parse(cols[5]),
+            CsvHelper.ParseEnum<CharacterRole>(cols[2], "Role"),
+            CsvHelper.ParseEnum<CharacterRarity>(cols[3], "Rarity"),
+            float.Parse(cols[4]),
+            float.Parse(cols[5]),
 
-            NormalSkillId = ParseOptionalInt(cols[6]),
-            UltimateSkillId = ParseOptionalInt(cols[7]),
-            SupportSkillId = ParseOptionalInt(cols[8]),
-
-        };
+            ParseOptionalInt(cols[6]),
+            ParseOptionalInt(cols[7]),
+            ParseOptionalInt(cols[8])
+        );
     }
     
     private void ValidateCharacters()
