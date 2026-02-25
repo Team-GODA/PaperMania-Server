@@ -20,6 +20,7 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore dependencies
+
         run: dotnet restore PaperMania.sln
 
       - name: Build solution
