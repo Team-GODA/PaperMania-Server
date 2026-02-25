@@ -32,43 +32,27 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
     {
         request.Validate();
 
-        var data = await _dataRepository.FindByUserIdAsync(request.UserId, ct)
-                   ?? throw new RequestException(
-                       ErrorStatusCode.NotFound,
-                       "PLAYER_DATA_NOT_FOUND"
-                   );
-
-        data.Exp += request.Exp;
+        var playerGame = await _dataRepository.FindByUserIdAsync(request.UserId, ct)
+                         ?? throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_DATA_NOT_FOUND");
 
         var currencyData = await _currencyRepository.FindByUserIdAsync(request.UserId, ct)
-                            ?? throw new RequestException(
-                                ErrorStatusCode.NotFound,
-                                "PLAYER_CURRENCY_DATA_NOT_FOUND"
-                                );
+                           ?? throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CURRENCY_DATA_NOT_FOUND");
 
-        var maxExp = 0;
-        while (true)
+        playerGame.GainExp(request.Exp, _store, (maxAp) => 
         {
-            var levelData = _store.GetLevelDefinition(data.Level);
-            if (levelData == null || data.Exp < levelData.MaxExp)
-                break;
-            
-            data.Exp -= levelData.MaxExp;
-            data.Level++;
-            
-            currencyData.SetMaxActionPoint(levelData.MaxActionPoint);
-            currencyData.SetActionPoint(levelData.MaxActionPoint);
-            
-            maxExp = levelData.MaxExp;
-        }
+            currencyData.SetMaxActionPoint(maxAp);
+            currencyData.SetActionPoint(maxAp);
+        });
 
-        await _dataRepository.UpdatePlayerLevelAsync(request.UserId, data.Level, data.Exp, ct);
+        await _dataRepository.UpdateAsync(playerGame, ct); 
         await _currencyRepository.UpdateAsync(currencyData, ct);
-        
+
+        var currentLevelDef = _store.GetLevelDefinition(playerGame.Level);
+
         return new GainPlayerExpUseCaseResult(
-            data.Level,
-            data.Exp,
-            maxExp,
+            playerGame.Level,
+            playerGame.Exp,
+            currentLevelDef?.MaxExp ?? 0,
             MaxActionPoint: currencyData.MaxActionPoint
         );
     }

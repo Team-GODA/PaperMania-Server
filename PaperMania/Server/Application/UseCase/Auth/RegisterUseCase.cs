@@ -2,6 +2,7 @@ using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Input.Auth;
 using Server.Application.Port.Output.Persistence;
+using Server.Application.Port.Output.Service;
 using Server.Application.UseCase.Auth.Command;
 using Server.Domain.Entity;
 using Server.Domain.Service;
@@ -35,15 +36,13 @@ public class RegisterUseCase : IRegisterUseCase
             );
 
         var hashedPassword = _passwordHasher.Hash(request.Password);
-        
-        var newAccount = new PlayerAccountData
-        {
-            PlayerId = request.PlayerId,
-            Email = request.Email,
-            Password = hashedPassword,
-            IsNewAccount = true,
-            Role = "user"
-        };
+
+        var newAccount = new Account(
+            request.PlayerId,
+            request.Email,
+            hashedPassword,
+            true
+            );
         
         await _repository.CreateAsync(newAccount, ct);
     }

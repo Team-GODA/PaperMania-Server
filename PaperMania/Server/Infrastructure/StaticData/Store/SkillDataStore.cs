@@ -80,17 +80,17 @@ public class SkillDataStore : ISkillDataStore, IHostedService
         // 4: ScalingType
         // 5: TargetType
 
-        return new SkillData
-        {
-            SkillId = int.Parse(cols[0]),
-            SkillName = cols[1],
+        return new SkillData(
+        
+            int.Parse(cols[0]),
+            cols[1],
 
-            SkillType = CsvHelper.ParseEnum<SkillType>(cols[2], "SkillType"),
-            CoolTime = float.Parse(cols[3]),
+            CsvHelper.ParseEnum<SkillType>(cols[2], "SkillType"),
+            float.Parse(cols[3]),
 
-            ScalingType = CsvHelper.ParseEnum<SkillScalingType>(cols[4], "ScalingType"),
-            TargetType = CsvHelper.ParseEnum<SkillTargetType>(cols[5], "TargetType")
-        };
+            CsvHelper.ParseEnum<SkillScalingType>(cols[4], "ScalingType"),
+            CsvHelper.ParseEnum<SkillTargetType>(cols[5], "TargetType")
+        );
     }
 
     private void ValidateSkills()

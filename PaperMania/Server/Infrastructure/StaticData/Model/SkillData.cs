@@ -1,16 +1,13 @@
 ﻿namespace Server.Infrastructure.StaticData.Model;
 
-public class SkillData
-{
-    public int SkillId { get; set; }
-    public string SkillName { get; set; }
-
-    public SkillType SkillType { get; set; }
-    public float CoolTime { get; set; }
-
-    public SkillScalingType ScalingType { get; set; }
-    public SkillTargetType TargetType { get; set; }
-}
+public record SkillData(
+    int SkillId,
+    string SkillName,
+    SkillType SkillType,
+    float CoolTime,
+    SkillScalingType ScalingType,
+    SkillTargetType TargetType
+);
 
 public enum SkillType
 {

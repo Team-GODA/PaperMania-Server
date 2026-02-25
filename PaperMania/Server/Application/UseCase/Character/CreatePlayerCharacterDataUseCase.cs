@@ -38,32 +38,19 @@ public class CreatePlayerCharacterDataUseCase : ICreatePlayerCharacterDataUseCas
         
         await _transactionScope.ExecuteAsync(async (innerCt) =>
         {
-            var data = new PlayerCharacterData
-            {
-                UserId = request.UserId,
-                CharacterId = request.CharacterId,
-
-                CharacterLevel = 1,
-                CharacterExp = 0,
-
-                NormalSkillLevel =
-                    character.NormalSkillId == 0 ? 0 : 1,
-
-                UltimateSkillLevel =
-                    character.UltimateSkillId == 0 ? 0 : 1,
-
-                SupportSkillLevel =
-                    character.SupportSkillId == 0 ? 0 : 1
-            };
+            var data = new PlayerCharacterData(
+                request.UserId,
+                request.CharacterId, 
+                1, 
+                0,
+                character.NormalSkillId == 0 ? 0 : 1,
+                character.UltimateSkillId == 0 ? 0 : 1,
+                character.SupportSkillId == 0 ? 0 : 1
+            );
 
             await _repository.CreateAsync(data, innerCt);
-            
-            await _repository.CreatePieceData(new PlayerCharacterPieceData
-            {
-                UserId = data.UserId,
-                CharacterId = data.CharacterId,
-                PieceAmount = 0
-            }, innerCt);
+
+            await _repository.CreatePieceData(new PlayerCharacterPieceData(data.UserId, data.CharacterId, 0),innerCt);
         }, ct);
     }
 }

@@ -1,14 +1,15 @@
-﻿using Server.Domain.Entity;
+﻿using Server.Application.Port.Output.Service;
+using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Domain.Service;
 
-public class ActionPointService
+public class ActionPointService : IActionPointService
 {
     private const int RegenerationIntervalMinutes = 4;
     private const int RegenerationAmount = 1;
 
-    public bool TryRegenerate(PlayerCurrencyData data, DateTime nowUtc)
+    public bool TryRegenerate(CurrencyData data, DateTime nowUtc)
     {
         if (data.ActionPoint >= data.MaxActionPoint)
             return false;
