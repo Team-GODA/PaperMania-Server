@@ -1,4 +1,4 @@
-﻿namespace Server.Domain.Service;
+﻿namespace Server.Application.Port.Output.Service;
 
 public interface IPasswordHasher
 {

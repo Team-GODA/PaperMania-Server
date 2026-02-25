@@ -1,20 +1,16 @@
 ﻿namespace Server.Infrastructure.StaticData.Model;
 
-public class CharacterData
-{
-    public int CharacterId  { get; set; }
-    public string CharacterName { get; set; }
-    
-    public CharacterRole Role { get; set; }
-    public CharacterRarity Rarity { get; set; }
-    
-    public float BaseHP { get; set; }
-    public float BaseATK { get; set; }
-    
-    public int NormalSkillId  { get; set; }
-    public int UltimateSkillId { get; set; }
-    public int SupportSkillId { get; set; }
-}
+public record CharacterData(
+    int CharacterId,
+    string CharacterName,
+    CharacterRole Role,
+    CharacterRarity Rarity,
+    float BaseHP,
+    float BaseATK,
+    int NormalSkillId,
+    int UltimateSkillId,
+    int SupportSkillId
+);
 
 public enum CharacterRole
 {

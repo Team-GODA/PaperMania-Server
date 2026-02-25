@@ -1,6 +1,6 @@
-﻿using Server.Domain.Service;
+﻿using Server.Application.Port.Output.Service;
 
-namespace Server.Infrastructure.Service;
+namespace Server.Domain.Service;
 
 public class PasswordHasher : IPasswordHasher
 {

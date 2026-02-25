@@ -1,8 +1,3 @@
 ﻿namespace Server.Infrastructure.StaticData.Model;
 
-public class LevelDefinition
-{
-    public int Level { get; set; }
-    public int MaxExp { get; set; } 
-    public int MaxActionPoint { get; set; } 
-}
+public record LevelDefinition(int Level, int MaxExp, int MaxActionPoint);

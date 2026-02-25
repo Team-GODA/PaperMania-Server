@@ -42,18 +42,27 @@ public class LoginUseCase : ILoginUseCase
             ct
         );
         
+        if (account == null)
+        {
+            Console.WriteLine($"[DEBUG] Account not found for PlayerId: {request.PlayerId}");
+        }
+        else 
+        {
+            Console.WriteLine($"[DEBUG] Account found: {account.Id}, Hash: {account.Password?.Substring(0, 5)}...");
+        }
+        
         if (account == null || string.IsNullOrEmpty(account.Password))
         {
-            _passwordHasher.Verify(request.Password, "DUMMY_HASH");
+            _passwordHasher.Verify(request.Password, "$2a$11$12345678901234567890123456789012345678901234567890123");
+        
             throw new RequestException(
                 ErrorStatusCode.Unauthorized,
                 "INVALID_CREDENTIALS");
         }
 
-        if (!_passwordHasher.Verify(request.Password, account.Password))
-            throw new RequestException(
-                ErrorStatusCode.Unauthorized,
-                "INVALID_PASSWORD");
+        Console.WriteLine($"[DEBUG] Comparing - Input: {request.Password}, Stored Hash: {account.Password}");
+        
+        account.VerifyPassword(request.Password, _passwordHasher);
         
         var sessionId = await _sessionService.CreateSessionAsync(account.Id, ct);
         if (string.IsNullOrEmpty(sessionId))

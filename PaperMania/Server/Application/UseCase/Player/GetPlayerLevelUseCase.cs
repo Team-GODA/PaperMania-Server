@@ -5,8 +5,6 @@ using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
-using Server.Domain.Entity;
-using Server.Infrastructure.Cache;
 
 namespace Server.Application.UseCase.Player;
 

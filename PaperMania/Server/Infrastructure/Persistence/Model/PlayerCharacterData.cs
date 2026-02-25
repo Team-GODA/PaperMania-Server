@@ -1,13 +1,11 @@
 ﻿namespace Server.Infrastructure.Persistence.Model;
 
-public class PlayerCharacterData
-{
-    public int UserId { get; set; }
-
-    public int CharacterId { get; set; }
-    public int CharacterLevel { get; set; } = 1;
-    public int CharacterExp { get; set; }
-    public int NormalSkillLevel { get; set; }
-    public int UltimateSkillLevel { get; set; }
-    public int SupportSkillLevel { get; set; }
-}
+public record PlayerCharacterData(
+    int UserId,
+    int CharacterId,
+    int CharacterLevel = 1,
+    int CharacterExp = 0,
+    int NormalSkillLevel = 1,
+    int UltimateSkillLevel = 1,
+    int SupportSkillLevel = 1
+);
