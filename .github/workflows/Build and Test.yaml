@@ -23,11 +23,7 @@ jobs:
         run: dotnet restore PaperMania.sln
 
       - name: Build solution
-        run: |
-          cd CSharpTest
-          dotnet build CSharpTest.sln --configuration Release
+        run: dotnet build PaperMania.sln --configuration Release
 
       - name: Run all tests
-        run: |
-          cd CSharpTest
-          dotnet test Server.Tests/Server.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
+        run: dotnet test Server.Tests/Server.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
