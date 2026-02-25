@@ -21,10 +21,11 @@ jobs:
 
       - name: Restore dependencies
 
-        run: dotnet restore PaperMania.sln
+        run: dotnet restore PaperMania/PaperMania.sln
 
       - name: Build solution
-        run: dotnet build PaperMania.sln --configuration Release
+        run: dotnet build PaperMania/PaperMania.sln --configuration Release
 
       - name: Run all tests
-        run: dotnet test Server.Tests/Server.Tests.csproj --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
+        run: dotnet test PaperMania/PaperMania.sln --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
+
