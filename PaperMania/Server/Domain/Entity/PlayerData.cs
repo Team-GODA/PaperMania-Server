@@ -2,14 +2,14 @@
 
 namespace Server.Domain.Entity;
 
-public class GameData
+public class PlayerData
 {
     public int UserId { get; }
     public string Name { get; private set; }
     public int Exp { get; private set; }
     public int Level { get; private set; }
 
-    public GameData(int userId, string name, int exp, int level)
+    public PlayerData(int userId, string name, int exp, int level)
     {
         UserId = userId;
         Name = name;
@@ -17,12 +17,12 @@ public class GameData
         Level = level;
     }
     
-    public static GameData Create(int userId, string name)
+    public static PlayerData Create(int userId, string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Invalid name");
 
-        return new GameData(userId, name, exp: 0, level: 1);
+        return new PlayerData(userId, name, exp: 0, level: 1);
     }
 
     public void Rename(string newName)

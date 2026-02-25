@@ -60,13 +60,13 @@ public class DataRepository : RepositoryBase, IDataRepository
     {
     }
     
-    private static PlayerGameData MapToModel(GameData entity) => 
+    private static PlayerGameData MapToModel(PlayerData entity) => 
         new(entity.UserId, entity.Name, entity.Exp, entity.Level);
     
-    private static GameData? MapToEntity(PlayerGameData? data) => 
-        data == null ? null : new GameData(data.UserId, data.Name, data.Exp, data.Level);
+    private static PlayerData? MapToEntity(PlayerGameData? data) => 
+        data == null ? null : new PlayerData(data.UserId, data.Name, data.Exp, data.Level);
     
-    public async Task<GameData?> ExistsPlayerNameAsync(string playerName, CancellationToken ct)
+    public async Task<PlayerData?> ExistsPlayerNameAsync(string playerName, CancellationToken ct)
     {
         var data = await ExecuteAsync((connection, transaction) =>
              connection.QueryFirstOrDefaultAsync<PlayerGameData>(
@@ -76,7 +76,7 @@ public class DataRepository : RepositoryBase, IDataRepository
         return  MapToEntity(data);
     }
 
-    public async Task CreateAsync(GameData player, CancellationToken ct)
+    public async Task CreateAsync(PlayerData player, CancellationToken ct)
     {
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
@@ -84,7 +84,7 @@ public class DataRepository : RepositoryBase, IDataRepository
         ), ct);
     }
 
-    public async Task<GameData?> FindByUserIdAsync(int? userId, CancellationToken ct)
+    public async Task<PlayerData?> FindByUserIdAsync(int? userId, CancellationToken ct)
     {
         var data =  await QueryAsync(connection =>
              connection.QueryFirstOrDefaultAsync<PlayerGameData>(
@@ -94,7 +94,7 @@ public class DataRepository : RepositoryBase, IDataRepository
         return  MapToEntity(data);
     }
 
-    public async Task UpdateAsync(GameData data, CancellationToken ct)
+    public async Task UpdateAsync(PlayerData data, CancellationToken ct)
     {
         await ExecuteAsync((conn, trans) => conn.ExecuteAsync(
             new CommandDefinition(Sql.UpdatePlayerData, MapToModel(data), transaction: trans, cancellationToken: ct)

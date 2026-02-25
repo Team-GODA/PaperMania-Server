@@ -32,7 +32,7 @@ public class GainPlayerExpUseCaseTests
     {
         _dataRepositoryMock
             .Setup(x => x.FindByUserIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((GameData?)null);
+            .ReturnsAsync((PlayerData?)null);
 
         var useCase = CreateUseCase();
         var command = new GainPlayerExpCommand(1, 100);
@@ -46,7 +46,7 @@ public class GainPlayerExpUseCaseTests
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Currency_Not_Found()
     {
-        var gameData = GameData.Create(1, "Player");
+        var gameData = PlayerData.Create(1, "Player");
 
         _dataRepositoryMock
             .Setup(x => x.FindByUserIdAsync(1, It.IsAny<CancellationToken>()))
@@ -68,7 +68,7 @@ public class GainPlayerExpUseCaseTests
     [Fact]
     public async Task ExecuteAsync_Should_Update_Player_And_Currency_When_Success()
     {
-        var gameData = GameData.Create(1, "Player");
+        var gameData = PlayerData.Create(1, "Player");
         var currencyData = CurrencyData.Create(1);
 
         _dataRepositoryMock
@@ -91,7 +91,7 @@ public class GainPlayerExpUseCaseTests
         result.Should().NotBeNull();
 
         _dataRepositoryMock.Verify(x =>
-                x.UpdateAsync(It.IsAny<GameData>(), It.IsAny<CancellationToken>()),
+                x.UpdateAsync(It.IsAny<PlayerData>(), It.IsAny<CancellationToken>()),
             Times.Once);
 
         _currencyRepositoryMock.Verify(x =>
@@ -102,7 +102,7 @@ public class GainPlayerExpUseCaseTests
     [Fact]
     public async Task ExecuteWithTransactionAsync_Should_Call_TransactionScope()
     {
-        var gameData = GameData.Create(1, "Player");
+        var gameData = PlayerData.Create(1, "Player");
         var currencyData = CurrencyData.Create(1);
 
         _dataRepositoryMock

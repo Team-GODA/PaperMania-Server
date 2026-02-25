@@ -107,7 +107,7 @@ public class CreatePlayerDataUseCaseTests
         result.PlayerName.Should().Be("Player1");
 
         _dataRepositoryMock.Verify(x =>
-                x.CreateAsync(It.IsAny<GameData>(), It.IsAny<CancellationToken>()),
+                x.CreateAsync(It.IsAny<PlayerData>(), It.IsAny<CancellationToken>()),
             Times.Once);
 
         _currencyRepositoryMock.Verify(x =>

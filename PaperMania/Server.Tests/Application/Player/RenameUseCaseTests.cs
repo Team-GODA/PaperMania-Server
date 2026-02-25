@@ -23,7 +23,7 @@ public class RenameUseCaseTests
 
         _repositoryMock
             .Setup(x => x.ExistsPlayerNameAsync("DuplicatedName", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(GameData.Create(999, "DuplicatedName"));
+            .ReturnsAsync(PlayerData.Create(999, "DuplicatedName"));
 
         var useCase = CreateUseCase();
 
@@ -40,7 +40,7 @@ public class RenameUseCaseTests
 
         _repositoryMock
             .Setup(x => x.ExistsPlayerNameAsync("NewName", It.IsAny<CancellationToken>()))
-            .ReturnsAsync((GameData?)null);
+            .ReturnsAsync((PlayerData?)null);
 
         var useCase = CreateUseCase();
 

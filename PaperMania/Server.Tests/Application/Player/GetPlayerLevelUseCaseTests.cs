@@ -24,7 +24,7 @@ public class GetPlayerLevelUseCaseTests
     {
         _repositoryMock
             .Setup(x => x.FindByUserIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((GameData?)null);
+            .ReturnsAsync((PlayerData?)null);
 
         var useCase = CreateUseCase();
         var command = new GetPlayerLevelCommand(1);
@@ -38,7 +38,7 @@ public class GetPlayerLevelUseCaseTests
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Level_Not_Found()
     {
-        var gameData = GameData.Create(1, "Player");
+        var gameData = PlayerData.Create(1, "Player");
 
         _repositoryMock
             .Setup(x => x.FindByUserIdAsync(1, It.IsAny<CancellationToken>()))
@@ -60,7 +60,7 @@ public class GetPlayerLevelUseCaseTests
     [Fact]
     public async Task ExecuteAsync_Should_Return_Level_Info_When_Success()
     {
-        var gameData = GameData.Create(1, "Player");
+        var gameData = PlayerData.Create(1, "Player");
         var levelDefinition = new LevelDefinition(1,100, 50);
 
         _repositoryMock

@@ -49,7 +49,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
     
         await _transactionScope.ExecuteAsync(async (innerCt) =>
         {
-            var player = new GameData(userId, request.PlayerName, 0, 1);
+            var player = new PlayerData(userId, request.PlayerName, 0, 1);
             
             await _dataRepository.CreateAsync(player, innerCt);
             await _currencyRepository.CreateByUserIdAsync(userId, innerCt);

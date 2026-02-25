@@ -22,12 +22,12 @@ public class GetPlayerNameUseCaseTests
     public async Task ExecuteAsync_Should_Throw_When_Player_Not_Found()
     {
         _cacheMock
-            .Setup(x => x.GetOrSetAsync<GameData>(
+            .Setup(x => x.GetOrSetAsync<PlayerData>(
                 It.IsAny<string>(),
-                It.IsAny<Func<CancellationToken, Task<GameData?>>>(),
+                It.IsAny<Func<CancellationToken, Task<PlayerData?>>>(),
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((GameData?)null);
+            .ReturnsAsync((PlayerData?)null);
 
         var useCase = CreateUseCase();
         var command = new GetPlayerNameCommand(1);
@@ -41,12 +41,12 @@ public class GetPlayerNameUseCaseTests
     [Fact]
     public async Task ExecuteAsync_Should_Return_Player_Name_When_Success()
     {
-        var player = GameData.Create(1, "TestPlayer");
+        var player = PlayerData.Create(1, "TestPlayer");
 
         _cacheMock
-            .Setup(x => x.GetOrSetAsync<GameData>(
+            .Setup(x => x.GetOrSetAsync<PlayerData>(
                 It.IsAny<string>(),
-                It.IsAny<Func<CancellationToken, Task<GameData?>>>(),
+                It.IsAny<Func<CancellationToken, Task<PlayerData?>>>(),
                 It.IsAny<TimeSpan>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(player);
