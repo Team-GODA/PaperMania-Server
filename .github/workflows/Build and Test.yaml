@@ -1,0 +1,35 @@
+name: CI - Build & Test
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET 9 SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore dependencies
+        run: |
+          cd CSharpTest
+          dotnet restore CSharpTest.sln
+
+      - name: Build solution
+        run: |
+          cd CSharpTest
+          dotnet build CSharpTest.sln --configuration Release
+
+      - name: Run all tests
+        run: |
+          cd CSharpTest
+          dotnet test CSharpTest.sln --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
