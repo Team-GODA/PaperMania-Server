@@ -8,7 +8,6 @@ using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Player;
 using Server.Application.UseCase.Player.Command;
 using Server.Domain.Entity;
-using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Tests.Application.Player;
 

@@ -32,6 +32,17 @@ public class Currency
         PaperPiece = paperPiece;
         LastActionPointUpdated = lastActionPointUpdated;
     }
+    
+    public static Currency Create(int userId)
+    {
+        return new Currency(
+            userId,
+            actionPoint: 0,
+            maxActionPoint: 100,
+            gold: 0,
+            paperPiece: 0,
+            lastActionPointUpdated: DateTime.UtcNow);
+    }
 
     public void SetMaxActionPoint(int amount)
     {

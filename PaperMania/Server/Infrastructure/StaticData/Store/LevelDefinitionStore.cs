@@ -43,12 +43,12 @@ public class LevelDefinitionStore : ILevelDefinitionStore,  IHostedService
             _level = await CsvHelper.LoadAsync<int, LevelDefinition>(
                 _httpClient,
                 url,
-                cols => new LevelDefinition
-                {
-                    Level = int.Parse(cols[0]),
-                    MaxExp = int.Parse(cols[1]),
-                    MaxActionPoint =  int.Parse(cols[2])
-                },
+                cols => new LevelDefinition(
+                
+                    int.Parse(cols[0]),
+                    int.Parse(cols[1]),
+                    int.Parse(cols[2])
+                ),
                 l => l.Level
             );
             

@@ -16,6 +16,14 @@ public class GameData
         Exp = exp;
         Level = level;
     }
+    
+    public static GameData Create(int userId, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Invalid name");
+
+        return new GameData(userId, name, exp: 0, level: 1);
+    }
 
     public void Rename(string newName)
     {
