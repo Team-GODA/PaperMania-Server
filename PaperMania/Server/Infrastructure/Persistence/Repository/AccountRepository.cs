@@ -75,7 +75,10 @@ public class AccountRepository : RepositoryBase, IAccountRepository
             data.Email,
             data.Password,
             data.IsNewAccount
-        );
+        )
+        { 
+            Id = data.Id
+        };
     }
     
     public async Task<Account?> FindByUserIdAsync(int userId, CancellationToken ct)
@@ -97,7 +100,13 @@ public class AccountRepository : RepositoryBase, IAccountRepository
                 new CommandDefinition(Sql.GetByPlayerId, new { PlayerId = playerId }, cancellationToken: ct)
             ), ct);
         
-        return MapToEntity(data);
+        Console.WriteLine($"[DEBUG] data.Id={data?.Id}");
+
+        var entity = MapToEntity(data);
+        Console.WriteLine($"[DEBUG] entity.Id={entity?.Id}");
+
+
+        return entity;
     }
 
     public async Task<Account?> FindByEmailAsync(string email, CancellationToken ct)
