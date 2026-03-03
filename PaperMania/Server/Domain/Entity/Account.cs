@@ -14,6 +14,8 @@ public class Account
     public bool IsNewAccount { get; set; }
     public string Role { get; set; } = "user";
     
+    private Account() { }
+    
     public Account(
         string playerId, 
         string email,

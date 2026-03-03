@@ -26,4 +26,3 @@ jobs:
 
       - name: Run all tests
         run: dotnet test PaperMania/PaperMania.sln --no-build --configuration Release --logger "trx;LogFileName=test_results.trx"
-

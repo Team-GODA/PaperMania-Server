@@ -42,14 +42,7 @@ public class LoginUseCase : ILoginUseCase
             ct
         );
         
-        if (account == null)
-        {
-            Console.WriteLine($"[DEBUG] Account not found for PlayerId: {request.PlayerId}");
-        }
-        else 
-        {
-            Console.WriteLine($"[DEBUG] Account found: {account.Id}, Hash: {account.Password?.Substring(0, 5)}...");
-        }
+        Console.WriteLine($"[DEBUG] account.Id={account?.Id}");
         
         if (account == null || string.IsNullOrEmpty(account.Password))
         {
