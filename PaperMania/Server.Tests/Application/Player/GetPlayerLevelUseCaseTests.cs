@@ -21,12 +21,21 @@ public class GetPlayerLevelUseCaseTests
     private GetPlayerLevelUseCase CreateUseCase() =>
         new(_repositoryMock.Object, _levelStoreMock.Object, _cacheMock.Object);
 
+    private void SetupCache(PlayerData? returnValue)
+    {
+        _cacheMock
+            .Setup(x => x.GetOrSetAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<CancellationToken, Task<PlayerData?>>>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(returnValue);
+    }
+
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Player_Not_Found()
     {
-        _repositoryMock
-            .Setup(x => x.FindByUserIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((PlayerData?)null);
+        SetupCache(null);
 
         var useCase = CreateUseCase();
         var command = new GetPlayerLevelCommand(1);
@@ -42,9 +51,7 @@ public class GetPlayerLevelUseCaseTests
     {
         var gameData = PlayerData.Create(1, "Player");
 
-        _repositoryMock
-            .Setup(x => x.FindByUserIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(gameData);
+        SetupCache(gameData);
 
         _levelStoreMock
             .Setup(x => x.GetLevelDefinition(It.IsAny<int>()))
@@ -63,11 +70,9 @@ public class GetPlayerLevelUseCaseTests
     public async Task ExecuteAsync_Should_Return_Level_Info_When_Success()
     {
         var gameData = PlayerData.Create(1, "Player");
-        var levelDefinition = new LevelDefinition(1,100, 50);
+        var levelDefinition = new LevelDefinition(1, 100, 50);
 
-        _repositoryMock
-            .Setup(x => x.FindByUserIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(gameData);
+        SetupCache(gameData);
 
         _levelStoreMock
             .Setup(x => x.GetLevelDefinition(1))

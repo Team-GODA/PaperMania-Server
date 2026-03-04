@@ -36,6 +36,11 @@ public class GetPlayerLevelUseCase : IGetPlayerLevelUseCase
             TimeSpan.FromDays(30),
             ct
         );
+        
+        if (player == null)
+            throw new RequestException(
+                ErrorStatusCode.NotFound,
+                "PLAYER_NOT_FOUND");
 
         var levelDef = _store.GetLevelDefinition(player.Level)
                         ?? throw new RequestException(
