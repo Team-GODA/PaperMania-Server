@@ -2,6 +2,7 @@
 using Moq;
 using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
+using Server.Application.Port.Output.Cache;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.StaticData;
 using Server.Application.UseCase.Player;
@@ -15,9 +16,10 @@ public class GetPlayerLevelUseCaseTests
 {
     private readonly Mock<IDataRepository> _repositoryMock = new();
     private readonly Mock<ILevelDefinitionStore> _levelStoreMock = new();
+    private readonly Mock<ICacheAsideService> _cacheMock = new();
 
     private GetPlayerLevelUseCase CreateUseCase() =>
-        new(_repositoryMock.Object, _levelStoreMock.Object);
+        new(_repositoryMock.Object, _levelStoreMock.Object, _cacheMock.Object);
 
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Player_Not_Found()
