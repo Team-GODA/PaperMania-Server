@@ -1,47 +1,38 @@
-name: CI - Build & Test
+name: Test & Coverage
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches:
+      - main
 
 jobs:
-  build-and-test:
-    runs-on: windows-latest
+  test:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET 9 SDK
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
-          cache: true
+          dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore PaperMania/PaperMania.sln
+        run: dotnet restore
 
-      - name: Build solution
-        run: dotnet build PaperMania/PaperMania.sln --configuration Release --no-restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
 
       - name: Run tests with coverage
-        run: dotnet test PaperMania/PaperMania.sln \
+        run: |
+          dotnet test \
           --no-build \
           --configuration Release \
           --collect:"XPlat Code Coverage"
-
-      - name: Install ReportGenerator
-        run: dotnet tool install -g dotnet-reportgenerator-globaltool
-
-      - name: Generate coverage report
-        run: |
-          reportgenerator \
-          -reports:**/coverage.cobertura.xml \
-          -targetdir:coveragereport \
-          -reporttypes:Html
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coveragereport
+          path: '**/coverage.cobertura.xml'
