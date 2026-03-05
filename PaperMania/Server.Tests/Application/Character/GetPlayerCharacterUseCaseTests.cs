@@ -13,8 +13,7 @@ public class GetPlayerCharacterUseCaseTests
 {
     private readonly Mock<ICharacterRepository> _repoMock = new();
 
-    private GetPlayerCharacterUseCase CreateUseCase()
-        => new GetPlayerCharacterUseCase(_repoMock.Object);
+    private GetPlayerCharacterUseCase CreateUseCase() => new(_repoMock.Object);
 
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_PlayerCharacter_Not_Found()

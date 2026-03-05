@@ -8,20 +8,17 @@ public class CharacterStore : ICharacterStore, IHostedService
     private readonly HttpClient _httpClient;
     private readonly ILogger<CharacterStore> _logger;
     private readonly IConfiguration _configuration;
-    private readonly ISkillDataStore _skillStore;
 
     private Dictionary<int, CharacterData> _characters = new();
 
     public CharacterStore(
         IHttpClientFactory httpClientFactory,
         ILogger<CharacterStore> logger,
-        IConfiguration configuration,
-        ISkillDataStore skillStore)
+        IConfiguration configuration)
     {
         _httpClient = httpClientFactory.CreateClient();
         _logger = logger;
         _configuration = configuration;
-        _skillStore = skillStore;
     }
 
     public CharacterData? Get(int characterId)
@@ -82,9 +79,6 @@ public class CharacterStore : ICharacterStore, IHostedService
         // 3: Rarity
         // 4: BaseHP
         // 5: BaseATK
-        // 6: NormalSkillId
-        // 7: UltimateSkillId
-        // 8: SupportSkillId
 
         return new CharacterData(
             int.Parse(cols[0]),
@@ -93,11 +87,7 @@ public class CharacterStore : ICharacterStore, IHostedService
             CsvHelper.ParseEnum<CharacterRole>(cols[2], "Role"),
             CsvHelper.ParseEnum<CharacterRarity>(cols[3], "Rarity"),
             float.Parse(cols[4]),
-            float.Parse(cols[5]),
-
-            ParseOptionalInt(cols[6]),
-            ParseOptionalInt(cols[7]),
-            ParseOptionalInt(cols[8])
+            float.Parse(cols[5])
         );
     }
     
@@ -111,35 +101,6 @@ public class CharacterStore : ICharacterStore, IHostedService
             if (c.BaseHP <= 0 || c.BaseATK <= 0)
                 throw new InvalidOperationException(
                     $"Invalid base stat for CharacterId={c.CharacterId}");
-
-            if (c.Role == CharacterRole.Main)
-            {
-                ValidateSkill(c.NormalSkillId, SkillType.Normal, c.CharacterId);
-                ValidateSkill(c.UltimateSkillId, SkillType.Ultimate, c.CharacterId);
-            }
-
-            if (c.Role == CharacterRole.Support)
-            {
-                ValidateSkill(c.SupportSkillId, SkillType.Support, c.CharacterId);
-            }
         }
     }
-    
-    private void ValidateSkill(int skillId, SkillType expectedType, int characterId)
-    {
-        if (skillId == 0)
-            return;
-
-        var skill = _skillStore.Get(skillId);
-        if (skill == null)
-            throw new InvalidOperationException(
-                $"Invalid SkillId={skillId} for CharacterId={characterId}");
-
-        if (skill.SkillType != expectedType)
-            throw new InvalidOperationException(
-                $"SkillType mismatch. CharacterId={characterId}, SkillId={skillId}");
-    }
-    
-    private static int ParseOptionalInt(string value)
-        => string.IsNullOrWhiteSpace(value) ? 0 : int.Parse(value);
 }

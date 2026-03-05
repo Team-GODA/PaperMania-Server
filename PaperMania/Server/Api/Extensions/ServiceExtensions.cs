@@ -97,10 +97,6 @@ public static class ServiceExtensions
         services.AddHostedService(sp => 
             (LevelDefinitionStore)sp.GetRequiredService<ILevelDefinitionStore>());
         
-        services.AddSingleton<ISkillDataStore, SkillDataStore>();
-        services.AddHostedService(sp => 
-            (SkillDataStore)sp.GetRequiredService<ISkillDataStore>());
-        
         services.AddSingleton<ICharacterStore, CharacterStore>();
         services.AddHostedService(sp => 
             (CharacterStore)sp.GetRequiredService<ICharacterStore>());

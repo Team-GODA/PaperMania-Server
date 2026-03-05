@@ -6,10 +6,7 @@ public record CharacterData(
     CharacterRole Role,
     CharacterRarity Rarity,
     float BaseHP,
-    float BaseATK,
-    int NormalSkillId,
-    int UltimateSkillId,
-    int SupportSkillId
+    float BaseATK
 );
 
 public enum CharacterRole
