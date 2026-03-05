@@ -2,7 +2,7 @@ name: CI - Build & Test
 
 on:
   pull_request:
-    branches: ["*"]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -10,18 +10,19 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup .NET 9 SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
+          cache: true
 
       - name: Restore dependencies
         run: dotnet restore PaperMania/PaperMania.sln
 
       - name: Build solution
-        run: dotnet build PaperMania/PaperMania.sln --configuration Release
+        run: dotnet build PaperMania/PaperMania.sln --configuration Release --no-restore
 
       - name: Run tests with coverage
         run: dotnet test PaperMania/PaperMania.sln \
@@ -40,7 +41,7 @@ jobs:
           -reporttypes:Html
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coveragereport
