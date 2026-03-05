@@ -1,8 +1,9 @@
-﻿using Server.Infrastructure.Persistence.Model;
+﻿using Server.Domain.Entity;
+using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Api.Dto.Response.Character;
 
 public class GetAllPlayerCharactersResponse
 {
-    public List<PlayerCharacterData> Characters { get; set; }
+    public List<PlayerCharacter> Characters { get; set; }
 }

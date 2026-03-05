@@ -4,7 +4,8 @@ using Server.Application.Exceptions;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Character;
 using Server.Application.UseCase.Character.Command;
-using Server.Infrastructure.Persistence.Model;
+using Server.Domain.Entity;
+using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Tests.Application.Character;
 
@@ -21,7 +22,7 @@ public class GetPlayerCharacterUseCaseTests
         var command = new GetPlayerCharacterCommand(1, 10);
 
         _repoMock.Setup(x => x.FindCharacter(1, 10, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((PlayerCharacterData?)null);
+            .ReturnsAsync((PlayerCharacter?)null);
 
         var useCase = CreateUseCase();
 
@@ -37,15 +38,7 @@ public class GetPlayerCharacterUseCaseTests
     {
         var command = new GetPlayerCharacterCommand(1, 10);
 
-        var characterData = new PlayerCharacterData(
-            UserId: 1,
-            CharacterId: 10,
-            CharacterLevel: 1,
-            CharacterExp: 0,
-            NormalSkillLevel: 1,
-            UltimateSkillLevel: 1,
-            SupportSkillLevel: 1
-        );
+        var characterData = PlayerCharacter.Create(1, 10, CharacterRole.Main);
 
         _repoMock.Setup(x => x.FindCharacter(1, 10, It.IsAny<CancellationToken>()))
             .ReturnsAsync(characterData);

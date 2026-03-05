@@ -1,9 +1,9 @@
 using Server.Application.UseCase.Character.Command;
-using Server.Infrastructure.Persistence.Model;
+using Server.Domain.Entity;
 
 namespace Server.Application.Port.Input.Character;
 
 public interface IGetPlayerCharacterUseCase
 {
-    Task<PlayerCharacterData> ExecuteAsync(GetPlayerCharacterCommand request, CancellationToken ct);
+    Task<PlayerCharacter> ExecuteAsync(GetPlayerCharacterCommand request, CancellationToken ct);
 }

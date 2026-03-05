@@ -3,7 +3,7 @@ using Server.Application.Exceptions;
 using Server.Application.Port.Input.Character;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Character.Command;
-using Server.Infrastructure.Persistence.Model;
+using Server.Domain.Entity;
 
 namespace Server.Application.UseCase.Character;
 
@@ -16,7 +16,7 @@ public class GetPlayerCharacterUseCase : IGetPlayerCharacterUseCase
         _repository = repository;
     }
     
-    public async Task<PlayerCharacterData> ExecuteAsync(GetPlayerCharacterCommand request, CancellationToken ct)
+    public async Task<PlayerCharacter> ExecuteAsync(GetPlayerCharacterCommand request, CancellationToken ct)
     {
         request.Validate();
         
