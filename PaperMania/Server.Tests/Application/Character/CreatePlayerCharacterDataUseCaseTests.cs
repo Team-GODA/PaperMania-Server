@@ -18,8 +18,7 @@ public class CreatePlayerCharacterDataUseCaseTests
     private readonly Mock<ICharacterStore> _storeMock = new();
     private readonly Mock<ITransactionScope> _txMock = new();
 
-    private CreatePlayerCharacterDataUseCase CreateUseCase()
-        => new CreatePlayerCharacterDataUseCase(_repoMock.Object, _storeMock.Object, _txMock.Object);
+    private CreatePlayerCharacterDataUseCase CreateUseCase() => new(_repoMock.Object, _storeMock.Object, _txMock.Object);
 
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Character_Not_Found()
@@ -48,10 +47,7 @@ public class CreatePlayerCharacterDataUseCaseTests
             Role: CharacterRole.Main,
             Rarity: CharacterRarity.Common,
             BaseHP: 100,
-            BaseATK: 20,
-            NormalSkillId: 1,
-            UltimateSkillId: 2,
-            SupportSkillId: 3
+            BaseATK: 20
         );
 
         _storeMock.Setup(x => x.Get(10)).Returns(character);

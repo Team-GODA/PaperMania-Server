@@ -13,8 +13,7 @@ public class GetAllPlayerCharacterDataUseCaseTests
 {
     private readonly Mock<ICharacterRepository> _repoMock = new();
 
-    private GetAllPlayerCharacterDataUseCase CreateUseCase()
-        => new GetAllPlayerCharacterDataUseCase(_repoMock.Object);
+    private GetAllPlayerCharacterDataUseCase CreateUseCase() => new(_repoMock.Object);
 
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_UserId_Invalid()
