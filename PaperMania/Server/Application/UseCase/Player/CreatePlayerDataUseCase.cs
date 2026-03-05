@@ -7,6 +7,7 @@ using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Player.Command;
 using Server.Application.UseCase.Player.Result;
 using Server.Domain.Entity;
+using Server.Infrastructure.Cache;
 
 namespace Server.Application.UseCase.Player;
 
@@ -16,6 +17,7 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
     private readonly IAccountRepository _accountRepository;
     private readonly ICurrencyRepository _currencyRepository;
     private readonly ISessionService _sessionService;
+    private readonly ICacheService _cacheService;
     private readonly ITransactionScope _transactionScope;
 
     public CreatePlayerDataUseCase(
@@ -23,12 +25,14 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
         IAccountRepository  accountRepository,
         ICurrencyRepository currencyRepository,
         ISessionService sessionService,
+        ICacheService cacheService,
         ITransactionScope transactionScope)
     {
         _dataRepository = dataRepository;
         _accountRepository = accountRepository;
         _currencyRepository = currencyRepository;
         _sessionService = sessionService;
+        _cacheService = cacheService;
         _transactionScope = transactionScope;
     }
     
@@ -57,6 +61,8 @@ public class CreatePlayerDataUseCase : ICreatePlayerDataUseCase
             account.IsNewAccount = false;
             await _accountRepository.UpdateAsync(account, innerCt);
         }, ct);
+        
+        await _cacheService.DeleteAsync(CacheKey.Account.ByPlayerId(account.PlayerId), ct);
 
         return new AddPlayerDataResult(
             PlayerName: request.PlayerName

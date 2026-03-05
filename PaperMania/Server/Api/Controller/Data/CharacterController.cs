@@ -94,7 +94,8 @@ public class CharacterController : BaseController
     /// <summary>
     /// 유저의 보유 캐릭터를 추가합니다.
     /// </summary>
-    [HttpPost]
+    [SessionAuthorize] 
+    [HttpPost("player")]
     public async Task<ActionResult<BaseResponse<EmptyResponse>>> AddPlayerCharacterData(
         [FromBody] AddPlayerCharacterRequest request,
         CancellationToken ct)
