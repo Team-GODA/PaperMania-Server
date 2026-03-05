@@ -7,7 +7,7 @@ using Server.Application.Port.Output.StaticData;
 using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Character;
 using Server.Application.UseCase.Character.Command;
-using Server.Infrastructure.Persistence.Model;
+using Server.Domain.Entity;
 using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Tests.Application.Character;
@@ -64,11 +64,11 @@ public class CreatePlayerCharacterDataUseCaseTests
 
         await useCase.ExecuteAsync(command, CancellationToken.None);
 
-        _repoMock.Verify(x => x.CreateAsync(It.Is<PlayerCharacterData>(
+        _repoMock.Verify(x => x.CreateAsync(It.Is<PlayerCharacter>(
             p => p.UserId == 1 && p.CharacterId == 10 && p.CharacterLevel == 1 && p.CharacterExp == 0
         ), It.IsAny<CancellationToken>()), Times.Once);
 
-        _repoMock.Verify(x => x.CreatePieceData(It.Is<PlayerCharacterPieceData>(
+        _repoMock.Verify(x => x.CreatePieceData(It.Is<PlayerCharacter>(
             p => p.UserId == 1 && p.CharacterId == 10 && p.PieceAmount == 0
         ), It.IsAny<CancellationToken>()), Times.Once);
     }

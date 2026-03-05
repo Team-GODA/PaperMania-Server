@@ -3,7 +3,9 @@ using Moq;
 using Server.Application.Exceptions;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.UseCase.Character;
+using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
+using Server.Infrastructure.StaticData.Model;
 
 namespace Server.Tests.Application.Character;
 
@@ -31,7 +33,7 @@ public class GetAllPlayerCharacterDataUseCaseTests
     {
         int userId = 1;
         _repoMock.Setup(x => x.FindAll(userId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Enumerable.Empty<PlayerCharacterData>());
+            .ReturnsAsync(Enumerable.Empty<PlayerCharacter>());
 
         var useCase = CreateUseCase();
 
@@ -44,10 +46,10 @@ public class GetAllPlayerCharacterDataUseCaseTests
     public async Task ExecuteAsync_Should_Return_All_Characters()
     {
         int userId = 1;
-        var characters = new List<PlayerCharacterData>
+        var characters = new List<PlayerCharacter>
         {
-            new PlayerCharacterData(userId, 10),
-            new PlayerCharacterData(userId, 20)
+            PlayerCharacter.Create(userId, 10, CharacterRole.Main),
+            PlayerCharacter.Create(userId, 20, CharacterRole.Main)
         };
 
         _repoMock.Setup(x => x.FindAll(userId, It.IsAny<CancellationToken>()))

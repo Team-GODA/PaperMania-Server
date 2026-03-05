@@ -1,6 +1,7 @@
 using Dapper;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Transaction;
+using Server.Domain.Entity;
 using Server.Infrastructure.Persistence.Model;
 
 namespace Server.Infrastructure.Persistence.Repository;
@@ -86,46 +87,95 @@ public class CharacterRepository : RepositoryBase, ICharacterRepository
         ) : base(connectionString, transactionScope)
     {
     }
-
-    public async Task<IEnumerable<PlayerCharacterData>> FindAll(int userId, CancellationToken ct)
+    
+    private static PlayerCharacter MapToEntity(PlayerCharacterData data)
     {
-        return await QueryAsync(conn =>
+        return new PlayerCharacter(
+            data.UserId,
+            data.CharacterId,
+            data.CharacterLevel,
+            data.CharacterExp,
+            data.NormalSkillLevel,
+            data.UltimateSkillLevel,
+            data.SupportSkillLevel,
+            data.PieceAmount
+        );
+    }
+    
+    private static PlayerCharacterData MapToData(PlayerCharacter entity)
+    {
+        return new PlayerCharacterData
+        {
+            UserId = entity.UserId,
+            CharacterId = entity.CharacterId,
+            CharacterLevel = entity.CharacterLevel,
+            CharacterExp = entity.CharacterExp,
+            NormalSkillLevel = entity.NormalSkillLevel,
+            UltimateSkillLevel = entity.UltimateSkillLevel,
+            SupportSkillLevel = entity.SupportSkillLevel,
+            PieceAmount = entity.PieceAmount
+        };
+    }
+    
+    private static PlayerCharacterPieceData MapToPieceData(PlayerCharacter entity)
+    {
+        return new PlayerCharacterPieceData
+        {
+            UserId = entity.UserId,
+            CharacterId = entity.CharacterId,
+            PieceAmount = entity.PieceAmount
+        };
+    }
+
+    public async Task<IEnumerable<PlayerCharacter>> FindAll(int userId, CancellationToken ct)
+    {
+        var rows = await QueryAsync(conn =>
             conn.QueryAsync<PlayerCharacterData>(
                 new CommandDefinition(Sql.GetAllByUserId, new { UserId = userId }, cancellationToken: ct)
             ), ct);
+
+        return rows.Select(MapToEntity);
     }
 
-    public async Task<PlayerCharacterData?> FindCharacter(int userId, int characterId, CancellationToken ct)
+    public async Task<PlayerCharacter?> FindCharacter(int userId, int characterId, CancellationToken ct)
     {
-        return await QueryAsync(conn =>
+        var row = await QueryAsync(conn =>
             conn.QuerySingleOrDefaultAsync<PlayerCharacterData>(
                 new CommandDefinition(Sql.GetByUserId, new { UserId = userId, CharacterId = characterId }, cancellationToken: ct)
             ), ct);
+
+        return MapToEntity(row);
     }
 
-    public async Task<PlayerCharacterData> UpdateAsync(PlayerCharacterData data, CancellationToken ct)
+    public async Task<PlayerCharacter> UpdateAsync(PlayerCharacter entity, CancellationToken ct)
     {
+        var data = MapToData(entity);
+
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
                 new CommandDefinition(Sql.UpdateData, data, transaction: transaction, cancellationToken: ct)
             ), ct);
 
-        return data;
+        return entity;
     }
 
-    public async Task CreateAsync(PlayerCharacterData data, CancellationToken ct)
+    public async Task CreateAsync(PlayerCharacter entity, CancellationToken ct)
     {
+        var data = MapToData(entity);
+
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
                 new CommandDefinition(Sql.createData, data, transaction: transaction, cancellationToken: ct)
             ), ct);
     }
 
-    public async Task CreatePieceData(PlayerCharacterPieceData data, CancellationToken ct)
+    public async Task CreatePieceData(PlayerCharacter entity, CancellationToken ct)
     {
+        var pieceData = MapToPieceData(entity);
+
         await ExecuteAsync((connection, transaction) =>
             connection.ExecuteAsync(
-                new CommandDefinition(Sql.CreatePieceData, data, transaction: transaction, cancellationToken: ct)
+                new CommandDefinition(Sql.CreatePieceData, pieceData, transaction: transaction, cancellationToken: ct)
             ), ct);
     }
 }
