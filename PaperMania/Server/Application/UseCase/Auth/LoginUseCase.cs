@@ -42,8 +42,6 @@ public class LoginUseCase : ILoginUseCase
             ct
         );
         
-        Console.WriteLine($"[DEBUG] account.Id={account?.Id}");
-        
         if (account == null || string.IsNullOrEmpty(account.Password))
         {
             _passwordHasher.Verify(request.Password, "$2a$11$12345678901234567890123456789012345678901234567890123");

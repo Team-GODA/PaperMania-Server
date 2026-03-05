@@ -17,6 +17,7 @@ public class CreatePlayerDataUseCaseTests
     private readonly Mock<IAccountRepository> _accountRepositoryMock = new();
     private readonly Mock<ICurrencyRepository> _currencyRepositoryMock = new();
     private readonly Mock<ISessionService> _sessionServiceMock = new();
+    private readonly Mock<ICacheService> _cacheServiceMock = new();
     private readonly Mock<ITransactionScope> _transactionScopeMock = new();
     
     private CreatePlayerDataUseCase CreateUseCase() => new(
@@ -24,6 +25,7 @@ public class CreatePlayerDataUseCaseTests
         _accountRepositoryMock.Object,
         _currencyRepositoryMock.Object,
         _sessionServiceMock.Object,
+        _cacheServiceMock.Object,
         _transactionScopeMock.Object
     );
     
