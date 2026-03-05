@@ -1,7 +1,7 @@
 namespace Server.Domain.Entity;
 
-using Server.Api.Dto.Response;
-using Server.Application.Exceptions;
+using Api.Dto.Response;
+using Application.Exceptions;
 
 public class CurrencyData
 {
@@ -164,4 +164,3 @@ public class CurrencyData
         PaperPiece += amount;
     }
 }
-
