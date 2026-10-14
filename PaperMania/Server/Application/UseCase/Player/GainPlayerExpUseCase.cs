@@ -32,11 +32,12 @@ public class GainPlayerExpUseCase : IGainPlayerExpUseCase
     {
         request.Validate();
 
-        var playerGame = await _dataRepository.FindByUserIdAsync(request.UserId, ct)
-                         ?? throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_DATA_NOT_FOUND");
-
+        // 재화 행을 먼저 잠가(트랜잭션 안에서 FOR UPDATE) 같은 유저의 동시 요청을 직렬화한 뒤 플레이어 데이터를 읽음
         var currencyData = await _currencyRepository.FindByUserIdAsync(request.UserId, ct)
                            ?? throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_CURRENCY_DATA_NOT_FOUND");
+
+        var playerGame = await _dataRepository.FindByUserIdAsync(request.UserId, ct)
+                         ?? throw new RequestException(ErrorStatusCode.NotFound, "PLAYER_DATA_NOT_FOUND");
 
         playerGame.GainExp(request.Exp, _store, (maxAp) => 
         {

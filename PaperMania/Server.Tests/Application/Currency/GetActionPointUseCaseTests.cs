@@ -4,8 +4,10 @@ using Server.Api.Dto.Response;
 using Server.Application.Exceptions;
 using Server.Application.Port.Output.Persistence;
 using Server.Application.Port.Output.Service;
+using Server.Application.Port.Output.Transaction;
 using Server.Application.UseCase.Currency;
 using Server.Application.UseCase.Currency.Command;
+using Server.Application.UseCase.Currency.Result;
 using Server.Domain.Entity;
 
 namespace Server.Tests.Application.Currency;
@@ -14,9 +16,17 @@ public class GetActionPointUseCaseTests
 {
     private readonly Mock<ICurrencyRepository> _repositoryMock = new();
     private readonly Mock<IActionPointService> _apServiceMock = new();
+    private readonly Mock<ITransactionScope> _transactionScopeMock = new();
+
+    public GetActionPointUseCaseTests()
+    {
+        _transactionScopeMock
+            .Setup(x => x.ExecuteAsync(It.IsAny<Func<CancellationToken, Task<GetActionPointResult>>>(), It.IsAny<CancellationToken>()))
+            .Returns<Func<CancellationToken, Task<GetActionPointResult>>, CancellationToken>((func, ct) => func(ct));
+    }
 
     private GetActionPointUseCase CreateUseCase()
-        => new(_repositoryMock.Object, _apServiceMock.Object);
+        => new(_repositoryMock.Object, _apServiceMock.Object, _transactionScopeMock.Object);
 
     [Fact]
     public async Task ExecuteAsync_Should_Throw_When_Data_Not_Found()

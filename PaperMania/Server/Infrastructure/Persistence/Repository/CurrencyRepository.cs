@@ -21,7 +21,10 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
             FROM paper_mania_game_data.player_currency_data
             WHERE user_id = @UserId
             ";
-        
+
+        // 트랜잭션 안의 조회 -> 갱신 사이에 다른 요청이 같은 행을 덮어쓰지 못하도록 커밋까지 행 잠금
+        public const string GetPlayerCurrencyDataForUpdate = GetPlayerCurrencyData + "FOR UPDATE";
+
         public const string UpdatePlayerCurrencyData = @"
             UPDATE paper_mania_game_data.player_currency_data
             SET action_point = @ActionPoint,
@@ -66,7 +69,8 @@ public class CurrencyRepository : RepositoryBase, ICurrencyRepository
     {
         var data = await QueryAsync(connection =>
             connection.QueryFirstOrDefaultAsync<PlayerCurrencyData>(
-                new CommandDefinition(Sql.GetPlayerCurrencyData, new { UserId = userId }, cancellationToken: ct)
+                new CommandDefinition(InTransaction ? Sql.GetPlayerCurrencyDataForUpdate : Sql.GetPlayerCurrencyData,
+                    new { UserId = userId }, cancellationToken: ct)
             ), ct);
 
         return data == null
