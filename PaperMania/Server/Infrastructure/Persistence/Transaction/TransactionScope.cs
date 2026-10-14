@@ -39,6 +39,8 @@ public class TransactionScope : ITransactionScope
         }
     }
     
+    public bool HasActiveTransaction => !_disposed && _transaction != null;
+
     private async Task EnsureConnectionAsync(CancellationToken ct)
     {
         if (_connection?.State == ConnectionState.Open)

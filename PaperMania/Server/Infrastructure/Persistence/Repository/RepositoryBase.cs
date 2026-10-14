@@ -16,11 +16,13 @@ public class RepositoryBase
         _transactionScope = transactionScope;
     }
 
+    protected bool InTransaction => _transactionScope is { HasActiveTransaction: true };
+
     protected async Task<T> ExecuteAsync<T>(
         Func<NpgsqlConnection, NpgsqlTransaction?, Task<T>> query,
         CancellationToken ct)
     {
-        if (_transactionScope != null)
+        if (InTransaction)
         {
             var connection = (NpgsqlConnection)_transactionScope.Connection;
             var transaction = _transactionScope.Transaction as NpgsqlTransaction;
@@ -36,7 +38,7 @@ public class RepositoryBase
         Func<NpgsqlConnection, NpgsqlTransaction?, Task> query,
         CancellationToken ct)
     {
-        if (_transactionScope != null)
+        if (InTransaction)
         {
             var connection = (NpgsqlConnection)_transactionScope.Connection;
             var transaction = _transactionScope.Transaction as NpgsqlTransaction;
@@ -53,7 +55,7 @@ public class RepositoryBase
         Func<NpgsqlConnection, Task<T>> query,
         CancellationToken ct)
     {
-        if (_transactionScope != null)
+        if (InTransaction)
         {
             var connection = (NpgsqlConnection)_transactionScope.Connection;
             return await query(connection);

@@ -6,6 +6,7 @@ public interface ITransactionScope : IDisposable, IAsyncDisposable
 {
     IDbConnection Connection { get; }
     IDbTransaction Transaction { get; }
+    bool HasActiveTransaction { get; }
 
     Task BeginTransactionAsync(
         IsolationLevel isolationLevel,

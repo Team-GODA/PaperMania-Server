@@ -38,38 +38,38 @@ public static class ServiceExtensions
         services.AddScoped<IAccountRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new AccountRepository(connectionString);
+            return new AccountRepository(connectionString, provider.GetRequiredService<ITransactionScope>());
         });
         
         services.AddScoped<IDataRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new DataRepository(connectionString);
+            return new DataRepository(connectionString, provider.GetRequiredService<ITransactionScope>());
         });
         
         services.AddScoped<ICurrencyRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new CurrencyRepository(connectionString);
+            return new CurrencyRepository(connectionString, provider.GetRequiredService<ITransactionScope>());
         });
         
         services.AddScoped<ICharacterRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new CharacterRepository(connectionString);
+            return new CharacterRepository(connectionString, provider.GetRequiredService<ITransactionScope>());
         });
         
         services.AddScoped<IStageRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
-            return new StageRepository(connectionString);
+            return new StageRepository(connectionString, provider.GetRequiredService<ITransactionScope>());
         });
         
         services.AddScoped<IRewardRepository>(provider =>
         {
             var connectionString = GetConnectionString(provider);
             var cache = provider.GetRequiredService<StageRewardStore>();
-            return new RewardRepository(connectionString, cache);
+            return new RewardRepository(connectionString, cache, provider.GetRequiredService<ITransactionScope>());
         });
         
         return services;
