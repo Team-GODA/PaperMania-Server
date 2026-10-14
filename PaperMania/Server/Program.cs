@@ -8,9 +8,11 @@ builder.WebHost.UseUrls("http://0.0.0.0:80");
 
 var keyVaultName = builder.Configuration["Azure:KeyVaultName"] 
                    ?? "papermaniadbconnection";
-var keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
 
-builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
+// Azure__UseKeyVault=false이면 Key Vault 없이 환경변수 설정만 사용 (로컬 부하 테스트용)
+if (builder.Configuration.GetValue("Azure:UseKeyVault", true))
+    builder.Configuration.AddAzureKeyVault(
+        new Uri($"https://{keyVaultName}.vault.azure.net/"), new DefaultAzureCredential());
 
 var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
 

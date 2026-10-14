@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgres:15
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"] # run.ps1이 DB 쿼리 수를 셈
+    environment:
+      POSTGRES_USER: loadtest
+      POSTGRES_PASSWORD: loadtest
+      POSTGRES_DB: papermania
+    ports:
+      - "5441:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "loadtest", "-d", "papermania"]
+      interval: 2s
+      retries: 30
+
+  redis:
+    image: redis:7.2
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 30
+
+  # 서버가 시작할 때 HTTP로 받아가는 정적 데이터(CSV) 서빙 (Key Vault 대체)
+  static-data:
+    image: nginx:alpine
+    ports:
+      - "5990:80"
+    volumes:
+      - ./static-data:/usr/share/nginx/html:ro
+
+  # -DbLatencyMs 사용 시 Postgres/Redis 앞에서 네트워크 지연을 흉내 냄 (run.ps1이 지연 설정)
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.12.0
+    command: ["-host=0.0.0.0", "-config=/config/toxiproxy.json"]
+    ports:
+      - "8474:8474"
+      - "15432:15432"
+      - "16379:16379"
+    volumes:
+      - ./toxiproxy.json:/config/toxiproxy.json:ro
+    depends_on:
+      - db
+      - redis

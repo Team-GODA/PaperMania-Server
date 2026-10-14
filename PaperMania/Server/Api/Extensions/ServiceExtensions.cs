@@ -178,7 +178,13 @@ public static class ServiceExtensions
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IActionPointService, ActionPointService>();
         
-        services.AddScoped<ICacheAsideService ,CacheAsideService>();
+        services.AddScoped<ICacheAsideService>(provider =>
+        {
+            var config = provider.GetRequiredService<IConfiguration>();
+            return config.GetValue("Cache:Enabled", true)
+                ? new CacheAsideService(provider.GetRequiredService<ICacheService>())
+                : new NoCacheAsideService();
+        });
         
         return services;
     }
